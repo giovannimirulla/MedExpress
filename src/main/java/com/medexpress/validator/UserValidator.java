@@ -3,6 +3,9 @@ package com.medexpress.validator;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 public class UserValidator {
     
      public static boolean validateFiscalCode(String fiscalCode) {
@@ -38,52 +41,52 @@ public class UserValidator {
     public static void validate(Map<String, String> body) {
         // check fiscal code is not empty
         if (!CommonValidator.checkString(body.get("fiscalCode"))) {
-            throw new IllegalArgumentException("Fiscal code is empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Fiscal code is empty");
         }
 
         // check fiscal code is valid
         if (!validateFiscalCode(body.get("fiscalCode"))) {
-            throw new IllegalArgumentException("Fiscal code is not valid");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Fiscal code is not valid");
         }
 
         // check age is valid
         if (!checkAge(body.get("fiscalCode"))) {
-            throw new IllegalArgumentException("User is not 18 years old");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"User is not 18 years old");
         }
 
         // check name is not empty
         if (!CommonValidator.checkString(body.get("name"))) {
-            throw new IllegalArgumentException("Name is empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Name is empty");
         }
 
         // check surname is not empty
         if (!CommonValidator.checkString(body.get("surname"))) {
-            throw new IllegalArgumentException("Surname is empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Surname is empty");
         }
 
         // check email is not empty
         if (!CommonValidator.checkString(body.get("email"))) {
-            throw new IllegalArgumentException("Email is empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Email is empty");
         }
 
         // check email is valid
         if (!CommonValidator.validateEmail(body.get("email"))) {
-            throw new IllegalArgumentException("Email is not valid");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Email is not valid");
         }
 
         // check address is not empty
         if (!CommonValidator.checkString(body.get("address"))) {
-            throw new IllegalArgumentException("Address is empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Address is empty");
         }
 
         // check password is not empty
         if (!CommonValidator.checkString(body.get("password"))) {
-            throw new IllegalArgumentException("Password is empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Password is empty");
         }
 
         // check password is valid
         if (!CommonValidator.validatePassword(body.get("password"))) {
-            throw new IllegalArgumentException("Password is not valid");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Password is not valid");
         }
     }
 

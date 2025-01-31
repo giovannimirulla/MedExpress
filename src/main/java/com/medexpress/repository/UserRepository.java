@@ -11,5 +11,6 @@ import com.medexpress.entity.User;
 public interface UserRepository extends MongoRepository <User, ObjectId> {
     
     public List<User> findAllByRole(Number role);
-    
+    public boolean existsByEmail(String email);
+    public boolean existsByFiscalCode(String fiscalCode);
 }

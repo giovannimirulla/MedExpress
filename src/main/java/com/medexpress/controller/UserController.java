@@ -4,8 +4,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.medexpress.entity.User;
+import com.medexpress.service.EncryptionService;
 import com.medexpress.service.UserService;
 import com.medexpress.validator.UserValidator;
+import com.medexpress.dto.UserDTO;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +26,13 @@ public class UserController {
     
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EncryptionService encryptionService;
     
-    public UserController(UserService userService) {
+    public UserController(UserService userService, EncryptionService encryptionService) {
         this.userService = userService;
+        this.encryptionService = encryptionService;
     }
     
     @GetMapping
@@ -40,13 +46,16 @@ public class UserController {
     }
 
     @PostMapping()
-    public ResponseEntity<User> createUser(@RequestBody Map<String, String> body) {
+    public ResponseEntity<UserDTO> createUser(@RequestBody Map<String, String> body) {
 
         UserValidator.validate(body);
 
-        //encrypt password
+        String encryptedPassword = encryptionService.encryptPassword(body.get("password"));
 
-        User user = userService.createUser(body.get("name"), body.get("surname"), body.get("fiscalCode"), body.get("address"), body.get("email"), body.get("password"), Integer.parseInt(body.get("role")), new ObjectId(body.get("doctor")));
-        return new ResponseEntity<User>(user, HttpStatus.CREATED);
+        User user = userService.createUser(body.get("name"), body.get("surname"), body.get("fiscalCode"), body.get("address"), body.get("email"), encryptedPassword, Integer.parseInt(body.get("role")), new ObjectId(body.get("doctor")));
+
+        UserDTO userDTO = new UserDTO(user.getName(), user.getSurname(), user.getFiscalCode(), user.getAddress(), user.getEmail(), user.getRole(), user.getDoctor());
+
+        return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
     }
 }

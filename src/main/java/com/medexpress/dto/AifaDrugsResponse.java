@@ -2,7 +2,7 @@ package com.medexpress.dto;
 
 import java.util.List;
 
-public class AifaDrugsResponse {
+public class AIFADrugsResponse {
     private int status;
     private Data data;
 

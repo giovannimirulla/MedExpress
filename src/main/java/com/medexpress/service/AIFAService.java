@@ -3,8 +3,8 @@ package com.medexpress.service;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import com.medexpress.dto.AIFAResponse;
-import com.medexpress.dto.AifaDrugsResponse; 
+import com.medexpress.dto.AIFAAutocompleteResponse;
+import com.medexpress.dto.AIFADrugsResponse; 
 
 @Service
 public class AIFAService {
@@ -15,7 +15,7 @@ public class AIFAService {
         this.webClient = webClientBuilder.baseUrl("https://api.aifa.gov.it").build();
     }
 
-    public Mono<AIFAResponse> getAutocompleteResults(String query, int nos) {
+    public Mono<AIFAAutocompleteResponse> getAutocompleteResults(String query, int nos) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/aifa-bdf-eif-be/1.0.0/autocomplete")
@@ -23,10 +23,10 @@ public class AIFAService {
                         .queryParam("nos", nos)
                         .build())
                 .retrieve()
-                .bodyToMono(AIFAResponse.class);
+                .bodyToMono(AIFAAutocompleteResponse.class);
     }
 
-  public Mono<AifaDrugsResponse> getDrugs(String query, boolean spellingCorrection, int page) {
+  public Mono<AIFADrugsResponse> getDrugs(String query, boolean spellingCorrection, int page) {
     return webClient.get()
             .uri(uriBuilder -> uriBuilder
                     .path("/aifa-bdf-eif-be/1.0.0/formadosaggio/ricerca")
@@ -35,7 +35,7 @@ public class AIFAService {
                     .queryParam("page", page)
                     .build())
             .retrieve()
-            .bodyToMono(AifaDrugsResponse.class);
+            .bodyToMono(AIFADrugsResponse.class);
 }
 
 

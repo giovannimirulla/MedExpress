@@ -5,12 +5,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
-import java.util.List;
 import com.medexpress.service.AIFAService;
-import com.medexpress.dto.AIFAResponse;
-import com.medexpress.dto.AifaDrugsResponse;
+import com.medexpress.dto.AIFAAutocompleteResponse;
+import com.medexpress.dto.AIFADrugsResponse;
 
 import reactor.core.publisher.Mono;
 
@@ -40,14 +37,14 @@ public class AIFAController {
     // }
 
     @GetMapping("/autocomplete")
-    public Mono<AIFAResponse> getAutocomplete(@RequestParam String query, @RequestParam(defaultValue = "5") int nos) {
+    public Mono<AIFAAutocompleteResponse> getAutocomplete(@RequestParam String query, @RequestParam(defaultValue = "5") int nos) {
         return aifaService.getAutocompleteResults(query, nos);
     }
 
      // https://api.aifa.gov.it/aifa-bdf-eif-be/1.0.0/formadosaggio/ricerca?query=Tachipirina&spellingCorrection=true&page=0
 
     @GetMapping("/drugs")
-    public Mono<AifaDrugsResponse> getDrugs(
+    public Mono<AIFADrugsResponse> getDrugs(
             @RequestParam String query,
             @RequestParam(defaultValue = "true") boolean spellingCorrection,
             @RequestParam(defaultValue = "0") int page) {

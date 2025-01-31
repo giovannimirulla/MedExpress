@@ -2,7 +2,7 @@ package com.medexpress.dto;
 
 import java.util.List;
 
-public class AifaAutocompleteResponse {
+public class AIFAAutocompleteResponse {
     private int status;
     private List<String> data;
 

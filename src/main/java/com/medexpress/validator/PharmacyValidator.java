@@ -2,6 +2,9 @@ package com.medexpress.validator;
 
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 public class PharmacyValidator {
 
     // This method is used to validate the VAT number.
@@ -12,23 +15,23 @@ public class PharmacyValidator {
  
     public static void validate(Map<String, String> body) {
         if (!validateVATNumber(body.get("VATnumber"))) {
-            throw new IllegalArgumentException("Invalid VAT number");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid VAT number");
         }
 
         if (!CommonValidator.checkString(body.get("companyName"))) {
-            throw new IllegalArgumentException("Invalid company name");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid company name");
         }
 
         if (!CommonValidator.checkString(body.get("address"))) {
-            throw new IllegalArgumentException("Invalid address");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid address");
         }
 
         if (!CommonValidator.validateEmail(body.get("email"))) {
-            throw new IllegalArgumentException("Invalid email");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid email");
         }
 
         if (!CommonValidator.validatePassword(body.get("password"))) {
-            throw new IllegalArgumentException("Invalid password");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid password");
         }
     }
 

@@ -49,6 +49,9 @@ out/
 
 # VS Code
 .vscode/
+.DS_Store
+.env
+=======
 
 # Maven wrapper
 .mvn/

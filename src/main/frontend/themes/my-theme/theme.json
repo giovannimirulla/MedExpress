@@ -1,0 +1,9 @@
+{
+  "lumoImports" : [ "typography", "color", "spacing", "badge", "utility" ],
+  "assets" : {
+    "@fontsource/heebo" : {
+      "*.css" : "@fontsource/heebo",
+      "files/*" : "@fontsource/heebo/files"
+    }
+  }
+}

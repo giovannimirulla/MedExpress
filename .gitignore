@@ -64,3 +64,4 @@ types.d.ts
 index.html
 .env
 *.lock
+package-lock.json

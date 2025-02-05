@@ -3,6 +3,7 @@ import Heading, { Banner } from './components/Heading';
 import AppContainer from './components/AppContainer';
  
 import '@vaadin/icons';
+import Footer from './components/Footer';
 import { ConfigProvider } from 'antd';
 import React from 'react';
 
@@ -41,7 +42,7 @@ const [toggle , setToggle] = React.useState('')
             <AppContainer/>
           </div>
       </div>
-            {/* <Footer/> */}
+             <Footer/> 
     </div>
     </ConfigProvider>
   );

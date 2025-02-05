@@ -24,9 +24,9 @@ const Heading = () => {
 
   return (
     <header>
-      <nav id="nav" className="absolute group z-10 w-full border-b border-black/5 dark:border-white/5 lg:border-transparent">
+      <nav id="nav" className="absolute h-24 flex items-center group z-10 w-full border-b border-black/5 dark:border-white/5 lg:border-transparent">
         <Container>
-          <div className="relative flex flex-wrap items-center justify-between gap-6 py-3 md:gap-0 md:py-4">
+          <div className="relative flex flex-wrap items-center justify-between ">
             <div className="relative z-20 flex w-full justify-between md:px-0 lg:w-fit">
               <a href="/#home" aria-label="logo" className="flex items-center space-x-2">
                 <div aria-hidden="true" className="flex space-x-1">

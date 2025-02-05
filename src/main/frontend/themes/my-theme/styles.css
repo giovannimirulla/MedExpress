@@ -2,6 +2,8 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+
+@import url('@fontsource/heebo/index.css');  
 @import url('@fontsource-variable/montserrat/index.css');  
 *,
 *::before,
@@ -262,4 +264,16 @@ vaadin-select-item::part(checkmark){
 
 vaadin-select::part(toggle-button){
   color: var(--primary-background-color);
+}
+
+.ant-pagination .ant-pagination-item{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ant-pagination .ant-pagination-jump-prev{
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

@@ -28,6 +28,7 @@
     "antd": "^5.23.3",
     "construct-style-sheets-polyfill": "3.1.0",
     "date-fns": "2.29.3",
+    "framer-motion": "^12.0.11",
     "i18next": "^23.13.0",
     "i18next-browser-languagedetector": "^8.0.0",
     "i18next-http-backend": "^2.5.2",
@@ -132,7 +133,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "d0eae5655f89cf9516a89e92a7aa2b12217451b3aea2890c4bff3ab294cd9dd6"
+    "hash": "90f09630c554b3a57047707debc4d46ebe554f71056bd50745c7155e83cece17"
   },
   "overrides": {
     "@vaadin/vaadin-development-mode-detector": "$@vaadin/vaadin-development-mode-detector",
@@ -180,6 +181,7 @@
     "@ant-design/icons": "$@ant-design/icons",
     "antd": "$antd",
     "date-fns": "$date-fns",
-    "@fontsource-variable/montserrat": "$@fontsource-variable/montserrat"
+    "@fontsource-variable/montserrat": "$@fontsource-variable/montserrat",
+    "framer-motion": "$framer-motion"
   }
 }

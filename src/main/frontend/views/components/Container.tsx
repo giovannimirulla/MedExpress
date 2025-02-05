@@ -7,7 +7,7 @@ interface ContainerProps {
 
 const Container: React.FC<ContainerProps> = ({ children , fullScreen = false }) => {
     return (
-        <div className={`max-w-7xl mx-auto px-6 md:px-12 ${fullScreen ? 'h-screen' : ''}`}>
+        <div className={`max-w-7xl mx-auto px-6 md:px-12 w-full ${fullScreen ? 'min-h-screen' : ''}`}>
         {children}
     </div>
     );

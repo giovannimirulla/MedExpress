@@ -47,8 +47,13 @@ public class AIFAController {
     public Mono<AIFADrugsResponse> getDrugs(
             @RequestParam String query,
             @RequestParam(defaultValue = "true") boolean spellingCorrection,
-            @RequestParam(defaultValue = "0") int page) {
-        return aifaService.getDrugs(query, spellingCorrection, page);
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+            ) {
+        if (size > 20) {
+            return Mono.error(new IllegalArgumentException("Size cannot be greater than 20"));
+        }
+        return aifaService.getDrugs(query, spellingCorrection, page, size);
     }
 
 }

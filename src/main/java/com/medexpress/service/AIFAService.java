@@ -7,44 +7,45 @@ import org.springframework.web.server.ResponseStatusException;
 
 import reactor.core.publisher.Mono;
 import com.medexpress.dto.AIFAAutocompleteResponse;
-import com.medexpress.dto.AIFADrugsResponse; 
+import com.medexpress.dto.AIFADrugsResponse;
 
 @Service
 public class AIFAService {
 
-    private final WebClient webClient;
+        private final WebClient webClient;
 
-    public AIFAService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://api.aifa.gov.it").build();
-    }
+        public AIFAService(WebClient.Builder webClientBuilder) {
+                this.webClient = webClientBuilder.baseUrl("https://api.aifa.gov.it").build();
+        }
 
-public Mono<AIFAAutocompleteResponse> getAutocompleteResults(String query, int nos) {
-    if (query.length() < 2 || query.length() > 100) {
-        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "The length of the query must be between 2 and 100 characters"));
-    }
-    return webClient.get()
-            .uri(uriBuilder -> uriBuilder
-                    .path("/aifa-bdf-eif-be/1.0.0/autocomplete")
-                    .queryParam("query", query)
-                    .queryParam("nos", nos)
-                    .build())
-            .retrieve()
-            .bodyToMono(AIFAAutocompleteResponse.class);
-}
+        public Mono<AIFAAutocompleteResponse> getAutocompleteResults(String query, int nos) {
+                if (query.length() < 2 || query.length() > 100) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                        "The length of the query must be between 2 and 100 characters"));
+                }
+                return webClient.get()
+                                .uri(uriBuilder -> uriBuilder
+                                                .path("/aifa-bdf-eif-be/1.0.0/autocomplete")
+                                                .queryParam("query", query)
+                                                .queryParam("nos", nos)
+                                                .build())
+                                .retrieve()
+                                .bodyToMono(AIFAAutocompleteResponse.class);
+        }
 
+        public Mono<AIFADrugsResponse> getDrugs(String query, boolean spellingCorrection, int page, int size) {
+                return webClient.get()
+                                .uri(uriBuilder -> {
+                                        uriBuilder.path("/aifa-bdf-eif-be/1.0.0/formadosaggio/ricerca")
+                                                        .queryParam("query", query)
+                                                        .queryParam("spellingCorrection", spellingCorrection)
+                                                        .queryParam("page", page)
+                                                        .queryParam("size", size);
 
-  public Mono<AIFADrugsResponse> getDrugs(String query, boolean spellingCorrection, int page) {
-    return webClient.get()
-            .uri(uriBuilder -> uriBuilder
-                    .path("/aifa-bdf-eif-be/1.0.0/formadosaggio/ricerca")
-                    .queryParam("query", query)
-                    .queryParam("spellingCorrection", spellingCorrection)
-                    .queryParam("page", page)
-                    .build())
-            .retrieve()
-            .bodyToMono(AIFADrugsResponse.class);
-}
-
-
+                                        return uriBuilder.build();
+                                })
+                                .retrieve()
+                                .bodyToMono(AIFADrugsResponse.class);
+        }
 
 }

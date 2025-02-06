@@ -6,6 +6,9 @@
     "@ant-design/icons": "5.6.0",
     "@fontsource-variable/montserrat": "^5.1.1",
     "@fontsource/heebo": "4.5.0",
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@polymer/polymer": "3.5.2",
     "@theme-toggles/react": "^4.1.0",
     "@vaadin/bundles": "24.6.3",
@@ -133,7 +136,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "90f09630c554b3a57047707debc4d46ebe554f71056bd50745c7155e83cece17"
+    "hash": "b1d1dc26988f62e1048bb8bb85baac76913341ef93961639c6629644ce4fd410"
   },
   "overrides": {
     "@vaadin/vaadin-development-mode-detector": "$@vaadin/vaadin-development-mode-detector",
@@ -182,6 +185,9 @@
     "antd": "$antd",
     "date-fns": "$date-fns",
     "@fontsource-variable/montserrat": "$@fontsource-variable/montserrat",
-    "framer-motion": "$framer-motion"
+    "framer-motion": "$framer-motion",
+    "@fortawesome/fontawesome-svg-core": "$@fortawesome/fontawesome-svg-core",
+    "@fortawesome/free-solid-svg-icons": "$@fortawesome/free-solid-svg-icons",
+    "@fortawesome/react-fontawesome": "$@fortawesome/react-fontawesome"
   }
 }

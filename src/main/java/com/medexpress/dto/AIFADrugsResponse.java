@@ -125,6 +125,7 @@ public class AIFADrugsResponse {
         private List<String> descrizioneAtc;
         private String formaFarmaceutica;
         private String descrizioneFormaDosaggio;
+        private String icon;
 
         public String getId() {
             return id;
@@ -196,6 +197,14 @@ public class AIFADrugsResponse {
 
         public void setDescrizioneFormaDosaggio(String descrizioneFormaDosaggio) {
             this.descrizioneFormaDosaggio = descrizioneFormaDosaggio;
+        }
+        
+        public String getIcon() {
+            return icon;
+        }
+
+        public void setIcon(String icon) {
+            this.icon = icon;
         }
     }
 

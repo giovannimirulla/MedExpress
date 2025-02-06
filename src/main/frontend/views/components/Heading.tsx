@@ -1,5 +1,4 @@
 
-import LocaleSelection from './LocaleSelection';
 import Container from './Container';
 
 import ToggleTheme from './ToggleTheme';
@@ -28,7 +27,7 @@ const Heading = () => {
         <Container>
           <div className="relative flex flex-wrap items-center justify-between ">
             <div className="relative z-20 flex w-full justify-between md:px-0 lg:w-fit">
-              <a href="/#home" aria-label="logo" className="flex items-center space-x-2">
+              <a href="/" aria-label="logo" className="flex items-center space-x-2  no-underline">
                 <div aria-hidden="true" className="flex space-x-1">
                   {/* <div className="size-4 rounded-full bg-body"></div> */}
                   <div className="h-6 w-2 bg-primary"></div>
@@ -47,9 +46,6 @@ const Heading = () => {
             <div id="navlinks" className="invisible absolute top-full left-0 z-20 w-full origin-top-right translate-y-1 scale-90 flex-col flex-wrap justify-end gap-6 rounded-3xl border border-gray-100 bg-white p-8 opacity-0 shadow-2xl shadow-gray-600/10 transition-all duration-300 dark:border-gray-700 dark:bg-gray-800 dark:shadow-none lg:visible lg:relative lg:flex lg:w-fit lg:translate-y-0 lg:scale-100 lg:flex-row lg:items-center lg:gap-0 lg:border-none lg:bg-transparent lg:p-0 lg:opacity-100 lg:shadow-none lg:dark:bg-transparent group-data-[state=active]:visible group-data-[state=active]:scale-100 group-data-[state=active]:opacity-100 lg:group-data-[state=active]:translate-y-0">
 
               <div className='flex items-center mr-[20px]'>
-                <div className='mr-[20px]'>
-                  <LocaleSelection />
-                </div>
                 <div className=' flex items-center'>
                   <ToggleTheme />
                 </div>

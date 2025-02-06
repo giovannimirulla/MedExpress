@@ -11,17 +11,6 @@ public class UserDTO {
     private Number role;
     private ObjectId doctor;
 
-    // Costruttore
-    public UserDTO(String name, String surname, String fiscalCode, String address, String email, Number role, ObjectId doctor) {
-        this.name = name;
-        this.surname = surname;
-        this.fiscalCode = fiscalCode;
-        this.address = address;
-        this.email = email;
-        this.role = role;
-        this.doctor = doctor;
-    }
-
     // Getter
     public String getName() {
         return name;

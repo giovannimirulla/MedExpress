@@ -6,15 +6,6 @@ public class PharmacyDTO {
     private String address;
     private String email;
 
-
-    public PharmacyDTO(String companyName, String VATnumber, String address, String email) {
-        this.companyName = companyName;
-        this.VATnumber = VATnumber;
-        this.address = address;
-        this.email = email;
-
-    }
-
     // Getter
     public String getCompanyName() {
         return companyName;

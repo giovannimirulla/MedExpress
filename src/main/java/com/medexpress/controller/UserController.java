@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 import java.util.Map;
 import org.bson.types.ObjectId;
+import org.modelmapper.ModelMapper;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -29,10 +30,14 @@ public class UserController {
 
     @Autowired
     private EncryptionService encryptionService;
+
+    @Autowired
+    private ModelMapper modelMapper;
     
-    public UserController(UserService userService, EncryptionService encryptionService) {
+    public UserController(UserService userService, EncryptionService encryptionService, ModelMapper modelMapper) {
         this.userService = userService;
         this.encryptionService = encryptionService;
+        this.modelMapper = modelMapper;
     }
     
     @GetMapping
@@ -54,8 +59,8 @@ public class UserController {
 
         User user = userService.createUser(body.get("name"), body.get("surname"), body.get("fiscalCode"), body.get("address"), body.get("email"), encryptedPassword, Integer.parseInt(body.get("role")), new ObjectId(body.get("doctor")));
 
-        UserDTO userDTO = new UserDTO(user.getName(), user.getSurname(), user.getFiscalCode(), user.getAddress(), user.getEmail(), user.getRole(), user.getDoctor());
-
+        UserDTO userDTO = modelMapper.map(user, UserDTO.class);
+        
         return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
     }
 }

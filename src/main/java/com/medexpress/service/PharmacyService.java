@@ -35,5 +35,9 @@ public class PharmacyService {
         Pharmacy pharmacy = pharmacyRepository.insert(new Pharmacy(companyName, VATnumber, address, email, password, LocalDateTime.now(), LocalDateTime.now()));
         return pharmacyRepository.save(pharmacy);
     }
+
+     public Pharmacy findByEmail(String email) {
+          return pharmacyRepository.findByEmail(email).orElse(null);
+     }
     
 }

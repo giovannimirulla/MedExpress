@@ -15,4 +15,8 @@ public class EncryptionService {
     public String encryptPassword(String password) {
         return passwordEncoder.encode(password);
     }
+
+    public boolean verifyPassword(String rawPassword, String encryptedPassword) {
+        return passwordEncoder.matches(rawPassword, encryptedPassword);
+    }
 }

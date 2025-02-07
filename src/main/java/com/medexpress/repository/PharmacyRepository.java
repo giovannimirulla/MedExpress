@@ -1,4 +1,5 @@
 package com.medexpress.repository;
+import java.util.Optional;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -11,5 +12,5 @@ public interface PharmacyRepository extends MongoRepository <Pharmacy, ObjectId>
     
     public boolean existsByEmail(String email); // This method is used to check if a pharmacy with the specified email exists in the database.
     public boolean existsByVATnumber(String VATnumber); // This method is used to check if a pharmacy with the specified VATnumber exists in the database.
-
+    Optional<Pharmacy> findByEmail(String email);  
 }

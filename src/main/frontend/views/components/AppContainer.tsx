@@ -1,7 +1,7 @@
 import Container from './Container';
 import { useTranslation } from "react-i18next";
 import { useState } from 'react';
-import { AutoComplete, Input, Pagination, PaginationProps, Spin, Avatar, Modal, List, Skeleton, Button } from 'antd';
+import { AutoComplete, Input, Pagination, PaginationProps, Spin, Avatar, Modal, List, Skeleton, Button, Alert } from 'antd';
 
 import type { AutoCompleteProps } from 'antd';
 
@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import CardDrug from './Card';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTruckFast } from '@fortawesome/free-solid-svg-icons';
+import DynamicDrugIcon from './DynamicDrugIcon';
 
 interface DataType {
   key: number;
@@ -139,7 +140,7 @@ const AppContainer = () => {
         <div className="blur-[106px] h-32 bg-gradient-to-r from-cyan-400 to-sky-300 dark:to-indigo-600"></div>
       </div>
       <Container fullScreen>
-        <Modal title={selectedDrug ? selectedDrug.medicinale.denominazioneMedicinale : ''} open={isModalOpen} onCancel={handleCancel}  footer={null}>
+        <Modal title={<span className='flex items-center'>{selectedDrug && <div className='mr-4'><DynamicDrugIcon drug={selectedDrug} /></div>} {selectedDrug ? selectedDrug.medicinale.denominazioneMedicinale : ''}</span>} open={isModalOpen} onCancel={handleCancel}  footer={null}>
           {/* {selectedDrug && selectedDrug.confezioni.map((confezione, index) => (
             <div key={index} className="mb-4">
               <p><strong>Denominazione Package:</strong> {confezione.denominazionePackage}</p>
@@ -168,6 +169,14 @@ const AppContainer = () => {
       )}
     />
 
+      <br/>
+      <Alert
+      message="Avviso"
+      description="I farmaci con il pulsante 'Ordina' arancione richiedono la prescrizione del medico. Cliccando su 'Ordina' verrà inviata una richiesta al medico di base."
+      type="warning"
+      showIcon
+      closable
+    />
 
         </Modal>
 

@@ -9,7 +9,7 @@ interface DynamicDrugIconProps {
   };
 }
 
-const DynamicDrugIconComponent: React.FC<DynamicDrugIconProps> = ({ drug }) => {
+const DynamicDrugIcon: React.FC<DynamicDrugIconProps> = ({ drug }) => {
   const [iconData, setIconData] = useState<{ name: keyof typeof solidIcons; color: string } | null>({ name: "faKitMedical", color: "gray" });
 
   const colorMap = {
@@ -66,4 +66,4 @@ const DynamicDrugIconComponent: React.FC<DynamicDrugIconProps> = ({ drug }) => {
   );
 };
 
-export default DynamicDrugIconComponent;
+export default DynamicDrugIcon;

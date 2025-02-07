@@ -1,5 +1,8 @@
 package com.medexpress.repository;
 
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
@@ -9,7 +12,7 @@ public interface IconRepository extends MongoRepository<Icon, ObjectId> {
 
     public Icon findByName(String name);
 
-    public Icon findByType(String type);
+    public List<Icon> findByTypeRegex(Pattern pattern);
 
     public boolean existsByName(String name);
 

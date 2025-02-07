@@ -7,6 +7,7 @@ import com.medexpress.validator.UserValidator;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +32,20 @@ public class IconController {
         this.iconService = iconService;
     }
 
-    // get icon by type
+    // get icon if include type in type column
     @GetMapping()
-    public Icon getIconByType(@RequestParam String type) {
-        return iconService.findByType(type);
+    public Icon findByTypeRegex(@RequestParam String type) {
+        // type is "Compressa orodispersibile" get icon with type "compressa"
+        String cleanedType = type.replaceAll("[.,]", "");
+        String[] words = cleanedType.split(" ");
+        String regex = String.join("|", words);
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        List<Icon> icons = iconService.findByTypeRegex(pattern);
+        if (icons.size() > 0) {
+            return icons.get(0);
+        }
+        return null;
+
     }
 
     // post name and type and create icon

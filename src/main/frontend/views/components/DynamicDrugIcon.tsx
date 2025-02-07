@@ -16,7 +16,21 @@ const DynamicDrugIconComponent: React.FC<DynamicDrugIconProps> = ({ drug }) => {
     "red": "text-red bg-red/20",
     "green": "text-green bg-green/20",
     "blue": "text-blue bg-blue/20",
-    "gray": "text-gray-400 bg-gray-400/20",
+    "yellow": "text-yellow bg-yellow/20",
+    "purple": "text-purple bg-purple/20",
+    "pink": "text-pink bg-pink/20",
+    "indigo": "text-indigo bg-indigo/20",
+    "teal": "text-teal bg-teal/20",
+    "orange": "text-orange bg-orange/20",
+    "cyan": "text-cyan bg-cyan/20",
+    "gray": "text-gray-200 bg-gray-200/20",
+    "lime": "text-lime bg-lime/20",
+    "amber": "text-amber bg-amber/20",
+    "emerald": "text-emerald bg-emerald/20",
+    "lightBlue": "text-lightBlue bg-lightBlue/20",
+    "violet": "text-violet bg-violet/20",
+    "fuchsia": "text-fuchsia bg-fuchsia/20",
+    "rose": "text-rose bg-rose/20",
   };
 
   useEffect(() => {

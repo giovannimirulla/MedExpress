@@ -33,7 +33,7 @@ const CardDrug: React.FC<CardDrugProps> = ({ drug, showModel }) => {
             
             } //http://localhost:8080/api/v1/icon/type/${drug.formaFarmaceutica}
                 title={drug.descrizioneFormaDosaggio}
-                description= {<p><strong>Somministrazione: </strong>{drug.vieSomministrazione}</p>}
+                description= {<div><p><strong>Somministrazione: </strong>{drug.vieSomministrazione}</p><br/><p><strong>formaFarmaceutica: </strong>{drug.formaFarmaceutica}</p></div>}
             />
 
         </Card>

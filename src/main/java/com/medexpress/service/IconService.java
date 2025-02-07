@@ -4,6 +4,7 @@ import com.medexpress.repository.IconRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,9 +16,8 @@ public class IconService {
     @Autowired
     private IconRepository iconRepository;
 
-    // findByType
-    public Icon findByType(String type) {
-        return iconRepository.findByType(type);
+    public List<Icon> findByTypeRegex(Pattern pattern) {
+        return iconRepository.findByTypeRegex(pattern);
     }
 
     public List<Icon> findAll() {

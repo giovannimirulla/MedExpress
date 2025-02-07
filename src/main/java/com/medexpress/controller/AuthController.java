@@ -72,12 +72,15 @@ public class AuthController {
         String refreshToken = body.get("refresh_token");
         Claims claims = JwtUtil.validateToken(refreshToken);
 
+
         if (claims != null) {
             String username = claims.getSubject();
             String newAccessToken = JwtUtil.generateAccessToken(username, "USER");
+            String newRefreshToken = JwtUtil.generateRefreshToken(claims.getSubject());
 
             Map<String, String> tokens = new HashMap<>();
             tokens.put("access_token", newAccessToken);
+            tokens.put("refresh_token", newRefreshToken);
             return new ResponseEntity<>(tokens, HttpStatus.OK);
         }
         return new ResponseEntity<>(Map.of("error", "Refresh Token non valido"), HttpStatus.UNAUTHORIZED);

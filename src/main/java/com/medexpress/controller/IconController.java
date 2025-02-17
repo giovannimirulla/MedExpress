@@ -3,13 +3,11 @@ package com.medexpress.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.medexpress.service.IconService;
-import com.medexpress.validator.UserValidator;
 
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.http.ResponseEntity;

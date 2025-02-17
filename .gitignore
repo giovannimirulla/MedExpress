@@ -65,3 +65,5 @@ index.html
 .env
 *.lock
 package-lock.json
+node/
+src/main/resources/static/

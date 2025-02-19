@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { colors } from "./src/lib/color";
 
 const config: Config = {
   content: [
@@ -8,6 +9,11 @@ const config: Config = {
   ],
   darkMode: 'media', //'media' or 'class'
   theme: {
+      extend: {
+        backgroundImage: {
+          'pattern': "url('/bg/drugs.svg')",
+        },
+      },
     screens: {
       sm: '640px',
       md: '768px',
@@ -15,46 +21,7 @@ const config: Config = {
       xl: '1280px',
       '2xl': '1536px',
     },
-    colors: ({ colors }) => ({
-      inherit: colors.inherit,
-      current: colors.current,
-      transparent: colors.transparent,
-      primary: "#00a9e4",
-      secondary: "#ff7e33",
-      info: "#0C63E7",
-      black: colors.black,
-      white: colors.white,
-      slate: colors.slate,
-      gray: {
-        50: "#FAFAFC",
-        100: "#E9E9EC",
-        200: "#C6C8CD",
-        300: "#ACAEB6",
-        400: "#92959F",
-        500: "#777C87",
-        600: "#5D6370",
-        700: "#434959",
-        800: "#293041",
-        900: "#0f172a",
-      },
-      red: "#EB2113",
-      orange: "#FF9100",
-      yellow: "#FFD300",
-      green: "#96CE00",
-      blue: "#00A9E4",
-      indigo: "#4B0082",
-      purple: "#8A2BE2",
-      pink: "#FF1493",
-      cyan: "#00FFFF",
-      teal: "#008080",
-      lime: "#bfff00",
-      amber: "#FFBF00",
-      emerald: "#008000",
-      lightBlue: "#87CEFA",
-      violet: "#EE82EE",
-      fuchsia: "#FF00FF",
-      rose: "#FF007F",
-    }),
+    colors,
     columns: {
       auto: 'auto',
       1: '1',

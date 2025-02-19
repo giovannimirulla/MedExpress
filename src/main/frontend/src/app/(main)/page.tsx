@@ -206,7 +206,7 @@ const Home = () => {
               options={options}
               onSelect={onSelect}
               onSearch={handleSearch}
-              size="large"
+
               autoFocus
             >
               <Input.Search size="large" placeholder="es. Tachipirina" enterButton />

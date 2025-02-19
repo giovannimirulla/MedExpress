@@ -19,7 +19,7 @@ interface CardDrugProps {
 const CardDrug: React.FC<CardDrugProps> = ({ drug, showModel }) => {
 
     return (
-        <Card title={drug.medicinale.denominazioneMedicinale} bordered={false}
+        <Card title={drug.medicinale.denominazioneMedicinale} 
             actions={[
                 <div key={drug.medicinale.denominazioneMedicinale} className='w-full h-full' onClick={() => showModel(drug)}><FontAwesomeIcon icon={faTruckFast} /> Ordina</div>
             ]}>

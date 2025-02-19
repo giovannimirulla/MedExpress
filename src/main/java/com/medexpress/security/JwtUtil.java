@@ -10,7 +10,14 @@ import java.util.Date;
 import java.util.Map;
 
 public class JwtUtil {
-    private static final String SECRET_KEY = "supersecretkeythatshouldbereplacedwitharealone";
+    private static final String SECRET_KEY = System.getenv("JWT_SECRET_KEY");
+    
+    static {
+        if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
+            throw new IllegalStateException("La variabile d'ambiente JWT_SECRET_KEY non è impostata.");
+        }
+    }
+    
     private static final long ACCESS_TOKEN_EXPIRATION = 900000;  // 15 minuti
     private static final long REFRESH_TOKEN_EXPIRATION = 604800000; // 7 giorni
 

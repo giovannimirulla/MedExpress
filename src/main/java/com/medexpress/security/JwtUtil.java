@@ -7,7 +7,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.Map;
+
 
 public class JwtUtil {
     private static final String SECRET_KEY = System.getenv("JWT_SECRET_KEY");
@@ -46,7 +46,7 @@ public class JwtUtil {
     }
 
     // Validare un token JWT
-    public static Claims validateToken(String token) {
+    public static Claims validateToken(String token) { 
         try {
             return Jwts.parser()
                     .verifyWith(key)  

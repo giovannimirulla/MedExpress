@@ -10,7 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.medexpress.entity.Pharmacy;
 import com.medexpress.repository.PharmacyRepository;
 
-@Service
+@Service // This annotation is used to indicate that this class is a service class.
 public class PharmacyService {
 
     @Autowired 
@@ -25,10 +25,10 @@ public class PharmacyService {
 
         //  throw exception if email or VAT number already exist
          if (existsByEmail) {
-              throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"User with email " + email + " already exists");
+              throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Pharmacy with email " + email + " already exists!");
          }
          if (existsByVATnumber) {
-              throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"User with VAT number " + VATnumber + " already exists");
+              throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Pharmacy with VAT number " + VATnumber + " already exists!");
          }
 
         //create pharmacy
@@ -36,8 +36,9 @@ public class PharmacyService {
         return pharmacyRepository.save(pharmacy);
     }
 
+     //find pharmacy by email
      public Pharmacy findByEmail(String email) {
-          return pharmacyRepository.findByEmail(email).orElse(null);
+          return pharmacyRepository.findByEmail(email).orElse(null); //orElse(null) is used to return null if the pharmacy is not found.
      }
     
 }

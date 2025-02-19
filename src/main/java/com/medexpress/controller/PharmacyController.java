@@ -19,19 +19,18 @@ import org.springframework.http.HttpStatus;
 
 import com.medexpress.validator.PharmacyValidator;
 
-@RestController
+@RestController 
 @RequestMapping("/api/v1/pharmacy")
 public class PharmacyController {
 
-    @Autowired // This annotation tells Spring to inject an instance of PharmacyService into
-               // this class.
+    @Autowired // This annotation tells Spring to inject an instance of PharmacyService into this class.
     private PharmacyService pharmacyService;
 
-    @Autowired
+    @Autowired // This annotation tells Spring to inject an instance of EncryptionService into this class.
     private EncryptionService encryptionService;
 
     @Autowired
-    private ModelMapper modelMapper;
+    private ModelMapper modelMapper; 
 
     public PharmacyController(PharmacyService pharmacyService, EncryptionService encryptionService,
             ModelMapper modelMapper) {
@@ -40,21 +39,20 @@ public class PharmacyController {
         this.modelMapper = modelMapper;
     }
 
-    @PostMapping()
+    @PostMapping() // This annotation is used to map HTTP POST requests onto specific handler methods.
 
     public ResponseEntity<PharmacyDTO> createPharmacy(@RequestBody Map<String, String> body) {
 
         PharmacyValidator.validate(body); // This line of code is used to validate the pharmacy details.
 
-        String encryptedPassword = encryptionService.encryptPassword(body.get("password"));
+        String encryptedPassword = encryptionService.encryptPassword(body.get("password")); 
 
         Pharmacy pharmacy = pharmacyService.createPharmacy(body.get("companyName"), body.get("VATnumber"),
-                body.get("address"), body.get("email"), encryptedPassword); // This line of code is used to create a new
-                                                                            // pharmacy.
+                body.get("address"), body.get("email"), encryptedPassword); // This line of code is used to create a new pharmacy.
 
-        PharmacyDTO pharmacyDTO = modelMapper.map(pharmacy, PharmacyDTO.class);
+        PharmacyDTO pharmacyDTO = modelMapper.map(pharmacy, PharmacyDTO.class); // This line of code is used to map the pharmacy entity to a pharmacy DTO.
 
-        return new ResponseEntity<>(pharmacyDTO, HttpStatus.CREATED);
+        return new ResponseEntity<>(pharmacyDTO, HttpStatus.CREATED); 
 
     }
 

@@ -67,3 +67,5 @@ index.html
 package-lock.json
 node/
 src/main/resources/static/
+src/main/frontend/out/
+*.next/

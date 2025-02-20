@@ -14,6 +14,7 @@ import com.medexpress.service.EncryptionService;
 import com.medexpress.entity.User;
 import com.medexpress.entity.Pharmacy;
 import com.medexpress.security.JwtUtil;
+import com.medexpress.enums.AuthEntityType;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -36,7 +37,7 @@ public class AuthController {
 
         User user = userService.findByEmail(email);
         if (user != null && encryptionService.verifyPassword(password, user.getPassword())) {
-            String accessToken = JwtUtil.generateAccessToken(user.getId().toString(), user.getEmail());
+            String accessToken = JwtUtil.generateAccessToken(user.getId().toString(), AuthEntityType.USER);
             String refreshToken = JwtUtil.generateRefreshToken(user.getEmail());
 
             Map<String, String> tokens = new HashMap<>();
@@ -55,7 +56,7 @@ public class AuthController {
 
         Pharmacy pharmacy = pharmacyService.findByEmail(email);
                 if (pharmacy != null && encryptionService.verifyPassword(password, pharmacy.getPassword())) {
-                    String accessToken = JwtUtil.generateAccessToken(pharmacy.getId().toString(), pharmacy.getEmail());
+                    String accessToken = JwtUtil.generateAccessToken(pharmacy.getId().toString(), AuthEntityType.PHARMACY);
                     String refreshToken = JwtUtil.generateRefreshToken(pharmacy.getEmail());
         
                     Map<String, String> tokens = new HashMap<>();
@@ -75,9 +76,9 @@ public class AuthController {
 
         if (claims != null) {
             String id = claims.getSubject();
-            String email = claims.get("email", String.class);
+            AuthEntityType role = claims.get("role", AuthEntityType.class);
 
-            String newAccessToken = JwtUtil.generateAccessToken(id, email);
+            String newAccessToken = JwtUtil.generateAccessToken(id, role);
             String newRefreshToken = JwtUtil.generateRefreshToken(claims.getSubject());
 
             Map<String, String> tokens = new HashMap<>();

@@ -7,14 +7,14 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.Map;
+import com.medexpress.enums.AuthEntityType;
 
 public class JwtUtil {
     private static final String SECRET_KEY = System.getenv("JWT_SECRET_KEY");
     
     static {
         if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
-            throw new IllegalStateException("La variabile d'ambiente JWT_SECRET_KEY non è impostata.");
+            throw new IllegalStateException("The environment variable JWT_SECRET_KEY is not set.");
         }
     }
     
@@ -25,12 +25,12 @@ public class JwtUtil {
     private static final SecureDigestAlgorithm<SecretKey, ?> algorithm = Jwts.SIG.HS256;  
 
     // Genera un Access Token con il ruolo
-    public static String generateAccessToken(String id, String email) {
+    public static String generateAccessToken(String id, AuthEntityType role) {
         return Jwts.builder()
                 .subject(id)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                .claim("email", email)
+                .claim("role", role.name())
                 .signWith(key)  
                 .compact();
     }
@@ -57,5 +57,4 @@ public class JwtUtil {
             return null; // Token non valido
         }
     }
-    
 }

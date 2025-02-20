@@ -7,7 +7,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import reactor.core.publisher.Mono;
 import com.medexpress.dto.AIFAAutocompleteResponse;
+import com.medexpress.dto.AIFADrugResponse;
 import com.medexpress.dto.AIFADrugsResponse; 
+import com.medexpress.dto.CommonPackage;
 
 @Service
 public class AIFAService {
@@ -33,18 +35,49 @@ public Mono<AIFAAutocompleteResponse> getAutocompleteResults(String query, int n
 }
 
 
-  public Mono<AIFADrugsResponse> getDrugs(String query, boolean spellingCorrection, int page) {
-    return webClient.get()
-            .uri(uriBuilder -> uriBuilder
-                    .path("/aifa-bdf-eif-be/1.0.0/formadosaggio/ricerca")
-                    .queryParam("query", query)
-                    .queryParam("spellingCorrection", spellingCorrection)
-                    .queryParam("page", page)
-                    .build())
-            .retrieve()
-            .bodyToMono(AIFADrugsResponse.class);
+public Mono<AIFADrugsResponse> getDrugs(String query, boolean spellingCorrection, int page, int size) {
+        return webClient.get()
+                        .uri(uriBuilder -> {
+                                uriBuilder.path("/aifa-bdf-eif-be/1.0.0/formadosaggio/ricerca")
+                                                .queryParam("query", query)
+                                                .queryParam("spellingCorrection", spellingCorrection)
+                                                .queryParam("page", page)
+                                                .queryParam("size", size);
+
+                                return uriBuilder.build();
+                        })
+                        .retrieve()
+                        .bodyToMono(AIFADrugsResponse.class);
 }
 
+//https://api.aifa.gov.it/aifa-bdf-eif-be/1.0.0/formadosaggio/0000049466?lang=it
+public Mono<AIFADrugResponse> getDrug(String id) {
+        return webClient.get()
+                        .uri(uriBuilder -> {
+                                uriBuilder.path("/aifa-bdf-eif-be/1.0.0/formadosaggio/" + id)
+                                                .queryParam("lang", "it");
+
+                                return uriBuilder.build();
+                        })
+                        .retrieve()
+                        .bodyToMono(AIFADrugResponse.class);
+                }
+
+                public Mono<CommonPackage> getPackage(String drugId, String packageId) {
+                        return getDrug(drugId)
+                                .flatMap(drugResponse -> {
+                                    if (drugResponse.getData() != null &&
+                                        drugResponse.getData().getConfezioni() != null) {
+                                        
+                                        return drugResponse.getData().getConfezioni().stream()
+                                                .filter(pkg -> packageId.equals(pkg.getIdPackage()))
+                                                .findFirst()
+                                                .map(Mono::just)
+                                                .orElse(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found")));
+                                    }
+                                    return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Drug or package not found"));
+                                });
+                    }
 
 
 }

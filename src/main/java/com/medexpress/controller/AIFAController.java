@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.medexpress.service.AIFAService;
 import com.medexpress.dto.AIFAAutocompleteResponse;
 import com.medexpress.dto.AIFADrugsResponse;
+import com.medexpress.dto.CommonPackage;
 
 import reactor.core.publisher.Mono;
 
@@ -37,18 +38,29 @@ public class AIFAController {
     // }
 
     @GetMapping("/autocomplete")
-    public Mono<AIFAAutocompleteResponse> getAutocomplete(@RequestParam String query, @RequestParam(defaultValue = "5") int nos) {
+    public Mono<AIFAAutocompleteResponse> getAutocomplete(@RequestParam String query,
+            @RequestParam(defaultValue = "5") int nos) {
         return aifaService.getAutocompleteResults(query, nos);
     }
 
-     // https://api.aifa.gov.it/aifa-bdf-eif-be/1.0.0/formadosaggio/ricerca?query=Tachipirina&spellingCorrection=true&page=0
+    // https://api.aifa.gov.it/aifa-bdf-eif-be/1.0.0/formadosaggio/ricerca?query=Tachipirina&spellingCorrection=true&page=0
 
     @GetMapping("/drugs")
     public Mono<AIFADrugsResponse> getDrugs(
             @RequestParam String query,
             @RequestParam(defaultValue = "true") boolean spellingCorrection,
-            @RequestParam(defaultValue = "0") int page) {
-        return aifaService.getDrugs(query, spellingCorrection, page);
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return aifaService.getDrugs(query, spellingCorrection, page, size);
+    }
+
+    // get package
+    @GetMapping("/package")
+    public Mono<CommonPackage> getPackage(
+            // iddrug and idpackage
+            @RequestParam String drugId,
+            @RequestParam String packageId) {
+        return aifaService.getPackage(drugId, packageId);
     }
 
 }

@@ -51,6 +51,11 @@ public class UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
     }
+
+    //find user by id
+    public User findById(String id) {
+        return userRepository.findById(new ObjectId(id)).orElse(null);
+    }
     
 
 }

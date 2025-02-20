@@ -25,12 +25,12 @@ public class JwtUtil {
     private static final SecureDigestAlgorithm<SecretKey, ?> algorithm = Jwts.SIG.HS256;  
 
     // Genera un Access Token con il ruolo
-    public static String generateAccessToken(String username, String role) {
+    public static String generateAccessToken(String id, String email) {
         return Jwts.builder()
-                .subject(username)
+                .subject(id)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                .claim("role", role)
+                .claim("email", email)
                 .signWith(key)  
                 .compact();
     }
@@ -57,6 +57,5 @@ public class JwtUtil {
             return null; // Token non valido
         }
     }
-
     
 }

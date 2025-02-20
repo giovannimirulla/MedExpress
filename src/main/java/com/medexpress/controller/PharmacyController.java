@@ -32,6 +32,7 @@ public class PharmacyController {
     @Autowired
     private ModelMapper modelMapper; 
 
+    // This constructor is used to create an instance of the PharmacyController class with the specified parameters.
     public PharmacyController(PharmacyService pharmacyService, EncryptionService encryptionService,
             ModelMapper modelMapper) {
         this.pharmacyService = pharmacyService;

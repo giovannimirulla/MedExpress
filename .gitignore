@@ -69,3 +69,4 @@ node/
 src/main/resources/static/
 src/main/frontend/out/
 *.next/
+*.tsbuildinfo

@@ -181,14 +181,14 @@ const Home = () => {
         </Modal>
 
         <motion.div
-          className="ml-auto h flex flex-col items-center justify-center"
+          className="ml-auto h flex flex-col items-center justify-center "
           initial={{ height: '80vh' }}
           animate={{ height: selected ? '6rem' : '80vh' }}
           transition={{ duration: 0.5 }}
         >
-          <div className="lg:w-2/3 text-center mx-auto">
+          <div className=" text-center mx-auto h-full flex flex-col items-center justify-center w-3/4">
             <motion.div
-              className="lg:w-2/3 text-center mx-auto"
+              className="mb-8"
               initial={{ opacity: 1 }}
               animate={{
                 opacity: selected ? 0 : 1,
@@ -200,9 +200,10 @@ const Home = () => {
 
             >
               <h1 className="text-body font-bold text-5xl md:text-6xl xl:text-7xl">Cerca qui il tuo <span className="text-primary">farmaco</span></h1>
-            </motion.div><AutoComplete
-              className={`z-20`}
-              style={{ width: '60%' }}
+            </motion.div>
+
+            <AutoComplete
+              className={`z-20 w-2/3 h-auto`}
               options={options}
               onSelect={onSelect}
               onSearch={handleSearch}

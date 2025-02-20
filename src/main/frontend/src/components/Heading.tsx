@@ -1,13 +1,15 @@
+"use client";
 import Link from 'next/link';
+import { isLogged } from '@/utils/auth';
 
 const Heading = () => {
   return (
     <header>
       <nav
         id="nav"
-        className="absolute h-24 flex items-center group z-10 w-full border-b lg:border-transparent"
+        className="absolute h-24 flex items-center group z-10 w-full lg:border-transparent"
       >
-        <div className={`max-w-7xl mx-auto px-6 md:px-12 w-full`}>
+        <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="relative flex flex-wrap items-center justify-between ">
             <div className="relative z-20 flex w-full justify-between md:px-0 lg:w-fit">
               <Link
@@ -16,7 +18,6 @@ const Heading = () => {
                 className="flex items-center space-x-2 no-underline"
               >
                 <div aria-hidden="true" className="flex space-x-1">
-                  {/* <div className="size-4 rounded-full bg-body"></div> */}
                   <div className="h-6 w-2 bg-primary"></div>
                 </div>
                 <span className="text-2xl font-bold text-body">MedExpress</span>
@@ -54,18 +55,29 @@ const Heading = () => {
                 {/* Altri link o contenuti della navigazione */}
               </div>
               <div className="flex items-center gap-4">
-                <Link
-                  href="/login"
-                  className="text-sm font-medium text-gray-700 hover:underline"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/signup"
-                  className="text-sm font-medium bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
-                >
-                  Sign Up
-                </Link>
+                {isLogged() ? (
+                  <Link
+                    href="/dashboard"
+                    className="text-sm font-medium bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
+                  >
+                    Dashboard
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      className="text-sm font-medium dark:text-white text-gray-700 hover:underline"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      href="/signup"
+                      className="text-sm font-medium bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>

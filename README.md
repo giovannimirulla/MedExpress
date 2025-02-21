@@ -33,9 +33,4 @@ If you manually switch to a different parent and actually want the inheritance, 
 - [x] UC1: User Registration - @giovannimirulla
 - [x] UC2: Pharmacy Registration - @agatarosselli
 - [x] UC3: Search for a drug - @giovannimirulla
-
-# Start the project
-
-```shell
-./mvnw spring-boot:run -Pprod
-```
+- [x] UC4: Order drug - @agatarosselli

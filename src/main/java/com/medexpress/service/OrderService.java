@@ -27,7 +27,8 @@ public class OrderService {
             throw new IllegalArgumentException("User with id " + idUser + " does not exist!");
         }
         
-        return orderRepository.insert(new Order(idPackage, new ObjectId(idUser), idDrug, LocalDateTime.now(), LocalDateTime.now()));
+        return orderRepository.insert(new Order(idPackage, new ObjectId(idUser), idDrug, LocalDateTime.now(), LocalDateTime.now(), 
+        Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, Order.Priority.LOW));
     }
     
 }

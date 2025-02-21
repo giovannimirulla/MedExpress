@@ -1,60 +1,85 @@
 package com.medexpress.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
+
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
+
 import javax.crypto.SecretKey;
 import java.util.Date;
 import com.medexpress.enums.AuthEntityType;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import javax.annotation.PostConstruct;
+
+
+@Component
 public class JwtUtil {
-    private static final String SECRET_KEY = System.getenv("JWT_SECRET_KEY");
+  
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+    @Value("${jwt.expiration}")
+    private int jwtExpirationMs;
+    @Value("${jwt.refreshExpiration}")
+    private int jwtRefreshExpirationMs;
+    private SecretKey key;
+    private final SecureDigestAlgorithm<SecretKey, ?> algorithm = Jwts.SIG.HS256;
+
+    //constructor with key and algorithm
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     
-    static {
-        if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
-            throw new IllegalStateException("The environment variable JWT_SECRET_KEY is not set.");
-        }
     }
+   
     
-    private static final long ACCESS_TOKEN_EXPIRATION = 900000;  // 15 minuti
-    private static final long REFRESH_TOKEN_EXPIRATION = 604800000; // 7 giorni
 
-    private static final SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY)); 
-    private static final SecureDigestAlgorithm<SecretKey, ?> algorithm = Jwts.SIG.HS256;  
+    //Generate JWT token with the user id and role 
+    public String generateAccessToken(String id, AuthEntityType role) {
+        return Jwts.builder()
+            .subject(id)
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+            .claim("role", role.name())
+            .signWith(key, algorithm)
+            .compact();
+    }
 
-    // Genera un Access Token con il ruolo
-    public static String generateAccessToken(String id, AuthEntityType role) {
+    // Refresh Token generation
+    public String generateRefreshToken(String id) {
         return Jwts.builder()
                 .subject(id)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                .claim("role", role.name())
+                .expiration(new Date(System.currentTimeMillis() + jwtRefreshExpirationMs))
                 .signWith(key)  
                 .compact();
     }
 
-    // Genera un Refresh Token
-    public static String generateRefreshToken(String username) {
-        return Jwts.builder()
-                .subject(username)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
-                .signWith(key)  
-                .compact();
-    }
-
-    // Validare un token JWT
-    public static Claims validateToken(String token) {
+    // Validate the JWT token
+    public Claims validateToken(String token) { 
         try {
             return Jwts.parser()
                     .verifyWith(key)  
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-        } catch (Exception e) {
-            return null; // Token non valido
+        } catch (SecurityException e) {
+            System.out.println("Invalid JWT signature: " + e.getMessage());
+        } catch (MalformedJwtException e) {
+            System.out.println("Invalid JWT token: " + e.getMessage());
+        } catch (ExpiredJwtException e) {
+            System.out.println("JWT token is expired: " + e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            System.out.println("JWT token is unsupported: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("JWT claims string is empty: " + e.getMessage());
         }
+        return null;
     }
 }

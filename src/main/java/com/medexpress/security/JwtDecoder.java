@@ -4,19 +4,25 @@ import io.jsonwebtoken.Claims;
 import com.medexpress.enums.AuthEntityType;
 import com.medexpress.service.UserService;
 import com.medexpress.service.PharmacyService;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class TokenDecoder {
+public class JwtDecoder {
 
+    @Autowired
     private final UserService userService;
+    @Autowired
     private final PharmacyService pharmacyService;
+    @Autowired
+    private final JwtUtil jwtUtil;
 
-    public TokenDecoder(UserService userService, PharmacyService pharmacyService) {
+    public JwtDecoder(UserService userService, PharmacyService pharmacyService, JwtUtil jwtUtil) {
         this.userService = userService;
         this.pharmacyService = pharmacyService;
+        this.jwtUtil = jwtUtil;
     }
 
     public Object decodeToken(String token) {
-        Claims claims = JwtUtil.validateToken(token);
+        Claims claims = jwtUtil.validateToken(token);
         if (claims == null) {
             return null;
         }
@@ -33,10 +39,21 @@ public class TokenDecoder {
 
     //decode token only id
     public String decodeTokenId(String token) {
-        Claims claims = JwtUtil.validateToken(token);
+        Claims claims = jwtUtil.validateToken(token);
         if (claims == null) {
             return null;
         }
         return claims.getSubject();
+    }
+
+    //decode token id and role
+    public Object decodeTokenIdAndRole(String token) {
+        Claims claims = jwtUtil.validateToken(token);
+        if (claims == null) {
+            return null;
+        }
+        AuthEntityType role = claims.get("role", AuthEntityType.class);
+        String id = claims.getSubject();
+        return new Object[]{id, role};
     }
 }

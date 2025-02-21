@@ -31,3 +31,4 @@ If you manually switch to a different parent and actually want the inheritance, 
 - [x] UC1: User Registration - @giovannimirulla
 - [x] UC2: Pharmacy Registration - @agatarosselli
 - [x] UC3: Search for a drug - @giovannimirulla
+- [x] UC4: Order drug - @agatarosselli

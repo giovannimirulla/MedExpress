@@ -5,11 +5,13 @@ import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.medexpress.entity.User;
 import com.medexpress.repository.UserRepository;
+import java.util.Collections;
 
 import org.bson.types.ObjectId;
 
@@ -53,8 +55,12 @@ public class UserService {
     }
 
     //find user by id
-    public User findById(String id) {
-        return userRepository.findById(new ObjectId(id)).orElse(null);
+    public UserDetails findById(String id) {
+        User user = userRepository.findById(new ObjectId(id)).orElse(null);
+        if(user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + id + " not found");
+        } 
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), Collections.emptyList());
     }
     
 

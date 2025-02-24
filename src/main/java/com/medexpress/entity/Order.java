@@ -18,19 +18,19 @@ import lombok.NoArgsConstructor;
 public class Order {
     @Id
     private ObjectId id;
-    private String idPackage;
-    private ObjectId idUser;
-    private String idDrug;    
+    private String packageId;
+    private User user;
+    private String drugId;    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private StatusPharmacy statusPharmacy;
     private StatusDriver statusDriver;
     private Priority priority;
 
-    public Order(String idPackage, ObjectId idUser, String idDrug, LocalDateTime createdAt, LocalDateTime updatedAt, StatusPharmacy statusPharmacy, StatusDriver statusDriver, Priority priority) {
-        this.idPackage = idPackage;
-        this.idUser = idUser;
-        this.idDrug = idDrug;
+    public Order(String packageId, User user, String drugId, LocalDateTime createdAt, LocalDateTime updatedAt, StatusPharmacy statusPharmacy, StatusDriver statusDriver, Priority priority) {
+        this.packageId = packageId;
+        this.user = user;
+        this.drugId = drugId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.statusPharmacy = statusPharmacy;

@@ -1,7 +1,6 @@
 package com.medexpress.service;
 
 import java.time.LocalDateTime;
-import org.bson.types.ObjectId;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,7 +8,8 @@ import com.medexpress.entity.Order;
 import com.medexpress.repository.OrderRepository;
 
 import com.medexpress.repository.UserRepository;
-
+import com.medexpress.entity.User;
+import org.bson.types.ObjectId;
 
 @Service
 public class OrderService {
@@ -20,14 +20,12 @@ public class OrderService {
     @Autowired
     private UserRepository userRepository;
 
-    public Order createOrder(String idPackage, String idUser, String idDrug) {
+    public Order createOrder(String packageId, String userId, String drugId) {
 
         // check if user exists
-        if (!userRepository.existsById(new ObjectId(idUser))) {
-            throw new IllegalArgumentException("User with id " + idUser + " does not exist!");
-        }
+        User user = userRepository.findById(new ObjectId(userId)).orElseThrow(() -> new RuntimeException("User not found"));
         
-        return orderRepository.insert(new Order(idPackage, new ObjectId(idUser), idDrug, LocalDateTime.now(), LocalDateTime.now(), 
+        return orderRepository.insert(new Order(packageId, user, drugId, LocalDateTime.now(), LocalDateTime.now(), 
         Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, Order.Priority.LOW));
     }
     

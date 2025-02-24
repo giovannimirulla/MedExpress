@@ -5,11 +5,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.medexpress.service.OrderService;
+import com.medexpress.dto.OrderDTO;
 import com.medexpress.entity.Order;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;  
 import org.springframework.http.HttpStatus;
 
-import java.util.Map;
 
 
 @RestController 
@@ -19,18 +21,22 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired  
+    private ModelMapper modelMapper; 
 
-    public OrderController(OrderService orderService) {
+
+    public OrderController(OrderService orderService, ModelMapper modelMapper) {
         this.orderService = orderService;
-        
+        this.modelMapper = modelMapper;
     }
 
     @PostMapping()
-    public ResponseEntity<Order> createOrder(@RequestBody Map<String, String> body) {
+    public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderDTO body) {
 
-        Order order = orderService.createOrder(body.get("idPackage"), body.get("idUser"), body.get("idDrug"));
+        Order order = orderService.createOrder(body.getPackageId(), body.getUserId(), body.getDrugId());
 
-        return new ResponseEntity<>(order, HttpStatus.CREATED);
+        OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
+        return new ResponseEntity<>(orderDTO, HttpStatus.CREATED);
 
     }
 

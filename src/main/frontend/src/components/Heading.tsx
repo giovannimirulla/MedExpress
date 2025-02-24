@@ -1,8 +1,10 @@
 "use client";
+
 import Link from 'next/link';
-import { isLogged } from '@/utils/auth';
+import { useAuth } from '@/context/authContext';
 
 const Heading = () => {
+  const { isLoggedIn } = useAuth();
   return (
     <header>
       <nav
@@ -55,7 +57,7 @@ const Heading = () => {
                 {/* Altri link o contenuti della navigazione */}
               </div>
               <div className="flex items-center gap-4">
-                {isLogged() ? (
+                {isLoggedIn() ? (
                   <Link
                     href="/dashboard"
                     className="text-sm font-medium bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"

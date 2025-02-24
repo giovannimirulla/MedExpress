@@ -22,5 +22,11 @@ export const theme: ThemeConfig = {
     colorBgSpotlight: colors.gray[50],
     
   },
+  components: {
+    Segmented: {
+      itemSelectedBg: colors.primary,
+      itemSelectedColor: colors.white,
+    }
+  }
 
 };

@@ -30,7 +30,21 @@ If you manually switch to a different parent and actually want the inheritance, 
 
 
 # To DO
+
+### Uses Cases
 - [x] UC1: User Registration - @giovannimirulla
 - [x] UC2: Pharmacy Registration - @agatarosselli
 - [x] UC3: Search for a drug - @giovannimirulla
 - [x] UC4: Order drug - @agatarosselli
+
+### Frontend - @giovannimirulla
+- [x] Home - Search drugs page 
+- [x] Swaggger
+- [x] List search results
+- [x] Drug details
+- [ ] Login
+- [ ] Register
+- [ ] Order drug
+
+### Tests
+- [x] UC1 tests - @mariachiara98

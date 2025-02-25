@@ -17,4 +17,5 @@ public interface UserRepository extends MongoRepository <User, ObjectId> {
     public boolean existsByFiscalCode(String fiscalCode);
     Optional<User> findByEmail(String email);
     List<User> findByRole(Role role);
+    List<User> findByRoleAndNameOrSurname(Role role, String name, String surname);
 }

@@ -36,6 +36,12 @@ public class UserService {
         return userRepository.findByRole(doctorRole);
     }
 
+    public List<User> searchDoctor(String query) {
+        Role doctorRole = roleRepository.findByName("Doctor")
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor role not found"));
+        return userRepository.findByRoleAndNameOrSurname(doctorRole, query, query);
+    }
+
 
     // create user
     public User createUser(String name, String surname, String fiscalCode, String address, String email,

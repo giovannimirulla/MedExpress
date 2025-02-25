@@ -23,7 +23,7 @@ public class Pharmacy {
     private ObjectId id;
     private String companyName;
     @Indexed(unique = true)
-    private String VATnumber;
+    private String vatNumber;
     private String address;
     @Indexed(unique = true)
     private String email;
@@ -32,9 +32,9 @@ public class Pharmacy {
     private LocalDateTime updatedAt;
 
     // This constructor is used to create a new instance of the Pharmacy class
-    public Pharmacy(String companyName, String VATnumber, String address, String email, String password, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Pharmacy(String companyName, String vatNumber, String address, String email, String password, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.companyName = companyName;
-        this.VATnumber = VATnumber;
+        this.vatNumber = vatNumber;
         this.address = address;
         this.email = email;
         this.password = password;

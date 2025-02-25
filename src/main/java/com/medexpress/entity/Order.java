@@ -19,7 +19,9 @@ public class Order {
     @Id
     private ObjectId id;
     private String packageId;
-    private User user;
+    private User user; //This is the user who made the order
+    private User driver;
+    private Pharmacy pharmacy; //This is the pharmacy that will prepare the order
     private String drugId;    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -28,9 +30,11 @@ public class Order {
     private StatusDoctor statusDoctor;
     private Priority priority;
 
-    public Order(String packageId, User user, String drugId, LocalDateTime createdAt, LocalDateTime updatedAt, StatusPharmacy statusPharmacy, StatusDriver statusDriver, StatusDoctor statusDoctor, Priority priority) {
+    public Order(String packageId, User user, User driver, Pharmacy pharmacy, String drugId, LocalDateTime createdAt, LocalDateTime updatedAt, StatusPharmacy statusPharmacy, StatusDriver statusDriver, StatusDoctor statusDoctor, Priority priority) {
         this.packageId = packageId;
         this.user = user;
+        this.driver = driver;
+        this.pharmacy = pharmacy;
         this.drugId = drugId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -42,7 +46,7 @@ public class Order {
 
     public enum StatusDoctor {
         PENDING,
-        APPROVED,
+        APPROVED, //The doctor has approved the order
         REJECTED
     }
 

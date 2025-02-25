@@ -9,6 +9,8 @@ import com.medexpress.repository.OrderRepository;
 
 import com.medexpress.repository.UserRepository;
 import com.medexpress.entity.User;
+
+
 import org.bson.types.ObjectId;
 
 @Service
@@ -27,8 +29,9 @@ public class OrderService {
 
        
         
-        return orderRepository.insert(new Order(packageId, user, drugId, LocalDateTime.now(), LocalDateTime.now(), 
-        Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, Order.StatusDoctor.PENDING, Order.Priority.LOW));
+      
+        Order order = new Order(packageId, user, null, null, drugId, LocalDateTime.now(), LocalDateTime.now(),  Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, Order.StatusDoctor.PENDING, Order.Priority.LOW);
+        return orderRepository.save(order);
 
 
     }

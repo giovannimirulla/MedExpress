@@ -14,6 +14,9 @@ import com.medexpress.entity.Order;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;  
 import org.springframework.http.HttpStatus;
+import com.corundumstudio.socketio.SocketIOServer;
+import com.medexpress.service.PharmacyService;
+import com.medexpress.entity.Pharmacy;
 
 
 
@@ -30,12 +33,23 @@ public class OrderController {
 
     @Autowired
     private AIFAService aifaService; 
+    
+    @Autowired
+    private SocketIOServer socketServer;
+
+    @Autowired
+    private PharmacyService pharmacyService;
 
 
-    public OrderController(OrderService orderService, ModelMapper modelMapper) {
+    public OrderController(OrderService orderService, ModelMapper modelMapper, AIFAService aifaService, SocketIOServer socketServer, PharmacyService pharmacyService){
         this.orderService = orderService;
         this.modelMapper = modelMapper;
+        this.aifaService = aifaService;
+        this.socketServer = socketServer;
+        this.pharmacyService = pharmacyService;
     }
+
+
 
     @PostMapping()
     public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderDTO body) {
@@ -48,11 +62,21 @@ public class OrderController {
        
         switch(commonPackage.getClasseFornitura()){
             case "RR": //ricetta ripetibile
-                ;
+
+                //get user's doctor and send order to doctor
+                socketServer.getBroadcastOperations().sendEvent(order.getUser().getDoctor().getId().toString(), order);
                 break;
+
             case "OTC": //over the counter (da banco)
-                ;
+ 
+                // find all pharmacies
+                Iterable<Pharmacy> pharmacies = pharmacyService.findAll();
+                // send order to all pharmacies
+                for(Pharmacy pharmacy : pharmacies){
+                    socketServer.getBroadcastOperations().sendEvent(pharmacy.getId().toString(), order);
+                }
                 break;
+                
             case "SOP": //senza obbligo di prescrizione, ma non da banco
                 ;
                 break;

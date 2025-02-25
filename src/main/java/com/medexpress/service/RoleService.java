@@ -23,7 +23,7 @@ public class RoleService {
     }
 
     //return list of all roles
-    public List<Role> findAll() {
+    public Iterable<Role> findAll() {
         return roleRepository.findAll();
     }
 

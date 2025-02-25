@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.medexpress.service.PharmacyService;
 import com.medexpress.service.EncryptionService;
 import com.medexpress.dto.PharmacyDTO;
-
+import com.medexpress.dto.PharmacyRequest;
 import com.medexpress.entity.Pharmacy;
 
 import org.modelmapper.ModelMapper;
@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import com.medexpress.validator.PharmacyValidator;
+
 
 @RestController 
 @RequestMapping("/api/v1/pharmacy")
@@ -41,13 +42,13 @@ public class PharmacyController {
 
     @PostMapping() // This annotation is used to map HTTP POST requests onto specific handler methods.
 
-    public ResponseEntity<PharmacyDTO> createPharmacy(@RequestBody Pharmacy body) {
+    public ResponseEntity<PharmacyDTO> createPharmacy(@RequestBody PharmacyRequest body) {
 
         PharmacyValidator.validate(body); // This line of code is used to validate the pharmacy details.
 
         String encryptedPassword = encryptionService.encryptPassword(body.getPassword());
 
-        Pharmacy pharmacy = pharmacyService.createPharmacy(body.getCompanyName(), body.getVATnumber(),
+        Pharmacy pharmacy = pharmacyService.createPharmacy(body.getCompanyName(), body.getvatNumber(),
                 body.getAddress(), body.getEmail(), encryptedPassword); // This line of code is used to create a new
                                                                             // pharmacy.
 

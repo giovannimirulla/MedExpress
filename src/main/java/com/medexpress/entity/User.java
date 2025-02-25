@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,16 +21,18 @@ public class User {
     private ObjectId id;
     private String name;
     private String surname;
+    @Indexed(unique = true)
     private String fiscalCode;
     private String address;
+    @Indexed(unique = true)
     private String email;
     private String password;
-    private Number role;
-    private ObjectId doctor;
+    private Role role;
+    private User doctor;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public User(String name, String surname, String fiscalCode, String address, String email, String password, Number role, ObjectId doctor, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public User(String name, String surname, String fiscalCode, String address, String email, String password, Role role, User doctor, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.name = name;
         this.surname = surname;
         this.fiscalCode = fiscalCode;

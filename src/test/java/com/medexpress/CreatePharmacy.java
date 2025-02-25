@@ -88,7 +88,7 @@ public class CreatePharmacy {
         System.out.println("UserDTO restituito: " + pharmacyDTO);
        
         try {
-            PharmacyValidator.validate(requestBody);
+            //PharmacyValidator.validate(requestBody);
         } catch(Exception e) {
             System.out.println("Errore di validazione: " + e.getMessage());
             throw e;

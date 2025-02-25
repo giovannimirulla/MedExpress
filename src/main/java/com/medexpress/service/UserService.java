@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.medexpress.entity.User;
+import com.medexpress.entity.Role;
 import com.medexpress.repository.UserRepository;
+import com.medexpress.repository.RoleRepository;
 import java.util.Collections;
 
 import org.bson.types.ObjectId;
@@ -21,17 +23,29 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     public List<User> getAllDoctors() {
-        return userRepository.findAllByRole(2);
+        Role doctorRole = roleRepository.findByName("Doctor")
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor role not found"));
+        return userRepository.findByRole(doctorRole);
     }
+
+    public List<User> searchDoctor(String query) {
+        Role doctorRole = roleRepository.findByName("Doctor")
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor role not found"));
+        return userRepository.findByRoleAndNameOrSurname(doctorRole, query, query);
+    }
+
 
     // create user
     public User createUser(String name, String surname, String fiscalCode, String address, String email,
-            String password, Number role, ObjectId doctor) {
+            String password, String roleId, String doctorId) {
 
         // check if the user already exists by email and fiscal code // userRepository.existsByEmail(email);
         boolean existsByEmail = userRepository.existsByEmail(email);
@@ -44,6 +58,14 @@ public class UserService {
         if (existsByFiscalCode) {
              throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"User with fiscal code " + fiscalCode + " already exists");
         }
+
+        // find role by id
+        Role role = roleRepository.findById(new ObjectId(roleId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role with id " + roleId + " not found"));
+
+        // find doctor by id
+        User doctor = doctorId != null ? userRepository.findById(new ObjectId(doctorId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor with id " + doctorId + " not found")) : null;
 
         User user = userRepository.insert(new User(name, surname, fiscalCode, address, email, password, role, doctor,
                 LocalDateTime.now(), LocalDateTime.now()));

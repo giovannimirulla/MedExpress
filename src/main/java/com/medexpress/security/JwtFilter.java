@@ -1,5 +1,7 @@
 package com.medexpress.security;
 
+import org.springframework.lang.NonNull;
+
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -33,12 +35,10 @@ private static PharmacyService pharmacyService;
 
 @Autowired
 private static UserService userService;
- 
-    @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);

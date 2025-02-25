@@ -1,7 +1,7 @@
+
 package com.medexpress.entity;
 
 import java.time.LocalDateTime;
-
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -11,36 +11,31 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 
 
-@Document(collection = "pharmacies")
+@Document(collection = "roles")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class Pharmacy {
+public class Role {
     @Id
     private ObjectId id;
-    private String companyName;
     @Indexed(unique = true)
-    private String VATnumber;
-    private String address;
-    @Indexed(unique = true)
-    private String email;
-    private String password;
+    private String name;
+    private String description;
+    private List<String> permissions;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-
-    public Pharmacy(String companyName, String VATnumber, String address, String email, String password, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.companyName = companyName;
-        this.VATnumber = VATnumber;
-        this.address = address;
-        this.email = email;
-        this.password = password;
+    //Counstructor
+    public Role(String name, String description, List<String> permissions, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.name = name;
+        this.description = description;
+        this.permissions = permissions;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
-
+    
 }

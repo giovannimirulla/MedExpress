@@ -1,6 +1,6 @@
 package com.medexpress.dto;
 
-public class UserDTO {
+public class UserRequest {
     private String name;
     private String surname;
     private String fiscalCode;
@@ -8,6 +8,7 @@ public class UserDTO {
     private String email;
     private String roleId;
     private String doctorId;
+    private String password;
 
     // Getter
     public String getName() {
@@ -36,6 +37,10 @@ public class UserDTO {
 
     public String getDoctorId() {
         return doctorId;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     // Setter
@@ -67,4 +72,8 @@ public class UserDTO {
         this.doctorId = doctorId;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
 }

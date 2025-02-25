@@ -1,10 +1,11 @@
 package com.medexpress.validator;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.medexpress.dto.UserRequest;
 
 public class UserValidator {
     
@@ -38,54 +39,54 @@ public class UserValidator {
     }
 
     // validate user
-    public static void validate(Map<String, String> body) {
+    public static void validate(UserRequest body) {
         // check fiscal code is not empty
-        if (!CommonValidator.checkString(body.get("fiscalCode"))) {
+        if (!CommonValidator.checkString(body.getFiscalCode())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Fiscal code is empty");
         }
 
         // check fiscal code is valid
-        if (!validateFiscalCode(body.get("fiscalCode"))) {
+        if (!validateFiscalCode(body.getFiscalCode())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Fiscal code is not valid");
         }
 
         // check age is valid
-        if (!checkAge(body.get("fiscalCode"))) {
+        if (!checkAge(body.getFiscalCode())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"User is not 18 years old");
         }
 
         // check name is not empty
-        if (!CommonValidator.checkString(body.get("name"))) {
+        if (!CommonValidator.checkString(body.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Name is empty");
         }
 
         // check surname is not empty
-        if (!CommonValidator.checkString(body.get("surname"))) {
+        if (!CommonValidator.checkString(body.getSurname())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Surname is empty");
         }
 
         // check email is not empty
-        if (!CommonValidator.checkString(body.get("email"))) {
+        if (!CommonValidator.checkString(body.getEmail())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Email is empty");
         }
 
         // check email is valid
-        if (!CommonValidator.validateEmail(body.get("email"))) {
+        if (!CommonValidator.validateEmail(body.getEmail())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Email is not valid");
         }
 
         // check address is not empty
-        if (!CommonValidator.checkString(body.get("address"))) {
+        if (!CommonValidator.checkString(body.getAddress())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Address is empty");
         }
 
         // check password is not empty
-        if (!CommonValidator.checkString(body.get("password"))) {
+        if (!CommonValidator.checkString(body.getPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Password is empty");
         }
 
         // check password is valid
-        if (!CommonValidator.validatePassword(body.get("password"))) {
+        if (!CommonValidator.validatePassword(body.getPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Password is not valid");
         }
     }

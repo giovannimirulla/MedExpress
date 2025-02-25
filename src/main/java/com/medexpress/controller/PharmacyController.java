@@ -10,7 +10,6 @@ import com.medexpress.service.PharmacyService;
 import com.medexpress.service.EncryptionService;
 import com.medexpress.dto.PharmacyDTO;
 
-import java.util.Map;
 import com.medexpress.entity.Pharmacy;
 
 import org.modelmapper.ModelMapper;
@@ -42,14 +41,14 @@ public class PharmacyController {
 
     @PostMapping()
 
-    public ResponseEntity<PharmacyDTO> createPharmacy(@RequestBody Map<String, String> body) {
+    public ResponseEntity<PharmacyDTO> createPharmacy(@RequestBody Pharmacy body) {
 
         PharmacyValidator.validate(body); // This line of code is used to validate the pharmacy details.
 
-        String encryptedPassword = encryptionService.encryptPassword(body.get("password"));
+        String encryptedPassword = encryptionService.encryptPassword(body.getPassword());
 
-        Pharmacy pharmacy = pharmacyService.createPharmacy(body.get("companyName"), body.get("VATnumber"),
-                body.get("address"), body.get("email"), encryptedPassword); // This line of code is used to create a new
+        Pharmacy pharmacy = pharmacyService.createPharmacy(body.getCompanyName(), body.getVATnumber(),
+                body.getAddress(), body.getEmail(), encryptedPassword); // This line of code is used to create a new
                                                                             // pharmacy.
 
         PharmacyDTO pharmacyDTO = modelMapper.map(pharmacy, PharmacyDTO.class);

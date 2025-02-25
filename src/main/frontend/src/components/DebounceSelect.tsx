@@ -3,14 +3,14 @@ import { Select, Spin } from 'antd';
 import type { SelectProps } from 'antd';
 import debounce from 'lodash/debounce';
 
-export interface DebounceSelectProps<ValueType = any>
+export interface DebounceSelectProps<ValueType = { key?: string; label: React.ReactNode; value: string | number }>
   extends Omit<SelectProps<ValueType | ValueType[]>, 'options' | 'children'> {
   fetchOptions: (search: string) => Promise<ValueType[]>;
   debounceTimeout?: number;
 }
 
 export function DebounceSelect<
-  ValueType extends { key?: string; label: React.ReactNode; value: string | number } = any,
+  ValueType extends { key?: string; label: React.ReactNode; value: string | number } = { key?: string; label: React.ReactNode; value: string | number },
 >({ fetchOptions, debounceTimeout = 800, ...props }: DebounceSelectProps<ValueType>) {
   const [fetching, setFetching] = useState(false);
   const [options, setOptions] = useState<ValueType[]>([]);

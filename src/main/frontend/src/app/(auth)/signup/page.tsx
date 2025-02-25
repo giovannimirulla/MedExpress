@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button, Checkbox, Form, Input, Segmented, Flex, Select } from "antd";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faStaffSnake, faIdCard, faEnvelope, faLocationDot, faLock, faUserDoctor } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faIdCard, faEnvelope, faLocationDot, faLock, faUserDoctor } from '@fortawesome/free-solid-svg-icons';
 import {DebounceSelect} from '@/components/DebounceSelect';
 
 
@@ -23,17 +23,21 @@ export default function Signup() {
   const [value, setValue] = useState<UserValue[]>([]);
 
   const authEntityOptions = Object.values(AuthEntityType).map((type) => ({
-    label: AuthEntityTypeIcon[type as AuthEntityType],
+    label: (
+      <span>
+        {AuthEntityTypeIcon[type as AuthEntityType]} {type}
+      </span>
+    ),
     value: type,
   }));
 
   useEffect(() => {
     async function fetchRoles() {
       try {
-        const res = await fetch('/api/roles');
+        const res = await fetch('http://localhost:8080/api/v1/role/all');
         if (res.ok) {
           const data = await res.json();
-          setRoles(data); // Assicurati che data sia un array di oggetti { value, label }
+      setRoles(data.map((role: { name: string; id: { timestamp: number; date: string } }) => ({ value: role.name, label: role.name })));
         } else {
           console.error('Error fetching roles:', res.status);
         }
@@ -45,20 +49,41 @@ export default function Signup() {
     fetchRoles();
   }, []);
 
-async function fetchUserList(username: string): Promise<UserValue[]> {
-  console.log('fetching user', username);
+// async function fetchUserList(username: string): Promise<UserValue[]> {
+//   console.log('fetching user', username);
+  
 
-  return fetch('https://randomuser.me/api/?results=5')
+//   return fetch('https://randomuser.me/api/?results=5')
+//     .then((response) => response.json())
+//     .then((body) =>
+//       body.results.map(
+//         (user: { name: { first: string; last: string }; login: { username: string } }) => ({
+//           label: `${user.name.first} ${user.name.last}`,
+//           value: user.login.username,
+//         }),
+//       ),
+//     );
+// }
+
+
+//http://localhost:8080/api/v1/doctor/search?query=John
+//fetch doctor 
+
+async function fetchDoctorList(query: string): Promise<UserValue[]> {
+  console.log('fetching doctor', query);
+
+  return fetch(`http://localhost:8080/api/v1/doctor/search?query=${query}`)
     .then((response) => response.json())
     .then((body) =>
-      body.results.map(
-        (user: { name: { first: string; last: string }; login: { username: string } }) => ({
-          label: `${user.name.first} ${user.name.last}`,
-          value: user.login.username,
+      body.map(
+        (doctor: { name: string; surname: string; id: string }) => ({
+          label: `${doctor.name} ${doctor.surname}`,
+          value: doctor.id,
         }),
       ),
     );
 }
+
 
 
 
@@ -110,14 +135,13 @@ async function fetchUserList(username: string): Promise<UserValue[]> {
           <Segmented
            size="large"
           className="mb-16 w-full"
-          defaultValue={AuthEntityType.User}
           shape="round"
           block
           options={authEntityOptions}
-              onChange={(val:string) => setEntity(val)}
+              onChange={(val:AuthEntityType) => setEntity(val)}
             />
           </Form.Item>
-          {entity === "pharmacy" ? (
+          {entity === AuthEntityType.Pharmacy ? (
             <Form.Item name="companyName" rules={[{ required: true, message: "Inserisci il nome della tua azienda!" }]}>
               <Input prefix={<FontAwesomeIcon icon={faUser} className="text-gray-200 mr-2" />} placeholder="Nome Azienda" />
             </Form.Item>
@@ -131,7 +155,7 @@ async function fetchUserList(username: string): Promise<UserValue[]> {
               </Form.Item>
             </div>
           )}
-          {entity === "user" && (
+          {entity === AuthEntityType.User && (
             <Form.Item  className="dark:text-white">
                  <Select
                  placeholder="Seleziona il tuo ruolo"
@@ -142,14 +166,14 @@ async function fetchUserList(username: string): Promise<UserValue[]> {
             </Form.Item>
           )}
 
-          {entity === "user" && (
+          {entity === AuthEntityType.User && (
                            <Form.Item  className="dark:text-white">
                            <DebounceSelect
                            prefix={<FontAwesomeIcon icon={faUserDoctor}  className="text-gray-200 mr-2"/>}
                       mode="multiple"
                       value={value}
                       placeholder="Seleziona un dottore"
-                      fetchOptions={fetchUserList}
+                      fetchOptions={fetchDoctorList}
                       onChange={(newValue) => {
                         setValue(newValue as UserValue[]);
                       }}
@@ -159,7 +183,7 @@ async function fetchUserList(username: string): Promise<UserValue[]> {
           )}
 
 
-        {entity === "pharmacy" ? (
+        {entity === AuthEntityType.Pharmacy ? (
             <Form.Item name="vatNumber" rules={[{ required: true, message: "Inserisci la Partita IVA!" }]}>
               <Input prefix={<FontAwesomeIcon icon={faIdCard} className="text-gray-200 mr-2"/>} placeholder="Partita IVA" />
             </Form.Item>

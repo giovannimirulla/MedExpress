@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
 import { App, Button, Checkbox, Form, Input, Flex, message, Segmented } from "antd";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faStaffSnake } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/context/authContext';
 
 import { AuthEntityType, AuthEntityTypeIcon } from '@/enums/AuthEntityType';
@@ -18,7 +16,11 @@ export default function Login() {
   const { login } = useAuth();
 
   const authEntityOptions = Object.values(AuthEntityType).map((type) => ({
-    label: AuthEntityTypeIcon[type as AuthEntityType],
+    label: (
+      <span>
+        {AuthEntityTypeIcon[type as AuthEntityType]} {type}
+      </span>
+    ),
     value: type,
   }));
 

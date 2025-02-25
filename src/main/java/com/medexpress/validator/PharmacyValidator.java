@@ -1,9 +1,9 @@
 package com.medexpress.validator;
 
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.medexpress.entity.Pharmacy;
 
 public class PharmacyValidator {
 
@@ -13,24 +13,24 @@ public class PharmacyValidator {
     }
 
  
-    public static void validate(Map<String, String> body) {
-        if (!validateVATNumber(body.get("VATnumber"))) {
+    public static void validate(Pharmacy body) {
+        if (!validateVATNumber(body.getVATnumber())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid VAT number");
         }
 
-        if (!CommonValidator.checkString(body.get("companyName"))) {
+        if (!CommonValidator.checkString(body.getCompanyName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid company name");
         }
 
-        if (!CommonValidator.checkString(body.get("address"))) {
+        if (!CommonValidator.checkString(body.getAddress())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid address");
         }
 
-        if (!CommonValidator.validateEmail(body.get("email"))) {
+        if (!CommonValidator.validateEmail(body.getEmail())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid email");
         }
 
-        if (!CommonValidator.validatePassword(body.get("password"))) {
+        if (!CommonValidator.validatePassword(body.getPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid password");
         }
     }

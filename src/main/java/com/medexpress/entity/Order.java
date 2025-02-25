@@ -25,9 +25,10 @@ public class Order {
     private LocalDateTime updatedAt;
     private StatusPharmacy statusPharmacy;
     private StatusDriver statusDriver;
+    private StatusDoctor statusDoctor;
     private Priority priority;
 
-    public Order(String packageId, User user, String drugId, LocalDateTime createdAt, LocalDateTime updatedAt, StatusPharmacy statusPharmacy, StatusDriver statusDriver, Priority priority) {
+    public Order(String packageId, User user, String drugId, LocalDateTime createdAt, LocalDateTime updatedAt, StatusPharmacy statusPharmacy, StatusDriver statusDriver, StatusDoctor statusDoctor, Priority priority) {
         this.packageId = packageId;
         this.user = user;
         this.drugId = drugId;
@@ -35,7 +36,14 @@ public class Order {
         this.updatedAt = updatedAt;
         this.statusPharmacy = statusPharmacy;
         this.statusDriver = statusDriver;
+        this.statusDoctor = statusDoctor;
         this.priority = priority;
+    }
+
+    public enum StatusDoctor {
+        PENDING,
+        APPROVED,
+        REJECTED
     }
 
     public enum StatusPharmacy {

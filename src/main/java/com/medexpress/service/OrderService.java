@@ -24,9 +24,15 @@ public class OrderService {
 
         // check if user exists
         User user = userRepository.findById(new ObjectId(userId)).orElseThrow(() -> new RuntimeException("User not found"));
+
+       
         
         return orderRepository.insert(new Order(packageId, user, drugId, LocalDateTime.now(), LocalDateTime.now(), 
-        Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, Order.Priority.LOW));
+        Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, Order.StatusDoctor.PENDING, Order.Priority.LOW));
+
+
     }
+
+
     
 }

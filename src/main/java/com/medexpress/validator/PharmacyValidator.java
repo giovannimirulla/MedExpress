@@ -9,13 +9,13 @@ import com.medexpress.dto.PharmacyRequest;
 public class PharmacyValidator {
 
     // This method is used to validate the VAT number.
-    public static boolean validatevatNumber(String vatNumber) {
+    public static boolean validateVatNumber(String vatNumber) {
         return vatNumber.matches("[0-9]{9}"); // This line of code is used to check if the VAT number is a 9 digit number.
     }
 
  
     public static void validate(PharmacyRequest body) {
-        if (!validatevatNumber(body.getvatNumber())) {
+        if (!validateVatNumber(body.getVatNumber())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid VAT number");
         }
 

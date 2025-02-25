@@ -11,7 +11,7 @@ public class PharmacyDTO {
         return companyName;
     }
 
-    public String getvatNumber() {
+    public String getVatNumber() {
         return vatNumber;
     }
 
@@ -28,7 +28,7 @@ public class PharmacyDTO {
         this.companyName = companyName;
     }
 
-    public void setvatNumber(String vatNumber) {
+    public void setVatNumber(String vatNumber) {
         this.vatNumber = vatNumber;
     }
 

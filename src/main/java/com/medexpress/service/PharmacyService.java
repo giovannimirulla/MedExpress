@@ -26,14 +26,14 @@ public class PharmacyService {
 
           // check if email and VAT number already exist
           boolean existsByEmail = pharmacyRepository.existsByEmail(email);
-          boolean existsByvatNumber = pharmacyRepository.existsByvatNumber(vatNumber);
+          boolean existsByVatNumber = pharmacyRepository.existsByVatNumber(vatNumber);
 
           // throw exception if email or VAT number already exist
           if (existsByEmail) {
                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                          "User with email " + email + " already exists");
           }
-          if (existsByvatNumber) {
+          if (existsByVatNumber) {
                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                          "User with VAT number " + vatNumber + " already exists");
           }

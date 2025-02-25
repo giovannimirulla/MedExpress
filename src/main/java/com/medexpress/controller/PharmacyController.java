@@ -48,7 +48,7 @@ public class PharmacyController {
 
         String encryptedPassword = encryptionService.encryptPassword(body.getPassword());
 
-        Pharmacy pharmacy = pharmacyService.createPharmacy(body.getCompanyName(), body.getvatNumber(),
+        Pharmacy pharmacy = pharmacyService.createPharmacy(body.getCompanyName(), body.getVatNumber(),
                 body.getAddress(), body.getEmail(), encryptedPassword); // This line of code is used to create a new
                                                                             // pharmacy.
 

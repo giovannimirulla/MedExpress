@@ -62,7 +62,7 @@ public class CreatePharmacy {
 
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("companyName", "Farmacia Centrale");
-        requestBody.put("VATnumber", "532858201");
+        requestBody.put("vatNumber", "532858201");
         requestBody.put("address", "Via Roma, 15");
         requestBody.put("email", "info@farmaciacentrale.it");
         requestBody.put("password", "Password123!");

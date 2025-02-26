@@ -65,7 +65,7 @@ public class UserService {
 
         // find doctor by id
         User doctor = doctorId != null ? userRepository.findById(new ObjectId(doctorId))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor with id " + doctorId + " not found")) : null;
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor with id " + doctorId + " not found")) : null; // if doctorId is null, set doctor to null
 
         User user = userRepository.insert(new User(name, surname, fiscalCode, address, email, password, role, doctor,
                 LocalDateTime.now(), LocalDateTime.now()));

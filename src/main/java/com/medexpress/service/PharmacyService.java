@@ -21,31 +21,32 @@ public class PharmacyService {
      private PharmacyRepository pharmacyRepository;
 
      // create pharmacy
-     public Pharmacy createPharmacy(String companyName, String VATnumber, String address, String email,
+     public Pharmacy createPharmacy(String companyName, String vatNumber, String address, String email,
                String password) {
 
           // check if email and VAT number already exist
           boolean existsByEmail = pharmacyRepository.existsByEmail(email);
-          boolean existsByVATnumber = pharmacyRepository.existsByVATnumber(VATnumber);
+          boolean existsByVatNumber = pharmacyRepository.existsByVatNumber(vatNumber);
 
           // throw exception if email or VAT number already exist
           if (existsByEmail) {
                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                          "User with email " + email + " already exists");
           }
-          if (existsByVATnumber) {
+          if (existsByVatNumber) {
                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                         "User with VAT number " + VATnumber + " already exists");
+                         "User with VAT number " + vatNumber + " already exists");
           }
 
           // create pharmacy
-          Pharmacy pharmacy = pharmacyRepository.insert(new Pharmacy(companyName, VATnumber, address, email, password,
+          Pharmacy pharmacy = pharmacyRepository.insert(new Pharmacy(companyName, vatNumber, address, email, password,
                     LocalDateTime.now(), LocalDateTime.now()));
           return pharmacyRepository.save(pharmacy);
      }
 
+     //find pharmacy by email
      public Pharmacy findByEmail(String email) {
-          return pharmacyRepository.findByEmail(email).orElse(null);
+          return pharmacyRepository.findByEmail(email).orElse(null); //orElse(null) is used to return null if the pharmacy is not found.
      }
 
      // find pharmacy by id
@@ -57,4 +58,9 @@ public class PharmacyService {
           return new org.springframework.security.core.userdetails.User(pharmacy.getEmail(), pharmacy.getPassword(), Collections.emptyList());
      }
 
+     // findAll pharmacies
+     public Iterable<Pharmacy> findAll() {
+          return pharmacyRepository.findAll();
+     }
+  
 }

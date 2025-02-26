@@ -3,13 +3,21 @@
 import Link from 'next/link';
 import { useAuth } from '@/context/authContext';
 
-const Heading = () => {
+type HeadingProps = {
+  position?: "absolute" | "relative";
+  navColor?: "transparent" | "primary"; // nuova proprietà per definire il colore della navbar
+};
+
+const Heading = ({ position = "absolute", navColor = "transparent" }: HeadingProps) => {
   const { isLoggedIn } = useAuth();
+  const navPositionClass = position;
+  const bgClass = navColor === "primary" ? "bg-primary" : "bg-transparent";
+
   return (
     <header>
       <nav
         id="nav"
-        className="absolute h-24 flex items-center group z-10 w-full lg:border-transparent"
+        className={`${navPositionClass} ${bgClass} h-24 flex items-center group z-10 w-full lg:border-transparent`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="relative flex flex-wrap items-center justify-between ">

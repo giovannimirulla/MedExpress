@@ -40,7 +40,6 @@ const DynamicDrugIcon: React.FC<DynamicDrugIconProps> = ({ drug }) => {
         const response = await fetch(`http://localhost:8080/api/v1/icon?type=${drug.formaFarmaceutica}`);
         if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
           const data = await response.json();
-          console.log('Icon data:', data);
           if (data) setIconData(data);
         }
       } catch (error) {

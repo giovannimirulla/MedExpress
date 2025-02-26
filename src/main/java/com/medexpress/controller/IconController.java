@@ -6,7 +6,6 @@ import com.medexpress.service.IconService;
 
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,15 +33,7 @@ public class IconController {
     @GetMapping()
     public Icon findByTypeRegex(@RequestParam String type) {
         // type is "Compressa orodispersibile" get icon with type "compressa"
-        String cleanedType = type.replaceAll("[.,]", "");
-        String[] words = cleanedType.split(" ");
-        String regex = String.join("|", words);
-        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        List<Icon> icons = iconService.findByTypeRegex(pattern);
-        if (icons.size() > 0) {
-            return icons.get(0);
-        }
-        return null;
+        return iconService.findByTypeRegex(type);
 
     }
 

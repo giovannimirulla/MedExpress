@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.medexpress.service.AIFAService;
 import com.medexpress.dto.AIFAAutocompleteResponse;
 import com.medexpress.dto.AIFADrugsResponse;
+import com.medexpress.dto.CommonDrug;
 import com.medexpress.dto.CommonPackage;
 
 import reactor.core.publisher.Mono;
@@ -56,7 +57,7 @@ public class AIFAController {
 
     // get package
     @GetMapping("/package")
-    public Mono<CommonPackage> getPackage(
+    public Mono<CommonDrug> getPackage(
             // iddrug and idpackage
             @RequestParam String drugId,
             @RequestParam String packageId) {

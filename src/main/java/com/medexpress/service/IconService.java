@@ -16,8 +16,17 @@ public class IconService {
     @Autowired
     private IconRepository iconRepository;
 
-    public List<Icon> findByTypeRegex(Pattern pattern) {
-        return iconRepository.findByTypeRegex(pattern);
+    public Icon findByTypeRegex(String type) {
+        String cleanedType = type.replaceAll("[.,]", "");
+        String[] words = cleanedType.split(" ");
+        String regex = String.join("|", words);
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        List<Icon> icons = iconRepository.findByTypeRegex(pattern);
+        if (icons.size() > 0) {
+            return icons.get(0);
+        }
+        return null;
+
     }
 
     public List<Icon> findAll() {

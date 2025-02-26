@@ -8,9 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.medexpress.service.AIFAService;
 import com.medexpress.service.OrderService;
-import com.medexpress.dto.CommonPackage;
+import com.medexpress.dto.CommonDrug;
 import com.medexpress.dto.OrderDTO;
 import com.medexpress.dto.OrderSocket;
+import com.medexpress.dto.OrderStatusDTO;
 import com.medexpress.entity.Order;
 
 import org.modelmapper.ModelMapper;
@@ -19,6 +20,10 @@ import org.springframework.http.HttpStatus;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.medexpress.service.PharmacyService;
 import com.medexpress.entity.Pharmacy;
+
+
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
 @RequestMapping("/api/v1/order")
@@ -53,20 +58,24 @@ public class OrderController {
         // create order
         Order order = orderService.createOrder(body.getPackageId(), body.getUserId(), body.getDrugId());
 
-        CommonPackage commonPackage = aifaService.getPackage(body.getDrugId(), body.getPackageId()).block();
+        CommonDrug drugPackage = aifaService.getPackage(body.getDrugId(), body.getPackageId()).block();
 
         // make object with commonPackage and body userId
-        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), body.getUserId(), body.getDrugId(), commonPackage);
-
+        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), body.getUserId(), body.getDrugId(),
+        drugPackage);
 
         // check if package classe fornitura is like RR
 
-        switch (commonPackage.getClasseFornitura()) {
+        switch (drugPackage.getConfezioni().get(0).getClasseFornitura()) {
             case "RR": // ricetta ripetibile
 
-                // get user's doctor and send order to doctor
-                socketServer.getBroadcastOperations().sendEvent(order.getUser().getDoctor().getId().toString(),
-                        orderSocket);
+                // get user's doctor and send order to doctor if available
+                if (order.getUser() != null) {
+                    var doctor = order.getUser().getDoctor();
+                    if (doctor != null) {
+                        socketServer.getBroadcastOperations().sendEvent(doctor.getId().toString(), orderSocket);
+                    }
+                }
                 break;
 
             case "OTC": // over the counter (da banco)
@@ -89,4 +98,10 @@ public class OrderController {
 
     }
 
+    // get all order by user id arranged by date and status
+    @GetMapping("/{userId}")
+    public ResponseEntity<OrderStatusDTO> getOrdersByUser(@PathVariable String userId) {
+        OrderStatusDTO orders = orderService.getOrdersGroupedByStatus(userId);
+        return new ResponseEntity<>(orders, HttpStatus.OK);
+    }
 }

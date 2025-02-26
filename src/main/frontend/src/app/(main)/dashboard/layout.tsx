@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Footer from "@/components/Footer";
 import Heading from "@/components/Heading";
 
 
@@ -17,7 +16,6 @@ export default function RootLayout({
       <div>
         <Heading position="relative" />
         {children}
-        <Footer />
         </div>
   );
 }

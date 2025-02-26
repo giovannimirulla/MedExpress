@@ -9,18 +9,36 @@ const { Content } = Layout;
 interface DataType {
   key: string;
   name: string;
-  age: number;
-  address: string;
-  tags: string[];
-    status: string;
+  status: string;
+  drugPackage: Order["drugPackage"];
+}
+
+interface Order {
+  id: string;
+  drugPackage: {
+    formaFarmaceutica: string;
+    medicinale: {
+      denominazioneMedicinale: string;
+    };
+  };
+  statusDoctor?: string;
+  statusPharmacy?: string;
+  statusDriver?: string;
+  statusUser?: string;
+}
+
+interface OrderResponse {
+  pending: DataType[];
+  approvedOrNoApprovalNeeded: DataType[];
+  deliveredToDriver: DataType[];
+  deliveredToUser: DataType[];
 }
 
 const columns = [
     {
       title: 'Nome',
       dataIndex: 'name',
-      key: 'name',
-      render: (_: string, record: any) => (
+      render: (_: string, record: DataType) => (
         <div className="flex items-center space-x-2">
           <DynamicDrugIcon drug={record.drugPackage} />
           <a>{record.name}</a>
@@ -60,7 +78,7 @@ const columns = [
 
 
 export default function Dashboard() {
-    const [orderData, setOrderData] = useState<any>({ pending: [], approvedOrNoApprovalNeeded: [], deliveredToDriver: [], deliveredToUser: [] });
+    const [orderData, setOrderData] = useState<OrderResponse>({ pending: [], approvedOrNoApprovalNeeded: [], deliveredToDriver: [], deliveredToUser: [] });
     
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -75,25 +93,25 @@ export default function Dashboard() {
             })
             .then(data => {
                 //add datatype icon, name and status. in response name is in array pending in drugPackage -> medicinale -> denominazioneMedicinale, status is in array for pending is statusDoctor, for approvedOrNoApprovalNeeded is statusPharmacy, for deliveredToDriver is statusDriver, for deliveredToUser is statusDriver
-                const pending = data.pending.map((order: any) => ({
+                const pending = data.pending.map((order: Order) => ({
                     key: order.id,
                     name: order.drugPackage.medicinale.denominazioneMedicinale,
                     status: order.statusDoctor,
                     drugPackage: order.drugPackage,
                 }));
-                const approvedOrNoApprovalNeeded = data.approvedOrNoApprovalNeeded.map((order: any) => ({
+                const approvedOrNoApprovalNeeded = data.approvedOrNoApprovalNeeded.map((order: Order) => ({
                     key: order.id,
                     name: order.drugPackage.medicinale.denominazioneMedicinale,
                     status: order.statusPharmacy,
                     drugPackage: order.drugPackage,
                 }));
-                const deliveredToDriver = data.deliveredToDriver.map((order: any) => ({
+                const deliveredToDriver = data.deliveredToDriver.map((order: Order) => ({
                     key: order.id,
                     name: order.drugPackage.medicinale.denominazioneMedicinale,
                     status: order.statusDriver,
                     drugPackage: order.drugPackage,
                 }));
-                const deliveredToUser = data.deliveredToUser.map((order: any) => ({
+                const deliveredToUser = data.deliveredToUser.map((order: Order) => ({
                     key: order.id,
                     name: order.drugPackage.medicinale.denominazioneMedicinale,
                     status: order.statusUser,

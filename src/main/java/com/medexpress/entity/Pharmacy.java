@@ -13,17 +13,17 @@ import lombok.NoArgsConstructor;
 
 
 
-@Document(collection = "pharmacies")
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Document(collection = "pharmacies") // This annotation is used to specify the name of the collection in the MongoDB database.
+@Data // This annotation is used to generate getters and setters for the fields in the class.
+@AllArgsConstructor // This annotation is used to generate a constructor with all the fields of the class as arguments.
+@NoArgsConstructor // This annotation is used to generate a constructor with no arguments. si deve togliere???
 
 public class Pharmacy {
-    @Id
+    @Id // This annotation is used to specify the primary key of the document.
     private ObjectId id;
     private String companyName;
     @Indexed(unique = true)
-    private String VATnumber;
+    private String vatNumber;
     private String address;
     @Indexed(unique = true)
     private String email;
@@ -31,10 +31,10 @@ public class Pharmacy {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-
-    public Pharmacy(String companyName, String VATnumber, String address, String email, String password, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    // This constructor is used to create a new instance of the Pharmacy class
+    public Pharmacy(String companyName, String vatNumber, String address, String email, String password, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.companyName = companyName;
-        this.VATnumber = VATnumber;
+        this.vatNumber = vatNumber;
         this.address = address;
         this.email = email;
         this.password = password;

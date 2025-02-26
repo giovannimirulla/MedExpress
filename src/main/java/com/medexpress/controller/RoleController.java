@@ -37,7 +37,8 @@ public class RoleController {
     //return list of all roles
     @RequestMapping("/all")
     public ResponseEntity<List<Role>> findAll() {
-        return new ResponseEntity<>(roleService.findAll(), HttpStatus.OK);
+        List<Role> roles = (List<Role>) roleService.findAll();
+        return new ResponseEntity<>(roles, HttpStatus.OK);
     }
     
 }

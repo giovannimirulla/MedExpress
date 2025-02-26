@@ -1,10 +1,13 @@
 package com.medexpress.dto;
 
-public class PharmacyDTO {
+
+public class PharmacyRequest {
+
     private String companyName;
     private String vatNumber;
     private String address;
     private String email;
+    private String password;
 
     // Getter
     public String getCompanyName() {
@@ -21,6 +24,10 @@ public class PharmacyDTO {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     // Setter
@@ -40,5 +47,7 @@ public class PharmacyDTO {
         this.email = email;
     }
 
-
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

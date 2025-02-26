@@ -5,11 +5,14 @@ import java.time.LocalDateTime;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.lang.Nullable;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 
 @Document(collection = "users")
 @Data
@@ -28,11 +31,12 @@ public class User {
     private String email;
     private String password;
     private Role role;
+    @Nullable
     private User doctor;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public User(String name, String surname, String fiscalCode, String address, String email, String password, Role role, User doctor, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public User(String name, String surname, String fiscalCode, String address, String email, String password, Role role, @Nullable User doctor, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.name = name;
         this.surname = surname;
         this.fiscalCode = fiscalCode;

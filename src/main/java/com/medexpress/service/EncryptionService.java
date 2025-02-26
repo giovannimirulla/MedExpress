@@ -16,6 +16,7 @@ public class EncryptionService {
         return passwordEncoder.encode(password);
     }
 
+    // This method is used to verify the password entered by the user during login
     public boolean verifyPassword(String rawPassword, String encryptedPassword) {
         return passwordEncoder.matches(rawPassword, encryptedPassword);
     }

@@ -6,9 +6,9 @@ public class OrderSocket {
     private String orderId;
     private String userId;
     private String drugId;
-    private CommonPackage drugPackage;
+    private CommonDrug drugPackage;
 
-    public OrderSocket(String orderId, String userId, String drugId, CommonPackage drugPackage) {
+    public OrderSocket(String orderId, String userId, String drugId, CommonDrug drugPackage) {
         this.userId = userId;
         this.drugPackage = drugPackage;
         this.orderId = orderId;
@@ -21,7 +21,7 @@ public class OrderSocket {
         return userId;
     }
 
-    public CommonPackage getDrugPackage() {
+    public CommonDrug getDrugPackage() {
         return drugPackage;
     }
 
@@ -38,7 +38,7 @@ public class OrderSocket {
         this.userId = userId;
     }
 
-    public void setDrugPackage(CommonPackage drugPackage) {
+    public void setDrugPackage(CommonDrug drugPackage) {
         this.drugPackage = drugPackage;
     }
 

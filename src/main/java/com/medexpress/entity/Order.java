@@ -6,6 +6,10 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.medexpress.dto.CommonDrug;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,14 +18,14 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
+@JsonInclude(JsonInclude.Include.NON_NULL) 
 public class Order {
     @Id
     private ObjectId id;
     private String packageId;
-    private User user; //This is the user who made the order
+    private User user; // This is the user who made the order
     private User driver;
-    private Pharmacy pharmacy; //This is the pharmacy that will prepare the order
+    private Pharmacy pharmacy; // This is the pharmacy that will prepare the order
     private String drugId;    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -29,6 +33,10 @@ public class Order {
     private StatusDriver statusDriver;
     private StatusDoctor statusDoctor;
     private Priority priority;
+
+        // Campo transitorio per i dettagli del package recuperato da AifaService.
+    @JsonProperty("drugPackage")
+    private transient CommonDrug drugPackage;
 
     public Order(String packageId, User user, User driver, Pharmacy pharmacy, String drugId, LocalDateTime createdAt, LocalDateTime updatedAt, StatusPharmacy statusPharmacy, StatusDriver statusDriver, StatusDoctor statusDoctor, Priority priority) {
         this.packageId = packageId;
@@ -46,8 +54,9 @@ public class Order {
 
     public enum StatusDoctor {
         PENDING,
-        APPROVED, //The doctor has approved the order
-        REJECTED
+        APPROVED, 
+        REJECTED,
+        NO_APPROVAL_NEEDED 
     }
 
     public enum StatusPharmacy {
@@ -62,12 +71,10 @@ public class Order {
         TAKEN_OVER,
         IN_DELIVERY,
         DELIVERED_TO_THE_USER
-        
     }
 
     public enum Priority {
         LOW,
         HIGH
     }
-
 }

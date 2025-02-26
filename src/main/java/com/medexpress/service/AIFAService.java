@@ -8,8 +8,8 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import com.medexpress.dto.AIFAAutocompleteResponse;
 import com.medexpress.dto.AIFADrugResponse;
-import com.medexpress.dto.AIFADrugsResponse; 
-import com.medexpress.dto.CommonPackage;
+import com.medexpress.dto.AIFADrugsResponse;
+import com.medexpress.dto.CommonDrug;
 
 @Service
 public class AIFAService {
@@ -61,23 +61,31 @@ public Mono<AIFADrugResponse> getDrug(String id) {
                         })
                         .retrieve()
                         .bodyToMono(AIFADrugResponse.class);
-                }
+                
+        }
 
-                public Mono<CommonPackage> getPackage(String drugId, String packageId) {
-                        return getDrug(drugId)
-                                .flatMap(drugResponse -> {
-                                    if (drugResponse.getData() != null &&
-                                        drugResponse.getData().getConfezioni() != null) {
-                                        
-                                        return drugResponse.getData().getConfezioni().stream()
-                                                .filter(pkg -> packageId.equals(pkg.getIdPackage()))
-                                                .findFirst()
-                                                .map(Mono::just)
-                                                .orElse(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found")));
-                                    }
-                                    return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Drug or package not found"));
-                                });
-                    }
+        public Mono<CommonDrug> getPackage(String drugId, String packageId) {
+                return getDrug(drugId)
+                                                .flatMap(drugResponse -> {
+                                                                if (drugResponse.getData() != null &&
+                                                                                                drugResponse.getData().getConfezioni() != null) {
+                                                                                var filteredPackages = drugResponse.getData().getConfezioni().stream()
+                                                                                                                .filter(pkg -> packageId.equals(pkg.getIdPackage()))
+                                                                                                                .collect(java.util.stream.Collectors.toList());
+                                                                                
+                                                                                if (!filteredPackages.isEmpty()) {
+                                                                                                drugResponse.getData().setConfezioni(filteredPackages);
+                                                                                                return Mono.just(drugResponse.getData());
+                                                                                }
+                                                                                return Mono.error(new ResponseStatusException(
+                                                                                                                HttpStatus.NOT_FOUND,
+                                                                                                                "Package not found"));
+                                                                }
+                                                                return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                                                                "Drug or package not found"));
+                                                });
 
+
+        }
 
 }

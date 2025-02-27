@@ -1,6 +1,5 @@
 package com.medexpress.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,11 +19,9 @@ import com.medexpress.service.OrderService;
 @RequestMapping("/api/v1/doctor")
 public class DoctorController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
 
     // constructor
     public DoctorController(UserService userService, OrderService orderService) {
@@ -44,7 +41,7 @@ public class DoctorController {
         return new ResponseEntity<Order>(orderService.approvePrescription(orderId), HttpStatus.OK);
     }
 
-    // reject prescription request of a drug in an order
+    // reject prescription request of a drug in an order -url with 67be54564f80bd31a2b5b128 = http://localhost:8080/api/v1/doctor/reject?orderId=67be54564f80bd31a2b5b128
     @RequestMapping("/reject")
     public ResponseEntity<Order> rejectPrescription(@RequestParam String orderId) {
         return new ResponseEntity<Order>(orderService.rejectPrescription(orderId), HttpStatus.OK);

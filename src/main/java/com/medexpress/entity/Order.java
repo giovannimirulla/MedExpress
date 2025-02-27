@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL) 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Order {
     @Id
     private ObjectId id;
@@ -26,7 +26,7 @@ public class Order {
     private User user; // This is the user who made the order
     private User driver;
     private Pharmacy pharmacy; // This is the pharmacy that will prepare the order
-    private String drugId;    
+    private String drugId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private StatusPharmacy statusPharmacy;
@@ -34,11 +34,13 @@ public class Order {
     private StatusDoctor statusDoctor;
     private Priority priority;
 
-        // Campo transitorio per i dettagli del package recuperato da AifaService.
+    // Campo transitorio per i dettagli del package recuperato da AifaService.
     @JsonProperty("drugPackage")
     private transient CommonDrug drugPackage;
 
-    public Order(String packageId, User user, User driver, Pharmacy pharmacy, String drugId, LocalDateTime createdAt, LocalDateTime updatedAt, StatusPharmacy statusPharmacy, StatusDriver statusDriver, StatusDoctor statusDoctor, Priority priority) {
+    public Order(String packageId, User user, User driver, Pharmacy pharmacy, String drugId, LocalDateTime createdAt,
+            LocalDateTime updatedAt, StatusPharmacy statusPharmacy, StatusDriver statusDriver,
+            StatusDoctor statusDoctor, Priority priority) {
         this.packageId = packageId;
         this.user = user;
         this.driver = driver;
@@ -54,9 +56,9 @@ public class Order {
 
     public enum StatusDoctor {
         PENDING,
-        APPROVED, 
+        APPROVED,
         REJECTED,
-        NO_APPROVAL_NEEDED 
+        NO_APPROVAL_NEEDED
     }
 
     public enum StatusPharmacy {
@@ -70,11 +72,16 @@ public class Order {
         PENDING,
         TAKEN_OVER,
         IN_DELIVERY,
-        DELIVERED_TO_THE_USER
+        DELIVERED_TO_USER
     }
 
     public enum Priority {
-        LOW,
+        NORMAL,
         HIGH
+    }
+
+    //get id returns a string
+    public String getId() {
+        return id.toString();
     }
 }

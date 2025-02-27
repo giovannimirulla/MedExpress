@@ -7,16 +7,13 @@ import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
 @Component
 
 public class SocketIOController {
-
-    @Autowired
-    private SocketIOServer socketServer;
+    private final SocketIOServer socketServer;
 
     SocketIOController(SocketIOServer socketServer){ // Constructor
         this.socketServer=socketServer;

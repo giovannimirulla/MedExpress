@@ -13,7 +13,6 @@ import com.medexpress.dto.PharmacyRequest;
 import com.medexpress.entity.Pharmacy;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import com.medexpress.validator.PharmacyValidator;
@@ -23,14 +22,9 @@ import com.medexpress.validator.PharmacyValidator;
 @RequestMapping("/api/v1/pharmacy")
 public class PharmacyController {
 
-    @Autowired // This annotation tells Spring to inject an instance of PharmacyService into this class.
-    private PharmacyService pharmacyService;
-
-    @Autowired // This annotation tells Spring to inject an instance of EncryptionService into this class.
-    private EncryptionService encryptionService;
-
-    @Autowired
-    private ModelMapper modelMapper; 
+    private final PharmacyService pharmacyService;
+    private final EncryptionService encryptionService;
+    private final ModelMapper modelMapper; 
 
     // This constructor is used to create an instance of the PharmacyController class with the specified parameters.
     public PharmacyController(PharmacyService pharmacyService, EncryptionService encryptionService,

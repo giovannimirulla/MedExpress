@@ -7,7 +7,6 @@ import com.medexpress.service.IconService;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -22,7 +21,6 @@ import com.medexpress.entity.Icon;
 @RequestMapping("/api/v1/icon")
 public class IconController {
 
-    @Autowired
     private final IconService iconService;
 
     public IconController(IconService iconService) {

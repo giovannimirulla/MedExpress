@@ -12,12 +12,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-
 @Document(collection = "pharmacies") // This annotation is used to specify the name of the collection in the MongoDB database.
 @Data // This annotation is used to generate getters and setters for the fields in the class.
 @AllArgsConstructor // This annotation is used to generate a constructor with all the fields of the class as arguments.
-@NoArgsConstructor // This annotation is used to generate a constructor with no arguments. si deve togliere???
-
+@NoArgsConstructor // This annotation is used to generate a constructor with no arguments.
 public class Pharmacy {
     @Id // This annotation is used to specify the primary key of the document.
     private ObjectId id;

@@ -18,7 +18,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class Role {
     @Id
     private ObjectId id;

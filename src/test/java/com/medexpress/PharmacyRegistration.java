@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
-public class CreatePharmacy {
+public class PharmacyRegistration {
     private MockMvc mockMvc;
 
     @Mock
@@ -58,7 +58,7 @@ public class CreatePharmacy {
     }
 
     @Test
-    void testCreatePharmacy() throws Exception {
+    void testPharmacyRegistration() throws Exception {
 
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("companyName", "Farmacia Centrale");

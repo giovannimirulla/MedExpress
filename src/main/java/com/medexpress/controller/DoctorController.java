@@ -35,15 +35,9 @@ public class DoctorController {
         return new ResponseEntity<List<User>>(userService.searchDoctor(query), HttpStatus.OK);
     }
 
-    // approve prescription request of a drug in an order
-    @RequestMapping("/approve")
-    public ResponseEntity<Order> approvePrescription(@RequestParam String orderId) {
-        return new ResponseEntity<Order>(orderService.approvePrescription(orderId), HttpStatus.OK);
-    }
-
-    // reject prescription request of a drug in an order -url with 67be54564f80bd31a2b5b128 = http://localhost:8080/api/v1/doctor/reject?orderId=67be54564f80bd31a2b5b128
-    @RequestMapping("/reject")
-    public ResponseEntity<Order> rejectPrescription(@RequestParam String orderId) {
-        return new ResponseEntity<Order>(orderService.rejectPrescription(orderId), HttpStatus.OK);
+    // update status of order
+    @RequestMapping("/updateStatus")
+    public ResponseEntity<Order> updateStatus(@RequestParam String orderId, @RequestParam Order.StatusDoctor status) {
+        return new ResponseEntity<Order>(orderService.updateStatusDoctor(orderId, status), HttpStatus.OK);
     }
 }

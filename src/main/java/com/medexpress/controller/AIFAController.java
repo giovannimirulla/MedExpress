@@ -4,12 +4,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.medexpress.service.AIFAService;
 import com.medexpress.dto.AIFAAutocompleteResponse;
 import com.medexpress.dto.AIFADrugsResponse;
 import com.medexpress.dto.CommonDrug;
-import com.medexpress.dto.CommonPackage;
 
 import reactor.core.publisher.Mono;
 
@@ -17,7 +15,6 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/v1/aifa")
 public class AIFAController {
 
-    @Autowired
     private final AIFAService aifaService;
 
     public AIFAController(AIFAService aifaService) {

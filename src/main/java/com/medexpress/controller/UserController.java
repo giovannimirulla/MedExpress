@@ -11,7 +11,6 @@ import com.medexpress.dto.UserDTO;
 import com.medexpress.dto.UserRequest;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,14 +23,9 @@ import org.modelmapper.ModelMapper;
 @RequestMapping("/api/v1/users")
 public class UserController {
     
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private EncryptionService encryptionService;
-
-    @Autowired
-    private ModelMapper modelMapper;
+    private final UserService userService;
+    private final EncryptionService encryptionService;
+    private final ModelMapper modelMapper;
     
     public UserController(UserService userService, EncryptionService encryptionService, ModelMapper modelMapper) {
         this.userService = userService;

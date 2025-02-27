@@ -2,8 +2,10 @@ package com.medexpress.controller;
 
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.http.HttpStatus;
 import java.util.HashMap;
@@ -25,14 +27,17 @@ import com.medexpress.enums.AuthEntityType;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private PharmacyService pharmacyService;
-    @Autowired
-    private EncryptionService encryptionService;
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final UserService userService;
+    private final PharmacyService pharmacyService;
+    private final EncryptionService encryptionService;
+    private final JwtUtil jwtUtil;
+
+    public AuthController(UserService userService, PharmacyService pharmacyService, EncryptionService encryptionService, JwtUtil jwtUtil) {
+        this.userService = userService;
+        this.pharmacyService = pharmacyService;
+        this.encryptionService = encryptionService;
+        this.jwtUtil = jwtUtil;
+    }
 
   
 

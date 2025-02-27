@@ -1,6 +1,5 @@
 package com.medexpress.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,11 +19,9 @@ import com.medexpress.service.OrderService;
 @RequestMapping("/api/v1/doctor")
 public class DoctorController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
 
     // constructor
     public DoctorController(UserService userService, OrderService orderService) {
@@ -38,15 +35,9 @@ public class DoctorController {
         return new ResponseEntity<List<User>>(userService.searchDoctor(query), HttpStatus.OK);
     }
 
-    // approve prescription request of a drug in an order
-    @RequestMapping("/approve")
-    public ResponseEntity<Order> approvePrescription(@RequestParam String orderId) {
-        return new ResponseEntity<Order>(orderService.approvePrescription(orderId), HttpStatus.OK);
-    }
-
-    // reject prescription request of a drug in an order
-    @RequestMapping("/reject")
-    public ResponseEntity<Order> rejectPrescription(@RequestParam String orderId) {
-        return new ResponseEntity<Order>(orderService.rejectPrescription(orderId), HttpStatus.OK);
+    // update status of order
+    @RequestMapping("/updateStatus")
+    public ResponseEntity<Order> updateStatus(@RequestParam String orderId, @RequestParam Order.StatusDoctor status) {
+        return new ResponseEntity<Order>(orderService.updateStatusDoctor(orderId, status), HttpStatus.OK);
     }
 }

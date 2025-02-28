@@ -14,6 +14,9 @@ public interface OrderRepository extends MongoRepository<Order, ObjectId> {
     public  List<Order> findByUser_Id(ObjectId userId, Sort sort);
     public Optional<Order> findByPharmacyId(ObjectId pharmacyId);
     public Optional<Order> findByDriverId(ObjectId driverId);
-    public Optional<Order> findByUserDoctorId(ObjectId doctorId);
+    //findByDriver_IdOrDriverIsNullAndStatusPharmacy
+    public List<Order> findByDriver_IdOrDriverIsNullAndStatusPharmacy(ObjectId driverId, Order.StatusPharmacy statusPharmacy, Sort sort);
+    //findByPharmacy_IdOrPharmacyIsNullAndStatusDoctorIn
+    public List<Order> findByPharmacy_IdOrPharmacyIsNullAndStatusDoctorIn(ObjectId pharmacyId, List<Order.StatusDoctor> statusDoctor, Sort sort);
     
-}
+}   

@@ -22,6 +22,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 import com.medexpress.service.PharmacyService;
 import com.medexpress.entity.Pharmacy;
 import com.medexpress.enums.DrugPackageClasseFornitura;
+import com.medexpress.security.CustomUserDetails;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
+import com.medexpress.enums.AuthEntityType;
+
+import com.medexpress.service.UserService;
+import com.medexpress.entity.User;
+
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/v1/order")
@@ -44,13 +51,16 @@ public class OrderController {
 
     private final PharmacyService pharmacyService;
 
+    private final UserService userService;
+
     public OrderController(OrderService orderService, ModelMapper modelMapper, AIFAService aifaService,
-            SocketIOServer socketServer, PharmacyService pharmacyService) {
+            SocketIOServer socketServer, PharmacyService pharmacyService, UserService userService) {
         this.orderService = orderService;
         this.modelMapper = modelMapper;
         this.aifaService = aifaService;
         this.socketServer = socketServer;
         this.pharmacyService = pharmacyService;
+        this.userService = userService;
     }
 
     @PostMapping()
@@ -110,19 +120,56 @@ public class OrderController {
 
     }
 
-// get all order by user id arranged by date and status - url: http://localhost:8080/api/v1/order/all
-@GetMapping("/all")
-public ResponseEntity<UserDetails> getAllOrders() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        System.out.println("Utente autenticato: " + userDetails.getUsername());
+    // get all order by user id arranged by date and status - url:
+    // http://localhost:8080/api/v1/order/all
+    @GetMapping("/all")
+    public ResponseEntity<List<Order>> getAllOrders() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-      //return only userDetails
-        return new ResponseEntity<>(userDetails, HttpStatus.OK);
+
+
+            // get entityType, if entityType is User check role else return all order where
+            // pharmacy is the pharmacy
+            if (userDetails.getEntityType() == AuthEntityType.USER) {
+                // if user is a doctor, get all orders of his patients
+                if (userDetails.getRole() == User.Role.DOCTOR) {
+                    List<User> patients = userService.getPatients(userDetails.getId());
+                    System.out.println("patients: " + patients);
+                    List<Order> orders = new ArrayList<>();
+                    for (User patient : patients) {
+                        // get all orders of the patient where statusDoctor is not NO_APPROVAL_NEEDED
+                        List<Order> patientOrders = orderService.getOrdersByUser(patient.getId().toString());
+                        for (Order order : patientOrders) {
+                            if (order.getStatusDoctor() != Order.StatusDoctor.NO_APPROVAL_NEEDED) {
+                                orders.add(order);
+                            }
+                        }
+                    }
+                    return new ResponseEntity<>(orders, HttpStatus.OK);
+                }
+                // else if user is a patient, get all orders of the patient
+                else if (userDetails.getRole() == User.Role.PATIENT) {
+                    List<Order> orders = orderService.getOrdersByUser(userDetails.getId());
+                    return new ResponseEntity<>(orders, HttpStatus.OK);
+                }
+
+                // else if driver, get all orders of the driver or statusPharmacy is
+                // DELIVERED_TO_DRIVER
+                else if (userDetails.getRole() == User.Role.DRIVER) {
+                    List<Order> orders = orderService.getOrdersByDriver(userDetails.getId());
+                    return new ResponseEntity<>(orders, HttpStatus.OK);
+                }
+
+            } else if (userDetails.getEntityType() == AuthEntityType.PHARMACY) {
+                List<Order> orders = orderService.getOrdersByPharmacy(userDetails.getId());
+                return new ResponseEntity<>(orders, HttpStatus.OK);
+            }
+
+        }
+
+        // Added default return to satisfy the return type
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
-    
-    // Added default return to satisfy the return type
-    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-}
 }

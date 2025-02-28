@@ -89,4 +89,11 @@ public class UserService {
         return new CustomUserDetails(user.getId().toString(),user.getEmail(), user.getPassword(), AuthEntityType.USER, user.getRole(), authorities);
     }
 
+    //get all patients of a doctor
+    public List<User> getPatients(String doctorId) {
+        User doctor = userRepository.findById(new ObjectId(doctorId)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor with id " + doctorId + " not found"));
+       //find by doctor id only, no role
+        return userRepository.findByDoctor_Id(doctor.getId());
+    }
+
 }

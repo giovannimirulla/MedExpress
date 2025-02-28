@@ -1,6 +1,7 @@
 package com.medexpress.security;
 
 import io.jsonwebtoken.Claims;
+
 import com.medexpress.enums.AuthEntityType;
 import com.medexpress.service.UserService;
 import com.medexpress.service.PharmacyService;
@@ -28,12 +29,12 @@ public class JwtDecoder {
         if (claims == null) {
             return null;
         }
-        AuthEntityType role = claims.get("role", AuthEntityType.class);
+        AuthEntityType entityType = claims.get("entityType", AuthEntityType.class);
         String id = claims.getSubject();
 
-        if (role == AuthEntityType.USER) {
+        if (entityType == AuthEntityType.USER) {
             return userService.findById(id);
-        } else if (role == AuthEntityType.PHARMACY) {
+        } else if (entityType == AuthEntityType.PHARMACY) {
             return pharmacyService.findById(id);
         }
         return null;
@@ -48,16 +49,15 @@ public class JwtDecoder {
         return claims.getSubject();
     }
 
-    //decode token id and role
-    public Object decodeTokenIdAndRole(String token) {
+    //decode token id and entityType
+    public Object decodeTokenIdAndEntityType(String token) {
         Claims claims = jwtUtil.validateToken(token);
         if (claims == null) {
             return null;
         }
         String id = claims.getSubject();
-        String roleAsString = claims.get("role", String.class); // Recupera il ruolo come String
-        AuthEntityType role = AuthEntityType.valueOf(roleAsString); // Converti manualmente in enum
+        AuthEntityType entityType = claims.get("entityType", AuthEntityType.class); // Recupera il ruolo come String
         
-        return new Object[]{id, role};
+        return new Object[]{id, entityType};
     }
 }

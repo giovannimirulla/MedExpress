@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Collections;
 
 import com.medexpress.entity.Pharmacy;
+import com.medexpress.enums.AuthEntityType;
 import com.medexpress.repository.PharmacyRepository;
 import com.medexpress.security.CustomUserDetails;
 
@@ -56,7 +57,7 @@ public class PharmacyService {
                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pharmacy with id " + id + " not found");
           }
           
-          return new CustomUserDetails(pharmacy.getId().toString(), pharmacy.getEmail(), pharmacy.getPassword(), null, Collections.emptyList());  
+          return new CustomUserDetails(pharmacy.getId().toString(), pharmacy.getEmail(), pharmacy.getPassword(), AuthEntityType.PHARMACY, null, Collections.emptyList());  
      }
 
      // findAll pharmacies

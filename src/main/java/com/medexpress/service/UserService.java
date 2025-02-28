@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.medexpress.entity.User;
+import com.medexpress.enums.AuthEntityType;
 import com.medexpress.repository.UserRepository;
 import com.medexpress.security.CustomUserDetails;
 
@@ -85,7 +86,7 @@ public class UserService {
         }
 
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(user.getRole().toString()));
-        return new CustomUserDetails(user.getId().toString(),user.getEmail(), user.getPassword(), user.getRole().toString(), authorities);
+        return new CustomUserDetails(user.getId().toString(),user.getEmail(), user.getPassword(), AuthEntityType.USER, user.getRole(), authorities);
     }
 
 }

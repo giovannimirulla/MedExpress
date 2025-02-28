@@ -40,12 +40,12 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             String jwt = parseJwt(request);
             if (jwt != null && jwtUtil.validateToken(jwt) != null) {
-                Object[] idAndRole = (Object[]) jwtDecoder.decodeTokenIdAndRole(jwt);
+                Object[] idAndEntityType = (Object[]) jwtDecoder.decodeTokenIdAndEntityType(jwt);
                 CustomUserDetails userDetails = null;
-                if (idAndRole[1] == AuthEntityType.PHARMACY) {
-                    userDetails = pharmacyService.findById((String) idAndRole[0]);
-                } else if (idAndRole[1] == AuthEntityType.USER) {
-                    userDetails = userService.findById((String) idAndRole[0]);
+                if (idAndEntityType[1] == AuthEntityType.PHARMACY) {
+                    userDetails = pharmacyService.findById((String) idAndEntityType[0]);
+                } else if (idAndEntityType[1] == AuthEntityType.USER) {
+                    userDetails = userService.findById((String) idAndEntityType[0]);
                 }
                 if (userDetails != null) {
                     UsernamePasswordAuthenticationToken authentication =

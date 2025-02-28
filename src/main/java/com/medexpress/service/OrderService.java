@@ -5,23 +5,19 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.medexpress.dto.CommonDrug;
 import com.medexpress.dto.OrderSocket;
 import com.medexpress.entity.Order;
-import com.medexpress.entity.Role;
 import com.medexpress.repository.OrderRepository;
 
 import com.medexpress.repository.UserRepository;
-import com.medexpress.repository.RoleRepository;
 import com.medexpress.repository.PharmacyRepository;
 import com.medexpress.entity.Pharmacy;
 import com.medexpress.entity.User;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 
 import com.corundumstudio.socketio.SocketIOServer;
 
@@ -34,8 +30,6 @@ public class OrderService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
 
     @Autowired
     private PharmacyRepository pharmacyRepository;
@@ -133,10 +127,7 @@ public class OrderService {
 
         // if Order.StatusPharmacy.READY_FOR_PICKUP, send notification to all drivers
         if (statusPharmacy == Order.StatusPharmacy.READY_FOR_PICKUP) {
-            Role driverRole = roleRepository.findByName("Driver")
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor role not found"));
-
-            List<User> drivers = userRepository.findByRole(driverRole);
+            List<User> drivers = userRepository.findByRole(User.Role.DRIVER);
             for (User driver : drivers) {
                 OrderSocket orderSocketDriver = new OrderSocket(order.getId().toString(), "statusPharmacy",
                         statusPharmacy.name());

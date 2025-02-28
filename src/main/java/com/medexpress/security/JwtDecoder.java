@@ -5,7 +5,9 @@ import com.medexpress.enums.AuthEntityType;
 import com.medexpress.service.UserService;
 import com.medexpress.service.PharmacyService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class JwtDecoder {
 
     @Autowired
@@ -52,8 +54,10 @@ public class JwtDecoder {
         if (claims == null) {
             return null;
         }
-        AuthEntityType role = claims.get("role", AuthEntityType.class);
         String id = claims.getSubject();
+        String roleAsString = claims.get("role", String.class); // Recupera il ruolo come String
+        AuthEntityType role = AuthEntityType.valueOf(roleAsString); // Converti manualmente in enum
+        
         return new Object[]{id, role};
     }
 }

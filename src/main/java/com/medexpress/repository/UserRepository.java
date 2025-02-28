@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 
 import com.medexpress.entity.User;
-import com.medexpress.entity.Role;
+
 
 @Repository
 public interface UserRepository extends MongoRepository <User, ObjectId> {
@@ -16,6 +16,6 @@ public interface UserRepository extends MongoRepository <User, ObjectId> {
     public boolean existsByEmail(String email);
     public boolean existsByFiscalCode(String fiscalCode);
     Optional<User> findByEmail(String email);
-    List<User> findByRole(Role role);
-    List<User> findByRoleAndNameOrSurname(Role role, String name, String surname);
+    List<User> findByRole(User.Role role);
+    List<User> findByRoleAndNameOrSurname(User.Role role, String name, String surname);
 }

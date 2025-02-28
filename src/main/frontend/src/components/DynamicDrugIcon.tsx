@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import * as solidIcons from "@fortawesome/free-solid-svg-icons";
 
+import api from "@/utils/api";
+
 interface DynamicDrugIconProps {
   drug: {
     formaFarmaceutica: string;
@@ -37,9 +39,9 @@ const DynamicDrugIcon: React.FC<DynamicDrugIconProps> = ({ drug }) => {
 
     const fetchIcon = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/v1/icon?type=${drug.formaFarmaceutica}`);
-        if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
-          const data = await response.json();
+        const response = await api.get(`icon?type=${drug.formaFarmaceutica}`);
+        if (response.status === 200 && response.headers["content-type"]?.includes('application/json')) {
+          const data = response.data;
           if (data) setIconData(data);
         }
       } catch (error) {

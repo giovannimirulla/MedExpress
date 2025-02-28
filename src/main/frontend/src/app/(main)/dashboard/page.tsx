@@ -4,7 +4,7 @@ import { Layout, Card, Table, ConfigProvider, Tag } from 'antd';
 import { CheckCircleOutlined, ExclamationCircleOutlined, CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import DynamicDrugIcon from '@/components/DynamicDrugIcon';
 import { socket } from "@/services/socketService";
-
+import api from '@/utils/api';
 const { Content } = Layout;
 
 interface DataType {
@@ -116,22 +116,16 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/order/67be417c419c6774d37aa75d")
+    
+    api.get("/api/v1/order/all")
       .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then(data => {
-        // Assumiamo che "data" sia un array di ordini
-        console.log(data);
-        setOrders(data);
-        setLoading(false);
+      console.log(response.data);
+      setOrders(response.data);
+      setLoading(false);
       })
       .catch(err => {
-        setError(err.message);
-        setLoading(false);
+      setError(err.message);
+      setLoading(false);
       });
   }, []);
 

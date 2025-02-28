@@ -10,7 +10,7 @@ import CardDrug from '@/components/CardDrug';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTruckFast } from '@fortawesome/free-solid-svg-icons';
 import DynamicDrugIcon from '@/components/DynamicDrugIcon';
-
+import api from '@/utils/api';
 
 interface DataType {
   key: number;
@@ -75,14 +75,8 @@ const Home = () => {
   const fetchDrugs = async (query: string, page: number, size: number) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/api/v1/aifa/drugs?query=${query}&spellingCorrection=true&page=${page}&size=${size}`, {
-        method: 'GET',
-        headers: {
-          'accept': '*/*'
-        }
-      });
-
-      const responseData = await response.json();
+      const response = await api.get(`/aifa/drugs?query=${query}&spellingCorrection=true&page=${page}&size=${size}`);
+      const responseData = response.data;
       console.log('fetchDrugs responseData', responseData);
       setLoading(false);
       if (response.status === 200 && responseData.data) {
@@ -101,13 +95,8 @@ const Home = () => {
     //min 2 max 100
     if (query.length > 2 && query.length < 100) {
       try {
-        const response = await fetch(`http://localhost:8080/api/v1/aifa/autocomplete?query=${query}`, {
-          method: 'GET',
-          headers: {
-            'accept': '*/*'
-          }
-        });
-        const responseData = await response.json();
+        const response = await api.get(`/aifa/autocomplete?query=${query}`);
+        const responseData = response.data;
         console.log('responseData', responseData);
 
         if (response.status === 200 && responseData.data) {

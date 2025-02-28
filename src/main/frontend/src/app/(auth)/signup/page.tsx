@@ -5,7 +5,7 @@ import { Button, Checkbox, Form, Input, Segmented, Flex, Select } from "antd";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faIdCard, faEnvelope, faLocationDot, faLock, faUserDoctor } from '@fortawesome/free-solid-svg-icons';
 import {DebounceSelect} from '@/components/DebounceSelect';
-
+import api from '@/utils/api';
 
 import { AuthEntityType, AuthEntityTypeIcon } from '@/enums/AuthEntityType';
 
@@ -34,13 +34,13 @@ export default function Signup() {
   useEffect(() => {
     async function fetchRoles() {
       try {
-        const res = await fetch('http://localhost:8080/api/v1/role/all');
-        if (res.ok) {
-          const data = await res.json();
-      setRoles(data.map((role: { name: string; id: { timestamp: number; date: string } }) => ({ value: role.name, label: role.name })));
-        } else {
-          console.error('Error fetching roles:', res.status);
-        }
+       const res = await api.get('/role/all');
+      if (res.status === 200) {
+        const data = res.data;
+        setRoles(data.map((role: { name: string; id: { timestamp: number; date: string } }) => ({ value: role.name, label: role.name })));
+      } else {
+        console.error('Error fetching roles:', res.status);
+      }
       } catch (error) {
         console.error('Error fetching roles:', error);
       }
@@ -72,8 +72,8 @@ export default function Signup() {
 async function fetchDoctorList(query: string): Promise<UserValue[]> {
   console.log('fetching doctor', query);
 
-  return fetch(`http://localhost:8080/api/v1/doctor/search?query=${query}`)
-    .then((response) => response.json())
+  return api.get(`/doctor/search?query=${query}`)
+    .then((response) => response.data)
     .then((body) =>
       body.map(
         (doctor: { name: string; surname: string; id: string }) => ({

@@ -46,7 +46,7 @@ public class UserController {
 
         String encryptedPassword = encryptionService.encryptPassword(body.getPassword());
 
-        User user = userService.createUser(body.getName(), body.getSurname(), body.getFiscalCode(), body.getAddress(), body.getEmail(), encryptedPassword, body.getRoleId(), body.getDoctorId());
+        User user = userService.createUser(body.getName(), body.getSurname(), body.getFiscalCode(), body.getAddress(), body.getEmail(), encryptedPassword, body.getRole(), body.getDoctorId());
 
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
         

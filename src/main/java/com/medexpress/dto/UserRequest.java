@@ -6,7 +6,7 @@ public class UserRequest {
     private String fiscalCode;
     private String address;
     private String email;
-    private String roleId;
+    private String role;
     private String doctorId;
     private String password;
 
@@ -31,8 +31,8 @@ public class UserRequest {
         return email;
     }
 
-    public String getRoleId() {
-        return roleId;
+    public String getRole() {
+        return role;
     }
 
     public String getDoctorId() {
@@ -64,8 +64,8 @@ public class UserRequest {
         this.email = email;
     }
 
-    public void setRoleId(String roleId) {
-        this.roleId = roleId;
+    public void setRole(String roleId) {
+        this.role = roleId;
     }
 
     public void setDoctorId(String doctorId) {

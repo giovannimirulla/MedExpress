@@ -47,4 +47,10 @@ public class User {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
+
+    public enum Role {
+        PATIENT,
+        DOCTOR,
+        DRIVER
+    }
 }

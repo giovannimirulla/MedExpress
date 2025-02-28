@@ -1,6 +1,8 @@
 package com.medexpress.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +27,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
+
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/v1/order")
@@ -106,11 +110,19 @@ public class OrderController {
 
     }
 
-    // get all order by user id arranged by date and status
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<OrderDTO>> getOrdersByUser(@PathVariable String userId) {
-        List<Order> orders = orderService.getOrders(userId);
-        return new ResponseEntity<>(orders.stream().map(order -> modelMapper.map(order, OrderDTO.class)).toList(),
-                HttpStatus.OK);
+// get all order by user id arranged by date and status - url: http://localhost:8080/api/v1/order/all
+@GetMapping("/all")
+public ResponseEntity<UserDetails> getAllOrders() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        System.out.println("Utente autenticato: " + userDetails.getUsername());
+
+      //return only userDetails
+        return new ResponseEntity<>(userDetails, HttpStatus.OK);
     }
+    
+    // Added default return to satisfy the return type
+    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+}
 }

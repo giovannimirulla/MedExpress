@@ -150,4 +150,25 @@ public class OrderService {
         socketServer.getBroadcastOperations().sendEvent(order.getUser().getId().toString(), orderSocket);
         return orderRepository.save(order);
     }
+
+    // get all orders of the driver or statusPharmacy is DELIVERED_TO_DRIVER
+    public List<Order> getOrdersByDriver(String driverId) {
+        Sort sort = Sort.by(
+            Sort.Order.desc("updatedAt"),
+            Sort.Order.asc("statusDoctor"),
+            Sort.Order.asc("statusPharmacy"),
+            Sort.Order.asc("statusDriver"));
+        return orderRepository.findByDriver_IdOrDriverIsNullAndStatusPharmacy(new ObjectId(driverId), Order.StatusPharmacy.DELIVERED_TO_DRIVER, sort);
+    }
+
+    // get all orders of the pharmacy or statusDoctor is NO_APPROVAL_NEEDED or APPROVED
+    public List<Order> getOrdersByPharmacy(String pharmacyId) {
+        Sort sort = Sort.by(
+            Sort.Order.desc("updatedAt"),
+            Sort.Order.asc("statusDoctor"),
+            Sort.Order.asc("statusPharmacy"),
+            Sort.Order.asc("statusDriver"));
+        return orderRepository.findByPharmacy_IdOrPharmacyIsNullAndStatusDoctorIn(new ObjectId(pharmacyId), List.of(Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.StatusDoctor.APPROVED), sort);
+    }
+    
 }

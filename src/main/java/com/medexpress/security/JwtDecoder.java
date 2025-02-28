@@ -56,8 +56,9 @@ public class JwtDecoder {
             return null;
         }
         String id = claims.getSubject();
-        AuthEntityType entityType = claims.get("entityType", AuthEntityType.class); // Recupera il ruolo come String
-        
+        String entityTypeString = claims.get("entityType", String.class);
+        AuthEntityType entityType = AuthEntityType.valueOf(entityTypeString);
+
         return new Object[]{id, entityType};
     }
 }

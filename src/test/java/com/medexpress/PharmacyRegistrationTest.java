@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
-public class PharmacyRegistration {
+public class PharmacyRegistrationTest {
     private MockMvc mockMvc;
 
     @Mock

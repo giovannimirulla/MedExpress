@@ -4,7 +4,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.medexpress.service.PharmacyService;
@@ -12,6 +11,7 @@ import com.medexpress.service.EncryptionService;
 import com.medexpress.service.OrderService;
 import com.medexpress.dto.PharmacyDTO;
 import com.medexpress.dto.PharmacyRequest;
+import com.medexpress.dto.UpdateStatusPharmacyRequest;
 import com.medexpress.entity.Order;
 import com.medexpress.entity.Pharmacy;
 
@@ -60,9 +60,10 @@ public class PharmacyController {
 
     }
 
-    @RequestMapping("/updateStatus")
-    public ResponseEntity<Order> updateStatus(@RequestParam String orderId, @RequestParam Order.StatusPharmacy status) {
-        return new ResponseEntity<Order>(orderService.updateStatusPharmacy(orderId, status), HttpStatus.OK);
+    @PostMapping("/updateStatus")
+    public ResponseEntity<Order> updateStatus(@RequestBody UpdateStatusPharmacyRequest body) {
+        Order order = orderService.updateStatusPharmacy(body.getOrderId(), body.getStatus());
+        return new ResponseEntity<Order>(order, HttpStatus.OK);
     }
 
 }

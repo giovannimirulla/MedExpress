@@ -52,10 +52,13 @@ public class AuthController {
             String accessToken = jwtUtil.generateAccessToken(user.getId().toString(), AuthEntityType.USER);
             String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
 
-            Map<String, String> tokens = new HashMap<>();
-            tokens.put("access_token", accessToken);
-            tokens.put("refresh_token", refreshToken);
-            return new ResponseEntity<>(tokens, HttpStatus.OK);
+            Map<String, String> response = new HashMap<>();
+            response.put("accessToken", accessToken);
+            response.put("refreshToken", refreshToken);
+            response.put("role", user.getRole().toString());
+            response.put("id", user.getId().toString());
+            response.put("nameAndSurname", user.getName()+ " " + user.getSurname());
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         return new ResponseEntity<>(Map.of("error", "Invalid credentials"), HttpStatus.UNAUTHORIZED);
     }
@@ -71,10 +74,12 @@ public class AuthController {
                     String accessToken = jwtUtil.generateAccessToken(pharmacy.getId().toString(), AuthEntityType.PHARMACY);
                     String refreshToken = jwtUtil.generateRefreshToken(pharmacy.getEmail());
         
-                    Map<String, String> tokens = new HashMap<>();
-                    tokens.put("access_token", accessToken);
-                    tokens.put("refresh_token", refreshToken);
-                    return new ResponseEntity<>(tokens, HttpStatus.OK);
+                    Map<String, String> response = new HashMap<>();
+                    response.put("accessToken", accessToken);
+                    response.put("refreshToken", refreshToken);
+                    response.put("id", pharmacy.getId().toString());
+                    response.put("nameCompany", pharmacy.getCompanyName());
+                    return new ResponseEntity<>(response, HttpStatus.OK);
                 }
                 return new ResponseEntity<>(Map.of("error", "Invalid credentials"), HttpStatus.UNAUTHORIZED);
     }
@@ -88,9 +93,11 @@ public class AuthController {
 
         if (claims != null) {
             String id = claims.getSubject();
-            AuthEntityType role = claims.get("role", AuthEntityType.class);
+            String entityTypeString = claims.get("entityType", String.class);
+            
+            AuthEntityType entityType = AuthEntityType.valueOf(entityTypeString);
 
-            String newAccessToken = jwtUtil.generateAccessToken(id, role);
+            String newAccessToken = jwtUtil.generateAccessToken(id, entityType);
             String newRefreshToken = jwtUtil.generateRefreshToken(claims.getSubject());
 
             Map<String, String> tokens = new HashMap<>();

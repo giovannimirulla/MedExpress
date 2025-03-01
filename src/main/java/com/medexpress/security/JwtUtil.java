@@ -46,7 +46,7 @@ public class JwtUtil {
             .subject(id)
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-            .claim("entityType", entityType)
+            .claim("entityType", entityType.toString())
             .signWith(key, algorithm)
             .compact();
     }

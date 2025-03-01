@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button, Checkbox, Form, Input, Segmented, Flex, Select } from "antd";
+import { useState, } from "react";
+import { Button, Form, Input, Segmented, Flex, Select } from "antd";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faIdCard, faEnvelope, faLocationDot, faLock, faUserDoctor } from '@fortawesome/free-solid-svg-icons';
 import {DebounceSelect} from '@/components/DebounceSelect';
 import api from '@/utils/api';
 
 import { AuthEntityType, AuthEntityTypeIcon } from '@/enums/AuthEntityType';
+import { Role } from "@/enums/Role";
 
   // Usage of DebounceSelect
   interface UserValue {
@@ -19,7 +20,6 @@ import { AuthEntityType, AuthEntityTypeIcon } from '@/enums/AuthEntityType';
 export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [entity, setEntity] = useState(AuthEntityType.User);
-  const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
   const [value, setValue] = useState<UserValue[]>([]);
 
   const authEntityOptions = Object.values(AuthEntityType).map((type) => ({
@@ -31,23 +31,6 @@ export default function Signup() {
     value: type,
   }));
 
-  useEffect(() => {
-    async function fetchRoles() {
-      try {
-       const res = await api.get('/role/all');
-      if (res.status === 200) {
-        const data = res.data;
-        setRoles(data.map((role: { name: string; id: { timestamp: number; date: string } }) => ({ value: role.name, label: role.name })));
-      } else {
-        console.error('Error fetching roles:', res.status);
-      }
-      } catch (error) {
-        console.error('Error fetching roles:', error);
-      }
-    }
-  
-    fetchRoles();
-  }, []);
 
 // async function fetchUserList(username: string): Promise<UserValue[]> {
 //   console.log('fetching user', username);
@@ -160,8 +143,8 @@ async function fetchDoctorList(query: string): Promise<UserValue[]> {
                  <Select
                  placeholder="Seleziona il tuo ruolo"
                  prefix={<FontAwesomeIcon icon={faIdCard} className="text-gray-200 mr-2"/>}
-                 defaultValue={roles.length > 0 ? roles[0].value : undefined}
-                 options={roles}
+                 defaultValue={Object.keys(Role).length > 0 ? Object.values(Role)[0] : undefined}
+                 options={Object.values(Role).map(role => ({ label: role, value: role }))}
               />
             </Form.Item>
           )}
@@ -208,9 +191,9 @@ async function fetchDoctorList(query: string): Promise<UserValue[]> {
           </div>
           <Form.Item>
             <Flex justify="space-between" align="center">
-              <Form.Item name="remember" valuePropName="checked" noStyle>
+              {/* <Form.Item name="remember" valuePropName="checked" noStyle>
                 <Checkbox className="dark:text-white">Ricordami</Checkbox>
-              </Form.Item>
+              </Form.Item> */}
               <a className="dark:text-white" href="/login">
                 Hai già un account?
               </a>

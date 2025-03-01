@@ -1,4 +1,5 @@
 export interface Drug {
+    id: string;
     medicinale: {
         denominazioneMedicinale: string;
     };

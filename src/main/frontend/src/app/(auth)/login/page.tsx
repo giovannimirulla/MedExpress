@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
-import { App, Button, Checkbox, Form, Input, Flex, message, Segmented } from "antd";
+import { App, Button, Form, Input, Flex, message, Segmented } from "antd";
 import { useAuth } from '@/context/authContext';
 
 import { AuthEntityType, AuthEntityTypeIcon } from '@/enums/AuthEntityType';
@@ -84,11 +84,14 @@ export default function Login() {
             </Form.Item>
             <Form.Item>
               <Flex justify="space-between" align="center">
-                <Form.Item name="remember" valuePropName="checked" noStyle>
+                {/* <Form.Item name="remember" valuePropName="checked" noStyle>
                   <Checkbox className="dark:text-white">Ricordami</Checkbox>
-                </Form.Item>
-                <a className="dark:text-white" href="/forgot-password">
+                </Form.Item> */}
+                {/* <a className="dark:text-white" href="/forgot-password">
                   Password dimenticata?
+                </a> */}
+                <a className="dark:text-white" href="/signup">
+                  Non hai un account? Registrati qui!
                 </a>
               </Flex>
             </Form.Item>

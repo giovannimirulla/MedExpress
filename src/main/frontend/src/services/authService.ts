@@ -5,7 +5,10 @@ export const loginUser = async (email: string, password: string) => {
       const response = await api.post('/auth/login/user', { email, password });
       return {
         accessToken: response.data.accessToken, // Ritorna l'accessToken
-        refreshToken: response.data.refreshToken // Ritorna il refreshToken
+        refreshToken: response.data.refreshToken, // Ritorna il refreshToken
+        role: response.data.role,
+        id: response.data.id,
+        name: response.data.nameAndSurname,
       };
     } catch (error) {
       console.error('Errore di login', error);
@@ -18,7 +21,9 @@ export const loginUser = async (email: string, password: string) => {
         const response = await api.post('/auth/login/pharmacy', { email, password });
         return {
             accessToken: response.data.accessToken, // Ritorna l'accessToken
-            refreshToken: response.data.refreshToken // Ritorna il refreshToken
+            refreshToken: response.data.refreshToken, // Ritorna il refreshToken
+            id: response.data.id,
+            name: response.data.nameCompany,
         };
         }
     catch (error) {

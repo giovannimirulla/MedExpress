@@ -1,7 +1,7 @@
 "use client";
 import Container from '@/components/Container';
 import { useState } from 'react';
-import { AutoComplete, Input, Pagination, PaginationProps, Spin, Modal, List, Button, Alert } from 'antd';
+import { App,AutoComplete, Input, Pagination, PaginationProps, Spin, Modal, List, Button, Alert, message } from 'antd';
 import { Drug } from '@/types/Drug';
 import type { AutoCompleteProps } from 'antd';
 
@@ -11,15 +11,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTruckFast } from '@fortawesome/free-solid-svg-icons';
 import DynamicDrugIcon from '@/components/DynamicDrugIcon';
 import api from '@/utils/api';
+import { useAuth } from '@/context/authContext';
 
 interface DataType {
   key: number;
+  id: string;
   title: string;
   description: string;
   prescription: boolean;
 }
 
 const Home = () => {
+  const { isLoggedIn } = useAuth();
 
   const [options, setOptions] = useState<AutoCompleteProps['options']>([]);
   const [selected, setSelected] = useState(false);
@@ -30,7 +33,7 @@ const Home = () => {
   const [searchedValue, setSearchedValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [list, setList] = useState<DataType[]>([]);
-
+  const [messageApi, contextHolder] = message.useMessage();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -48,6 +51,7 @@ const Home = () => {
         ...list,
         {
           key: index,
+          id: confezione.idPackage,
           title: confezione.denominazionePackage,
           description: confezione.descrizioneRf.join(', '),
           prescription: confezione.classeFornitura === 'RR' || confezione.classeFornitura === 'RNR' 
@@ -77,7 +81,6 @@ const Home = () => {
       setLoading(true);
       const response = await api.get(`/aifa/drugs?query=${query}&spellingCorrection=true&page=${page}&size=${size}`);
       const responseData = response.data;
-      console.log('fetchDrugs responseData', responseData);
       setLoading(false);
       if (response.status === 200 && responseData.data) {
         setDrugs(responseData.data.content);
@@ -97,7 +100,6 @@ const Home = () => {
       try {
         const response = await api.get(`/aifa/autocomplete?query=${query}`);
         const responseData = response.data;
-        console.log('responseData', responseData);
 
         if (response.status === 200 && responseData.data) {
           const options: AutoCompleteProps['options'] = responseData.data.map((item: string) => ({ value: item.toString() }));
@@ -114,7 +116,6 @@ const Home = () => {
   };
 
   const onSelect = (value: string) => {
-    console.log('onSelect', value);
     setSelected(true);
     //save selected value
     setCurrentPage(0);
@@ -122,7 +123,29 @@ const Home = () => {
     fetchDrugs(value, currentPage, pageSize);
   }
 
+  const handleOrder = (drugId: string, packageId: string): void => {
+    if (!isLoggedIn()) {
+      messageApi.error('Devi effettuare il login per ordinare un farmaco');
+      return;
+    }
+
+    api.post('/order', { drugId, packageId })
+      .then((response) => {
+      console.log('Order response', response);
+      if (response.status === 200) {
+        console.log('Order success');
+        setIsModalOpen(false);
+      } else {
+        console.error('Order failed');
+      }
+      })
+      .catch((error) => {
+      console.error('Order error', error);
+      });
+  }
   return (
+    <App>
+       {contextHolder}
     <main className="relative min-h-screen w-screen" id="home">
       <div aria-hidden="true" className="absolute inset-0 grid grid-cols-2 -space-x-52 opacity-40 dark:opacity-20">
         <div className="blur-[106px] h-56 bg-gradient-to-br from-primary to-purple-400 dark:from-blue-700"></div>
@@ -145,7 +168,12 @@ const Home = () => {
       renderItem={(item) => (
         <List.Item
           actions={[
-            <Button key={item.key} color={item.prescription? "orange":"primary"} variant="solid">
+            <Button 
+              key={item.key} 
+              color={item.prescription ? "orange" : "primary"} 
+              variant="solid"
+              onClick={() => selectedDrug?.id && handleOrder(selectedDrug.id, item.id)}
+            >
               <FontAwesomeIcon icon={faTruckFast} /> Ordina
             </Button>
           ]}
@@ -188,7 +216,7 @@ const Home = () => {
               transition={{ duration: 0.5 }}
 
             >
-              <h1 className="text-body font-bold text-5xl md:text-6xl xl:text-7xl">Cerca qui il tuo <span className="text-primary">farmaco</span></h1>
+              <h1 className="text-body dark:text-white font-bold text-5xl md:text-6xl xl:text-7xl">Cerca qui il tuo <span className="text-primary">farmaco</span></h1>
             </motion.div>
 
             <AutoComplete
@@ -239,6 +267,7 @@ const Home = () => {
         transition={{ duration: 0.5 }}
       ></motion.div>
     </main>
+    </App>
   )
 }
 

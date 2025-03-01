@@ -2,7 +2,6 @@ package com.medexpress.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +23,6 @@ import com.medexpress.entity.Pharmacy;
 import com.medexpress.enums.DrugPackageClasseFornitura;
 import com.medexpress.security.CustomUserDetails;
 
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
@@ -94,7 +92,7 @@ public class OrderController {
                     var doctor = order.getUser().getDoctor();
                     if (doctor != null) {
                         OrderSocket orderSocket = new OrderSocket(order.getId().toString(),
-                                "statusDoctor", statusDoctor.name());
+                                "statusDoctor", statusDoctor.name(),  order.getUpdatedAt());
                         socketServer.getBroadcastOperations().sendEvent(doctor.getId().toString(), orderSocket);
                     }
                 }
@@ -106,7 +104,7 @@ public class OrderController {
                 // send order to all pharmacies
                 for (Pharmacy pharmacy : pharmacies) {
                     OrderSocket orderSocket = new OrderSocket(order.getId().toString(),
-                            "statusPharmacy", statusPharmacy.name());
+                            "statusPharmacy", statusPharmacy.name(), order.getUpdatedAt());
                     socketServer.getBroadcastOperations().sendEvent(pharmacy.getId().toString(), orderSocket);
                 }
                 break;
@@ -136,13 +134,14 @@ public class OrderController {
                 // if user is a doctor, get all orders of his patients
                 if (userDetails.getRole() == User.Role.DOCTOR) {
                     List<User> patients = userService.getPatients(userDetails.getId());
-                    System.out.println("patients: " + patients);
                     List<Order> orders = new ArrayList<>();
                     for (User patient : patients) {
                         // get all orders of the patient where statusDoctor is not NO_APPROVAL_NEEDED
                         List<Order> patientOrders = orderService.getOrdersByUser(patient.getId().toString());
                         for (Order order : patientOrders) {
                             if (order.getStatusDoctor() != Order.StatusDoctor.NO_APPROVAL_NEEDED) {
+                                //add drugPackage
+                                order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
                                 orders.add(order);
                             }
                         }
@@ -152,6 +151,10 @@ public class OrderController {
                 // else if user is a patient, get all orders of the patient
                 else if (userDetails.getRole() == User.Role.PATIENT) {
                     List<Order> orders = orderService.getOrdersByUser(userDetails.getId());
+                    //add drugPackage
+                    for (Order order : orders) {
+                        order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
+                    }
                     return new ResponseEntity<>(orders, HttpStatus.OK);
                 }
 
@@ -159,11 +162,19 @@ public class OrderController {
                 // DELIVERED_TO_DRIVER
                 else if (userDetails.getRole() == User.Role.DRIVER) {
                     List<Order> orders = orderService.getOrdersByDriver(userDetails.getId());
+                    //add drugPackage
+                    for (Order order : orders) {
+                        order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
+                    }
                     return new ResponseEntity<>(orders, HttpStatus.OK);
                 }
 
             } else if (userDetails.getEntityType() == AuthEntityType.PHARMACY) {
                 List<Order> orders = orderService.getOrdersByPharmacy(userDetails.getId());
+                //add drugPackage
+                for (Order order : orders) {
+                    order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
+                }
                 return new ResponseEntity<>(orders, HttpStatus.OK);
             }
 

@@ -33,7 +33,7 @@ public class UserService {
     }
 
     public List<User> searchDoctor(String query) {
-        return userRepository.findByRoleAndNameOrSurname(User.Role.DOCTOR, query, query);
+        return userRepository.findByRoleAndNameContainingIgnoreCaseOrSurnameContainingIgnoreCase(User.Role.DOCTOR, query, query);
     }
 
     // create user

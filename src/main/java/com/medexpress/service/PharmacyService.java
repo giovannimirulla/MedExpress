@@ -4,13 +4,14 @@ import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.Collections;
 
 import com.medexpress.entity.Pharmacy;
+import com.medexpress.enums.AuthEntityType;
 import com.medexpress.repository.PharmacyRepository;
+import com.medexpress.security.CustomUserDetails;
 
 import org.bson.types.ObjectId;
 
@@ -50,12 +51,13 @@ public class PharmacyService {
      }
 
      // find pharmacy by id
-     public UserDetails findById(String id) {
+     public CustomUserDetails findById(String id) {
           Pharmacy pharmacy = pharmacyRepository.findById(new ObjectId(id)).orElse(null);
           if(pharmacy == null) {
                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pharmacy with id " + id + " not found");
           }
-          return new org.springframework.security.core.userdetails.User(pharmacy.getEmail(), pharmacy.getPassword(), Collections.emptyList());
+          
+          return new CustomUserDetails(pharmacy.getId().toString(), pharmacy.getEmail(), pharmacy.getPassword(), AuthEntityType.PHARMACY, null, Collections.emptyList());  
      }
 
      // findAll pharmacies

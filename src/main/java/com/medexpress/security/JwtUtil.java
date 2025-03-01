@@ -40,13 +40,13 @@ public class JwtUtil {
    
     
 
-    //Generate JWT token with the user id and role 
-    public String generateAccessToken(String id, AuthEntityType role) {
+    //Generate JWT token with the user id and entityType 
+    public String generateAccessToken(String id, AuthEntityType entityType) {
         return Jwts.builder()
             .subject(id)
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-            .claim("role", role.name())
+            .claim("entityType", entityType)
             .signWith(key, algorithm)
             .compact();
     }

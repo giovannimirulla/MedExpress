@@ -1,6 +1,6 @@
 package com.medexpress;
 
-
+import org.springframework.web.reactive.function.client.WebClient;
 import com.medexpress.service.AIFAService;
 import com.medexpress.dto.AIFADrugsResponse;
 import okhttp3.mockwebserver.MockResponse;
@@ -9,7 +9,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -21,13 +20,15 @@ class AIFAServiceTest {
 
     private static MockWebServer mockWebServer;
     private static AIFAService aifaService;
-
+    private static WebClient webClient;
+    
+    
     @BeforeAll
     static void setUp() throws IOException {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
 
-        aifaService = new AIFAService(WebClient.builder().baseUrl("https://api.aifa.gov.it"));// Lambda per simulare il WebClient.Builder
+        aifaService = new AIFAService(null);// Lambda per simulare il WebClient.Builder
     }
 
     @AfterAll

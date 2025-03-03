@@ -18,8 +18,6 @@ import com.medexpress.service.UserService;
 import com.medexpress.service.OrderService;
 import com.medexpress.dto.DoctorDTO;
 import com.medexpress.dto.UpdateStatusDoctorRequest;
-import com.medexpress.dto.UserDTO;
-
 
 
 

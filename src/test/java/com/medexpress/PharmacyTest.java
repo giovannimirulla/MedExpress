@@ -9,13 +9,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medexpress.controller.PharmacyController;
 import com.medexpress.dto.PharmacyDTO;
-import com.medexpress.dto.UserDTO;
 import com.medexpress.entity.Pharmacy;
-import com.medexpress.entity.User;
 import com.medexpress.service.EncryptionService;
 import com.medexpress.service.PharmacyService;
-import com.medexpress.validator.PharmacyValidator;
-import com.medexpress.validator.UserValidator;
+
 
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;

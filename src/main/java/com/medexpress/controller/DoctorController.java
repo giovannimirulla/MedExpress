@@ -1,6 +1,8 @@
 package com.medexpress.controller;
 
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -14,6 +16,10 @@ import com.medexpress.entity.User;
 
 import com.medexpress.service.UserService;
 import com.medexpress.service.OrderService;
+import com.medexpress.dto.DoctorDTO;
+import com.medexpress.dto.UpdateStatusDoctorRequest;
+
+
 
 @RestController
 @RequestMapping("/api/v1/doctor")
@@ -31,13 +37,16 @@ public class DoctorController {
 
     // search doctor by name or lastname using one query string
     @RequestMapping("/search")
-    public ResponseEntity<List<User>> searchDoctor(@RequestParam String query) {
-        return new ResponseEntity<List<User>>(userService.searchDoctor(query), HttpStatus.OK);
+    public ResponseEntity<List<DoctorDTO>> searchDoctor(@RequestParam String query) {
+        List<User> doctors = userService.searchDoctor(query);
+        List<DoctorDTO> doctorDTOs = DoctorDTO.fromEntityList(doctors);
+        return new ResponseEntity<List<DoctorDTO>>(doctorDTOs, HttpStatus.OK);
     }
 
     // update status of order
-    @RequestMapping("/updateStatus")
-    public ResponseEntity<Order> updateStatus(@RequestParam String orderId, @RequestParam Order.StatusDoctor status) {
-        return new ResponseEntity<Order>(orderService.updateStatusDoctor(orderId, status), HttpStatus.OK);
+    @PostMapping("/updateStatus")
+    public ResponseEntity<Order> updateStatus(@RequestBody UpdateStatusDoctorRequest body) {
+        Order order = orderService.updateStatusDoctor(body.getOrderId(), body.getStatus());
+        return new ResponseEntity<Order>(order, HttpStatus.OK);
     }
 }

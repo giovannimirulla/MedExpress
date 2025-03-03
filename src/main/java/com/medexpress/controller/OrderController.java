@@ -2,7 +2,6 @@ package com.medexpress.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,48 +70,45 @@ public class OrderController {
         if (drugPackage == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        // if RR or SOP Order.StatusDoctor.NO_APPROVAL_NEEDED
-        Order.StatusDoctor statusDoctor = Order.StatusDoctor.NO_APPROVAL_NEEDED;
-        Order.StatusPharmacy statusPharmacy = Order.StatusPharmacy.PENDING;
+
         // convert drugPackage.getConfezioni().get(0).getClasseFornitura() to
         // DrugPackageClasseFornitura
         DrugPackageClasseFornitura drugPackageClasseFornitura = DrugPackageClasseFornitura
                 .valueOf(drugPackage.getConfezioni().get(0).getClasseFornitura());
-        // if otc
-        if (drugPackageClasseFornitura == DrugPackageClasseFornitura.OTC) {
-            statusDoctor = Order.StatusDoctor.PENDING;
-        }
+
+        Order.StatusDoctor statusDoctor = Order.getStatusDoctor(drugPackageClasseFornitura);
+        Order.StatusPharmacy statusPharmacy = Order.StatusPharmacy.PENDING;
+        Order.Priority priority = Order.getPriority(drugPackageClasseFornitura);
 
         // create order
         Order order = orderService.createOrder(body.getPackageId(), body.getUserId(), body.getDrugId(), statusDoctor,
-                Order.Priority.NORMAL);
+                priority);
 
-        switch (drugPackageClasseFornitura) {
-            case RR: // ricetta ripetibile
-                // get user's doctor and send order to doctor if available
-                if (order.getUser() != null) {
-                    var doctor = order.getUser().getDoctor();
-                    if (doctor != null) {
-                        OrderSocket orderSocket = new OrderSocket(order.getId().toString(),
-                                "statusDoctor", statusDoctor.name());
-                        socketServer.getBroadcastOperations().sendEvent(doctor.getId().toString(), orderSocket);
-                    }
-                }
-                break;
+        if (order == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
-            case OTC: // over the counter (da banco)
-                // find all pharmacies
-                Iterable<Pharmacy> pharmacies = pharmacyService.findAll();
-                // send order to all pharmacies
-                for (Pharmacy pharmacy : pharmacies) {
+        if (statusDoctor == Order.StatusDoctor.PENDING) {
+            // get user's doctor and send order to doctor if available
+            if (order.getUser() != null) {
+                var doctor = order.getUser().getDoctor();
+                if (doctor != null) {
                     OrderSocket orderSocket = new OrderSocket(order.getId().toString(),
-                            "statusPharmacy", statusPharmacy.name());
-                    socketServer.getBroadcastOperations().sendEvent(pharmacy.getId().toString(), orderSocket);
+                            "statusDoctor", statusDoctor.name(), order.getUpdatedAt());
+                    socketServer.getBroadcastOperations().sendEvent(doctor.getId().toString(), orderSocket);
                 }
-                break;
+            }
+        }
 
-            case SOP: // senza obbligo di prescrizione, ma non da banco
-                break;
+        if (statusDoctor == Order.StatusDoctor.NO_APPROVAL_NEEDED && statusPharmacy == Order.StatusPharmacy.PENDING) {
+            // find all pharmacies
+            Iterable<Pharmacy> pharmacies = pharmacyService.findAll();
+            // send order to all pharmacies
+            for (Pharmacy pharmacy : pharmacies) {
+                OrderSocket orderSocket = new OrderSocket(order.getId().toString(),
+                        "statusPharmacy", statusPharmacy.name(), order.getUpdatedAt());
+                socketServer.getBroadcastOperations().sendEvent(pharmacy.getId().toString(), orderSocket);
+            }
         }
 
         OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
@@ -128,21 +124,21 @@ public class OrderController {
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-
-
             // get entityType, if entityType is User check role else return all order where
             // pharmacy is the pharmacy
             if (userDetails.getEntityType() == AuthEntityType.USER) {
                 // if user is a doctor, get all orders of his patients
                 if (userDetails.getRole() == User.Role.DOCTOR) {
                     List<User> patients = userService.getPatients(userDetails.getId());
-                    System.out.println("patients: " + patients);
                     List<Order> orders = new ArrayList<>();
                     for (User patient : patients) {
                         // get all orders of the patient where statusDoctor is not NO_APPROVAL_NEEDED
                         List<Order> patientOrders = orderService.getOrdersByUser(patient.getId().toString());
                         for (Order order : patientOrders) {
                             if (order.getStatusDoctor() != Order.StatusDoctor.NO_APPROVAL_NEEDED) {
+                                // add drugPackage
+                                order.setDrugPackage(
+                                        aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
                                 orders.add(order);
                             }
                         }
@@ -152,6 +148,10 @@ public class OrderController {
                 // else if user is a patient, get all orders of the patient
                 else if (userDetails.getRole() == User.Role.PATIENT) {
                     List<Order> orders = orderService.getOrdersByUser(userDetails.getId());
+                    // add drugPackage
+                    for (Order order : orders) {
+                        order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
+                    }
                     return new ResponseEntity<>(orders, HttpStatus.OK);
                 }
 
@@ -159,11 +159,19 @@ public class OrderController {
                 // DELIVERED_TO_DRIVER
                 else if (userDetails.getRole() == User.Role.DRIVER) {
                     List<Order> orders = orderService.getOrdersByDriver(userDetails.getId());
+                    // add drugPackage
+                    for (Order order : orders) {
+                        order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
+                    }
                     return new ResponseEntity<>(orders, HttpStatus.OK);
                 }
 
             } else if (userDetails.getEntityType() == AuthEntityType.PHARMACY) {
                 List<Order> orders = orderService.getOrdersByPharmacy(userDetails.getId());
+                // add drugPackage
+                for (Order order : orders) {
+                    order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
+                }
                 return new ResponseEntity<>(orders, HttpStatus.OK);
             }
 

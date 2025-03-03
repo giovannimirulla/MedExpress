@@ -30,7 +30,6 @@ public class OrderService {
     @Autowired
     private UserRepository userRepository;
 
-
     @Autowired
     private PharmacyRepository pharmacyRepository;
 
@@ -95,8 +94,10 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found!"));
 
         order.setStatusDoctor(statusDoctor);
+        order.setUpdatedAt(LocalDateTime.now());
 
-        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), "statusDoctor", statusDoctor.name());
+        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), "statusDoctor", statusDoctor.name(),
+                order.getUpdatedAt());
 
         // send notification to user that the prescription has been approved
         socketServer.getBroadcastOperations().sendEvent(order.getUser().getId().toString(), orderSocket);
@@ -106,7 +107,7 @@ public class OrderService {
             Iterable<Pharmacy> pharmacies = pharmacyRepository.findAll();
             for (Pharmacy pharmacy : pharmacies) {
                 OrderSocket orderSocketPharmacy = new OrderSocket(order.getId().toString(), "statusDoctor",
-                        statusDoctor.name());
+                        statusDoctor.name(), order.getUpdatedAt());
                 socketServer.getBroadcastOperations().sendEvent(pharmacy.getId().toString(), orderSocketPharmacy);
             }
         }
@@ -119,8 +120,10 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found!"));
 
         order.setStatusPharmacy(statusPharmacy);
+        order.setUpdatedAt(LocalDateTime.now());
 
-        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), "statusPharmacy", statusPharmacy.name());
+        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), "statusPharmacy", statusPharmacy.name(),
+                order.getUpdatedAt());
 
         // send notification to user that the prescription has been approved
         socketServer.getBroadcastOperations().sendEvent(order.getUser().getId().toString(), orderSocket);
@@ -130,7 +133,7 @@ public class OrderService {
             List<User> drivers = userRepository.findByRole(User.Role.DRIVER);
             for (User driver : drivers) {
                 OrderSocket orderSocketDriver = new OrderSocket(order.getId().toString(), "statusPharmacy",
-                        statusPharmacy.name());
+                        statusPharmacy.name(), order.getUpdatedAt());
                 socketServer.getBroadcastOperations().sendEvent(driver.getId().toString(), orderSocketDriver);
             }
         }
@@ -143,8 +146,10 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found!"));
 
         order.setStatusDriver(statusDriver);
+        order.setUpdatedAt(LocalDateTime.now());
 
-        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), "statusDriver", statusDriver.name());
+        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), "statusDriver", statusDriver.name(),
+                order.getUpdatedAt());
 
         // send notification to user that the prescription has been approved
         socketServer.getBroadcastOperations().sendEvent(order.getUser().getId().toString(), orderSocket);
@@ -154,21 +159,24 @@ public class OrderService {
     // get all orders of the driver or statusPharmacy is DELIVERED_TO_DRIVER
     public List<Order> getOrdersByDriver(String driverId) {
         Sort sort = Sort.by(
-            Sort.Order.desc("updatedAt"),
-            Sort.Order.asc("statusDoctor"),
-            Sort.Order.asc("statusPharmacy"),
-            Sort.Order.asc("statusDriver"));
-        return orderRepository.findByDriver_IdOrDriverIsNullAndStatusPharmacy(new ObjectId(driverId), Order.StatusPharmacy.DELIVERED_TO_DRIVER, sort);
+                Sort.Order.desc("updatedAt"),
+                Sort.Order.asc("statusDoctor"),
+                Sort.Order.asc("statusPharmacy"),
+                Sort.Order.asc("statusDriver"));
+        return orderRepository.findByDriver_IdOrDriverIsNullAndStatusPharmacy(new ObjectId(driverId),
+                Order.StatusPharmacy.DELIVERED_TO_DRIVER, sort);
     }
 
-    // get all orders of the pharmacy or statusDoctor is NO_APPROVAL_NEEDED or APPROVED
+    // get all orders of the pharmacy or statusDoctor is NO_APPROVAL_NEEDED or
+    // APPROVED
     public List<Order> getOrdersByPharmacy(String pharmacyId) {
         Sort sort = Sort.by(
-            Sort.Order.desc("updatedAt"),
-            Sort.Order.asc("statusDoctor"),
-            Sort.Order.asc("statusPharmacy"),
-            Sort.Order.asc("statusDriver"));
-        return orderRepository.findByPharmacy_IdOrPharmacyIsNullAndStatusDoctorIn(new ObjectId(pharmacyId), List.of(Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.StatusDoctor.APPROVED), sort);
+                Sort.Order.desc("updatedAt"),
+                Sort.Order.asc("statusDoctor"),
+                Sort.Order.asc("statusPharmacy"),
+                Sort.Order.asc("statusDriver"));
+        return orderRepository.findByPharmacy_IdOrPharmacyIsNullAndStatusDoctorIn(new ObjectId(pharmacyId),
+                List.of(Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.StatusDoctor.APPROVED), sort);
     }
-    
+
 }

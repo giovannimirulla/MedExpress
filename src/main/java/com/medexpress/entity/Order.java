@@ -14,6 +14,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.medexpress.enums.DrugPackageClasseFornitura;
+
+
 @Document(collection = "orders")
 @Data
 @AllArgsConstructor
@@ -80,8 +83,56 @@ public class Order {
         HIGH
     }
 
-    //get id returns a string
+    // get id returns a string
     public String getId() {
         return id.toString();
+    }
+
+    public  static Order.Priority getPriority(DrugPackageClasseFornitura drugPackageClasseFornitura) {
+        switch (drugPackageClasseFornitura) {
+            case OTC:
+                return Order.Priority.NORMAL;
+            case SOP:
+                return Order.Priority.NORMAL;
+            case RR:
+                return Order.Priority.NORMAL;
+            case RNR:
+                return Order.Priority.NORMAL;
+            case RMR:
+                return Order.Priority.NORMAL;
+            case RRL:
+                return Order.Priority.HIGH;
+            case RNRL:
+                return Order.Priority.HIGH;
+            case OSP:
+                return Order.Priority.HIGH;
+            case USPL:
+                return Order.Priority.HIGH;
+        }
+        return Order.Priority.NORMAL; // Add a default return statement to avoid compilation error
+    }
+
+    public static Order.StatusDoctor getStatusDoctor(DrugPackageClasseFornitura drugPackageClasseFornitura) {
+        switch (drugPackageClasseFornitura) {
+            case OTC:
+                return Order.StatusDoctor.PENDING;
+            case SOP:
+                return Order.StatusDoctor.PENDING;
+            case RR:
+                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+            case RNR:
+                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+            case RMR:
+                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+            case RRL:
+                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+            case RNRL:
+                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+            case OSP:
+                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+            case USPL:
+                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+        }
+        return Order.StatusDoctor.NO_APPROVAL_NEEDED; // Add a default return statement to avoid compilation error
     }
 }

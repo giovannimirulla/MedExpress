@@ -89,6 +89,17 @@ public class UserService {
         return new CustomUserDetails(user.getId().toString(),user.getEmail(), user.getPassword(), AuthEntityType.USER, user.getRole(), authorities);
     }
 
+    //find user by id return User
+    public User getUser(String id) {
+        return userRepository.findById(new ObjectId(id)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + id + " not found"));
+    }
+
+    //get doctor by user id
+    public User getDoctor(String userId) {
+        User user = userRepository.findById(new ObjectId(userId)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + userId + " not found"));
+        return user.getDoctor();
+    }
+
     //get all patients of a doctor
     public List<User> getPatients(String doctorId) {
         User doctor = userRepository.findById(new ObjectId(doctorId)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor with id " + doctorId + " not found"));

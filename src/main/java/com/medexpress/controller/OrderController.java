@@ -63,56 +63,66 @@ public class OrderController {
 
     @PostMapping()
     public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderRequest body) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            if (userDetails.getEntityType() == AuthEntityType.PHARMACY) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
 
-        CommonDrug drugPackage = aifaService.getPackage(body.getDrugId(), body.getPackageId()).block();
 
-        if (drugPackage == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+            CommonDrug drugPackage = aifaService.getPackage(body.getDrugId(), body.getPackageId()).block();
 
-        // convert drugPackage.getConfezioni().get(0).getClasseFornitura() to
-        // DrugPackageClasseFornitura
-        DrugPackageClasseFornitura drugPackageClasseFornitura = DrugPackageClasseFornitura
-                .valueOf(drugPackage.getConfezioni().get(0).getClasseFornitura());
+            if (drugPackage == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
 
-        Order.StatusDoctor statusDoctor = Order.getStatusDoctor(drugPackageClasseFornitura);
-        Order.StatusPharmacy statusPharmacy = Order.StatusPharmacy.PENDING;
-        Order.Priority priority = Order.getPriority(drugPackageClasseFornitura);
+            // convert drugPackage.getConfezioni().get(0).getClasseFornitura() to
+            // DrugPackageClasseFornitura
+            DrugPackageClasseFornitura drugPackageClasseFornitura = DrugPackageClasseFornitura
+                    .valueOf(drugPackage.getConfezioni().get(0).getClasseFornitura());
 
-        // create order
-        Order order = orderService.createOrder(body.getPackageId(), body.getUserId(), body.getDrugId(), statusDoctor,
-                priority);
+            Order.StatusDoctor statusDoctor = Order.getStatusDoctor(drugPackageClasseFornitura);
+            Order.StatusPharmacy statusPharmacy = Order.StatusPharmacy.PENDING;
+            Order.Priority priority = Order.getPriority(drugPackageClasseFornitura);
 
-        if (order == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+            // create order
+            Order order = orderService.createOrder(body.getPackageId(), userDetails.getId(), body.getDrugId(),
+                    statusDoctor,
+                    priority);
 
-        if (statusDoctor == Order.StatusDoctor.PENDING) {
-            // get user's doctor and send order to doctor if available
-            if (order.getUser() != null) {
-                var doctor = order.getUser().getDoctor();
-                if (doctor != null) {
-                    OrderSocket orderSocket = new OrderSocket(order.getId().toString(),
-                            "statusDoctor", statusDoctor.name(), order.getUpdatedAt());
-                    socketServer.getBroadcastOperations().sendEvent(doctor.getId().toString(), orderSocket);
+            if (order == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            if (statusDoctor == Order.StatusDoctor.PENDING) {
+                // get user's doctor and send order to doctor if available
+                if (order.getUser() != null) {
+                    User doctor = userService.getDoctor(order.getUser().getId().toString());
+                    if (doctor != null) {
+                        OrderSocket orderSocket = new OrderSocket(order.getId().toString(),
+                                "statusDoctor", statusDoctor.name(), order.getUpdatedAt());
+                        socketServer.getBroadcastOperations().sendEvent(doctor.getId().toString(), orderSocket);
+                    }
                 }
             }
-        }
 
-        if (statusDoctor == Order.StatusDoctor.NO_APPROVAL_NEEDED && statusPharmacy == Order.StatusPharmacy.PENDING) {
-            // find all pharmacies
-            Iterable<Pharmacy> pharmacies = pharmacyService.findAll();
-            // send order to all pharmacies
-            for (Pharmacy pharmacy : pharmacies) {
-                OrderSocket orderSocket = new OrderSocket(order.getId().toString(),
-                        "statusPharmacy", statusPharmacy.name(), order.getUpdatedAt());
-                socketServer.getBroadcastOperations().sendEvent(pharmacy.getId().toString(), orderSocket);
+            if (statusDoctor == Order.StatusDoctor.NO_APPROVAL_NEEDED
+                    && statusPharmacy == Order.StatusPharmacy.PENDING) {
+                // find all pharmacies
+                Iterable<Pharmacy> pharmacies = pharmacyService.findAll();
+                // send order to all pharmacies
+                for (Pharmacy pharmacy : pharmacies) {
+                    OrderSocket orderSocket = new OrderSocket(order.getId().toString(),
+                            "statusPharmacy", statusPharmacy.name(), order.getUpdatedAt());
+                    socketServer.getBroadcastOperations().sendEvent(pharmacy.getId().toString(), orderSocket);
+                }
             }
+
+            OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
+            return new ResponseEntity<>(orderDTO, HttpStatus.CREATED);
         }
-
-        OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
-        return new ResponseEntity<>(orderDTO, HttpStatus.CREATED);
-
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     // get all order by user id arranged by date and status - url:

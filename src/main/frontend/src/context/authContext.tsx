@@ -1,6 +1,6 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { loginUser, loginPharmacy, refreshAccessToken } from '@/services/authService';
+import React, { createContext, useContext, useState } from 'react';
+import { loginUser, loginPharmacy } from '@/services/authService';
 import { AuthEntityType } from '@/enums/AuthEntityType';
 import { Role } from '@/enums/Role';
 
@@ -18,12 +18,25 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [accessToken, setAccessToken] = useState<string | null>(null);
-    const [refreshingToken, setRefreshingToken] = useState<string | null>(null);
-    const [entityType, setEntityType] = useState<AuthEntityType>(AuthEntityType.User);
-    const [role, setRole] = useState<Role | null>(null);
-    const [id, setId] = useState<string | null>(null);
-    const [name, setName] = useState<string | null>(null);
+    const [accessToken, setAccessToken] = useState<string | null>(
+        typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+    );
+    const [refreshingToken, setRefreshingToken] = 
+        useState<string | null>(typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null);
+    const [entityType, setEntityType] = useState<AuthEntityType>(
+        typeof window !== 'undefined' ? localStorage.getItem('entityType') as AuthEntityType : AuthEntityType.User
+    );
+    const [role, setRole] = useState<Role | null>(
+        typeof window !== 'undefined' ? localStorage.getItem('role') as Role : null
+    );
+    const [id, setId] = useState<string | null>(
+        typeof window !== 'undefined' ? localStorage.getItem('id') : null
+    );
+    const [name, setName] =     useState<string | null>(
+        typeof window !== 'undefined' ? localStorage.getItem('name') : null
+    );
+
+
 
 
 
@@ -76,6 +89,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // is logged in
     const isLoggedIn = () => {
+        //with localStorage
+        if (typeof window !== 'undefined') {
+            return !!accessToken || !!localStorage.getItem('accessToken');
+        }
         return !!accessToken;
     }
 
@@ -85,47 +102,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             return entityType || localStorage.getItem('entityType') as AuthEntityType;
         }
         return entityType;
-    }   
+    }
 
     //get role
     const getRole = () => {
         if (typeof window !== 'undefined') {
-          return role || localStorage.getItem('role') as Role;
+            return role || localStorage.getItem('role') as Role;
         }
         return role;
-      }
+    }
 
     //get id
     const getId = () => {
         if (typeof window !== 'undefined') {
-          return id || localStorage.getItem('id');
+            return id || localStorage.getItem('id');
         }
         return id;
-      }
+    }
 
     //get name
     const getName = () => {
         if (typeof window !== 'undefined') {
             return name || localStorage.getItem('name');
-            }
-            return name;
+        }
+        return name;
     }
-
-    // Auto-refresh token quando l'app si avvia
-    useEffect(() => {
-        const initializeAuth = async () => {
-            const token = localStorage.getItem('refreshToken') || refreshingToken;
-            if (!token) return;
-            const result = await refreshAccessToken(token);
-            if (result && result.accessToken && result.refreshToken) {
-                setAccessToken(result.accessToken);
-                setRefreshingToken(result.refreshToken);
-                localStorage.setItem('accessToken', result.accessToken);
-                localStorage.setItem('refreshToken', result.refreshToken);
-            }
-        };
-        initializeAuth();
-    }, [refreshingToken]);
 
     return (
         <AuthContext.Provider value={{ accessToken, login, logout, isLoggedIn, getEntityType, getRole, getId, getName }}>

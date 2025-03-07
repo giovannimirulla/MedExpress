@@ -50,7 +50,7 @@ public class AuthController {
         User user = userService.findByEmail(email);
         if (user != null && encryptionService.verifyPassword(password, user.getPassword())) {
             String accessToken = jwtUtil.generateAccessToken(user.getId().toString(), AuthEntityType.USER);
-            String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+            String refreshToken = jwtUtil.generateRefreshToken(user.getEmail(), AuthEntityType.USER);
 
             Map<String, String> response = new HashMap<>();
             response.put("accessToken", accessToken);
@@ -72,7 +72,7 @@ public class AuthController {
         Pharmacy pharmacy = pharmacyService.findByEmail(email);
                 if (pharmacy != null && encryptionService.verifyPassword(password, pharmacy.getPassword())) {
                     String accessToken = jwtUtil.generateAccessToken(pharmacy.getId().toString(), AuthEntityType.PHARMACY);
-                    String refreshToken = jwtUtil.generateRefreshToken(pharmacy.getEmail());
+                    String refreshToken = jwtUtil.generateRefreshToken(pharmacy.getEmail(), AuthEntityType.PHARMACY);
         
                     Map<String, String> response = new HashMap<>();
                     response.put("accessToken", accessToken);
@@ -93,12 +93,14 @@ public class AuthController {
 
         if (claims != null) {
             String id = claims.getSubject();
+
+
             String entityTypeString = claims.get("entityType", String.class);
             
             AuthEntityType entityType = AuthEntityType.valueOf(entityTypeString);
 
             String newAccessToken = jwtUtil.generateAccessToken(id, entityType);
-            String newRefreshToken = jwtUtil.generateRefreshToken(claims.getSubject());
+            String newRefreshToken = jwtUtil.generateRefreshToken(claims.getSubject(), entityType);
 
             Map<String, String> tokens = new HashMap<>();
             tokens.put("accessToken", newAccessToken);

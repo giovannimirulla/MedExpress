@@ -115,24 +115,24 @@ public class Order {
     public static Order.StatusDoctor getStatusDoctor(DrugPackageClasseFornitura drugPackageClasseFornitura) {
         switch (drugPackageClasseFornitura) {
             case OTC:
-                return Order.StatusDoctor.PENDING;
+                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
             case SOP:
-                return Order.StatusDoctor.PENDING;
+                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
             case RR:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
             case RNR:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
             case RMR:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
             case RRL:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
             case RNRL:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
             case OSP:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
             case USPL:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
         }
-        return Order.StatusDoctor.NO_APPROVAL_NEEDED; // Add a default return statement to avoid compilation error
+        return Order.StatusDoctor.PENDING; // Add a default return statement to avoid compilation error
     }
 }

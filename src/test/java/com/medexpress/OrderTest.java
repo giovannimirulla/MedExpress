@@ -3,6 +3,7 @@ package com.medexpress;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -216,5 +217,44 @@ class OrderServiceTest {
         verify(socketServer.getBroadcastOperations(), times(1))
     .       sendEvent(eq(order.getUser().getId().toString()), any(Object.class));
     }
-   
+    
+    @Test
+    void testGetOrdersByPharmacy() {
+
+        ObjectId pharmacyId = new ObjectId(); 
+        String pharmacyIdString = pharmacyId.toString();
+        Order order = new Order(); 
+
+        when(orderRepository.findByPharmacy_IdOrPharmacyIsNullAndStatusDoctorIn(
+                any(ObjectId.class), anyList(), any(Sort.class)))
+                .thenReturn(List.of(order));
+
+        List<Order> result = orderService.getOrdersByPharmacy(pharmacyIdString);
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+        verify(orderRepository, times(1)).findByPharmacy_IdOrPharmacyIsNullAndStatusDoctorIn(
+                any(ObjectId.class), anyList(), any(Sort.class));
+    }
+
+    @Test
+    void testUpdateStatusPharmacy() {
+        ObjectId pharmacyId = new ObjectId(); 
+        String pharmacyIdString = pharmacyId.toString(); 
+        Order order = new Order(); 
+
+        when(orderRepository.findById(any(ObjectId.class))).thenReturn(Optional.of(order));
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
+
+        Order updatedOrder = orderService.updateStatusPharmacy(order.getId().toString(), Order.StatusPharmacy.READY_FOR_PICKUP);
+
+        assertNotNull(updatedOrder);
+        assertEquals(Order.StatusPharmacy.READY_FOR_PICKUP, updatedOrder.getStatusPharmacy());
+        verify(orderRepository, times(1)).save(any(Order.class));
+        verify(socketServer.getBroadcastOperations(), times(1))
+                .sendEvent(eq(order.getUser().getId().toString()), any(Object.class));
+    }
+
+
 }

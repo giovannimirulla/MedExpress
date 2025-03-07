@@ -2,6 +2,7 @@ package com.medexpress;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.medexpress.entity.Order;
@@ -18,6 +20,10 @@ import com.medexpress.repository.UserRepository;
 import com.medexpress.security.JwtUtil;
 import com.medexpress.service.AIFAService;
 import com.medexpress.service.OrderService;
+import com.corundumstudio.socketio.SocketIOServer;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 import io.jsonwebtoken.Claims;
 
@@ -40,17 +46,18 @@ class OrderServiceTest {
 
     @Mock
     private JwtUtil jwtUtil;
-
+ 
     private String userId;
     private User user;
     private String validToken;
     private String invalidToken;
     private String packageId;
     private String drugId;
+    private SocketIOServer socketServer;
 
     @BeforeEach
     void setUp() {
-        
+
         MockitoAnnotations.openMocks(this);
 
         userId = new ObjectId().toString();
@@ -181,6 +188,33 @@ class OrderServiceTest {
 
         assertNotNull(createdOrder);
         assertNotEquals(Order.StatusDoctor.REJECTED, createdOrder.getStatusDoctor());
+    }
+
+    @Test
+    void shouldAuthorizeMedicalPrescription() {
+        
+        Order order = new Order(packageId, user, null, null, drugId, 
+                null, null, Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, 
+                Order.StatusDoctor.PENDING, Order.Priority.HIGH);
+        order.setId(new ObjectId());
+
+        // Mockiamo il repository per restituire l'ordine quando richiesto
+        when(orderRepository.findByUser_Id(user.getId(), Sort.by(Sort.Order.desc("createdAt")))).thenReturn(null);
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act: Aggiorniamo lo stato della prescrizione a APPROVED
+        Order updatedOrder = orderService.updateStatusDoctor(order.getId().toString(), Order.StatusDoctor.APPROVED);
+
+        // Assert: Verifichiamo che lo stato sia stato aggiornato correttamente
+        assertNotNull(updatedOrder);
+        assertEquals(Order.StatusDoctor.APPROVED, updatedOrder.getStatusDoctor());
+        assertNotNull(updatedOrder.getUpdatedAt());
+
+        // Verifichiamo che il repository sia stato chiamato per salvare l'ordine
+        verify(orderRepository, times(1)).save(updatedOrder);
+
+        verify(socketServer.getBroadcastOperations(), times(1))
+    .       sendEvent(eq(order.getUser().getId().toString()), any(Object.class));
     }
    
 }

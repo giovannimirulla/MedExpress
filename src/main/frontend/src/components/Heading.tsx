@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/context/authContext';
+import { Button } from 'antd';
 
 type HeadingProps = {
   position?: "absolute" | "relative";
@@ -9,7 +10,7 @@ type HeadingProps = {
 };
 
 const Heading = ({ position = "absolute", navColor = "transparent" }: HeadingProps) => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, logout } = useAuth();
   const navPositionClass = position;
   const bgClass = navColor === "primary" ? "bg-primary" : "bg-transparent";
 
@@ -65,13 +66,17 @@ const Heading = ({ position = "absolute", navColor = "transparent" }: HeadingPro
                 {/* Altri link o contenuti della navigazione */}
               </div>
               <div className="flex items-center gap-4">
-                {isLoggedIn() ? (
+                {isLoggedIn() ? (<>
                   <Link
                     href="/dashboard"
                     className="text-sm font-medium bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
                   >
                     Dashboard
                   </Link>
+                  <Button onClick={() => logout()} className="text-sm font-medium dark:text-white text-gray-700 hover:underline">
+                    Logout
+                  </Button>
+                </>
                 ) : (
                   <>
                     <Link

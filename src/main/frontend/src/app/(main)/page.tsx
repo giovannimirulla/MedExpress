@@ -135,8 +135,10 @@ const Home = () => {
       if (response.status === 200) {
         console.log('Order success');
         setIsModalOpen(false);
+        messageApi.success('Ordine effettuato con successo');
       } else {
         console.error('Order failed');
+        messageApi.error('Errore durante l\'ordine');
       }
       })
       .catch((error) => {

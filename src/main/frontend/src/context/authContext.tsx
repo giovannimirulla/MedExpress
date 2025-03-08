@@ -4,6 +4,7 @@ import { loginUser, loginPharmacy } from '@/services/authService';
 import { AuthEntityType } from '@/enums/AuthEntityType';
 import { Role } from '@/enums/Role';
 
+
 interface AuthContextType {
     accessToken: string | null;
     login: (entity: AuthEntityType, username: string, password: string) => Promise<boolean>;
@@ -35,6 +36,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [name, setName] =     useState<string | null>(
         typeof window !== 'undefined' ? localStorage.getItem('name') : null
     );
+        
+    
+    //check if user is logged in
+    React.useEffect(() => {
+        console.log(window.location.pathname);
+     if(isLoggedIn()){
+        if(window.location.pathname === '/login' || window.location.pathname === '/login/'){
+            window.location.href = '/';
+        }else if(window.location.pathname === '/signup' || window.location.pathname === '/signup/'){
+            window.location.href = '/';
+        }
+     }else{
+            if(window.location.pathname === '/dashboard' || window.location.pathname === '/dashboard/'){
+                window.location.href = '/login';
+     }
+    }
+    }, [accessToken]);
 
 
 
@@ -127,6 +145,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
         return name;
     }
+
 
     return (
         <AuthContext.Provider value={{ accessToken, login, logout, isLoggedIn, getEntityType, getRole, getId, getName }}>

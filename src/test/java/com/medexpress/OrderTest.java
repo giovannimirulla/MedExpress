@@ -227,7 +227,7 @@ class OrderServiceTest {
 
         when(orderRepository.findByPharmacy_IdOrPharmacyIsNullAndStatusDoctorIn(
                 any(ObjectId.class), anyList(), any(Sort.class)))
-                .thenReturn(List.of(order));
+                .thenReturn(List.of(order)); 
 
         List<Order> result = orderService.getOrdersByPharmacy(pharmacyIdString);
 
@@ -256,5 +256,74 @@ class OrderServiceTest {
                 .sendEvent(eq(order.getUser().getId().toString()), any(Object.class));
     }
 
+    @Test
+    void testTrackingDeliverYStatus() {
+        // Prepara i dati
+        String orderId = "order-id-123";
+        String userId = "user-id-123";
+        String pharmacyId = "pharmacy-id-123";
+        String driverId = "driver-id-123";
+
+        User user = new User();
+        user.setId(new ObjectId(userId));
+        Pharmacy pharmacy = new Pharmacy();
+        pharmacy.setId(new ObjectId(pharmacyId));
+
+        Order order = new Order();
+        order.setId(new ObjectId(orderId));
+        order.setUser(user);
+        order.setPharmacy(pharmacy);
+        order.setStatusPharmacy(Order.StatusPharmacy.READY_FOR_PICKUP);
+        order.setStatusDriver(Order.StatusDriver.PENDING);
+
+        // Mock dei metodi
+        when(orderRepository.findById(new ObjectId(orderId))).thenReturn(Optional.of(order));
+        when(userRepository.findById(new ObjectId(userId))).thenReturn(Optional.of(user));
+        when(pharmacyRepository.findById(new ObjectId(pharmacyId))).thenReturn(Optional.of(pharmacy));
+
+        // Esegui il metodo di tracciamento
+        Order result = orderService.getOrder(orderId);
+
+        // Verifica che il risultato contenga le informazioni corrette
+        assertNotNull(result);
+        assertEquals(pharmacyId, result.getPharmacy().getId().toString());
+        assertEquals(Order.StatusPharmacy.READY_FOR_PICKUP, result.getStatusPharmacy());
+        assertEquals(Order.StatusDriver.PENDING, result.getStatusDriver());
+    }
+
+    @Test
+    void testManagingPriorityOrders() {
+        // Prepara i dati
+        String orderId = "order-id-123";
+        String userId = "user-id-123";
+        String drugId = "drug-id-lifesaving";
+        String pharmacyId = "pharmacy-id-123";
+
+        User user = new User();
+        user.setId(new ObjectId(userId));
+
+        Pharmacy pharmacy = new Pharmacy();
+        pharmacy.setId(new ObjectId(pharmacyId));
+
+        Order order = new Order();
+        order.setId(new ObjectId(orderId));
+        order.setUser(user);
+        order.setDrugId(drugId);  // Farmaco salvavita
+        order.setPharmacy(pharmacy);
+        order.setPriority(Order.Priority.HIGH); // Ordine prioritario
+
+        // Mock dei metodi
+        Mockito.when(orderRepository.findById(new ObjectId(orderId))).thenReturn(Optional.of(order));
+        Mockito.when(aifaService.getPackage(drugId, order.getPackageId())).thenReturn(Mono.just(new CommonDrug()));
+        Mockito.when(pharmacyRepository.findById(new ObjectId(pharmacyId))).thenReturn(Optional.of(pharmacy));
+
+        // Esegui il metodo di aggiornamento dello stato
+        Order updatedOrder = orderService.updateStatusPharmacy(orderId, Order.StatusPharmacy.READY_FOR_PICKUP);
+
+        // Verifica che l'ordine prioritario venga trattato con urgenza
+        assertNotNull(updatedOrder);
+        assertEquals(Order.StatusPharmacy.READY_FOR_PICKUP, updatedOrder.getStatusPharmacy());
+        assertEquals(Order.Priority.HIGH, updatedOrder.getPriority());
+    }
 
 }

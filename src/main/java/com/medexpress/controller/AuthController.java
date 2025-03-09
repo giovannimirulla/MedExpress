@@ -21,6 +21,7 @@ import com.medexpress.dto.RefreshTokenRequest;
 import com.medexpress.entity.Pharmacy;
 import com.medexpress.security.JwtUtil;
 import com.medexpress.enums.AuthEntityType;
+import com.medexpress.security.CustomUserDetails;
 
 
 @RestController
@@ -50,7 +51,7 @@ public class AuthController {
         User user = userService.findByEmail(email);
         if (user != null && encryptionService.verifyPassword(password, user.getPassword())) {
             String accessToken = jwtUtil.generateAccessToken(user.getId().toString(), AuthEntityType.USER);
-            String refreshToken = jwtUtil.generateRefreshToken(user.getEmail(), AuthEntityType.USER);
+            String refreshToken = jwtUtil.generateRefreshToken(user.getId().toString(), AuthEntityType.USER);
 
             Map<String, String> response = new HashMap<>();
             response.put("accessToken", accessToken);
@@ -72,7 +73,7 @@ public class AuthController {
         Pharmacy pharmacy = pharmacyService.findByEmail(email);
                 if (pharmacy != null && encryptionService.verifyPassword(password, pharmacy.getPassword())) {
                     String accessToken = jwtUtil.generateAccessToken(pharmacy.getId().toString(), AuthEntityType.PHARMACY);
-                    String refreshToken = jwtUtil.generateRefreshToken(pharmacy.getEmail(), AuthEntityType.PHARMACY);
+                    String refreshToken = jwtUtil.generateRefreshToken(pharmacy.getId().toString(), AuthEntityType.PHARMACY);
         
                     Map<String, String> response = new HashMap<>();
                     response.put("accessToken", accessToken);
@@ -84,8 +85,8 @@ public class AuthController {
                 return new ResponseEntity<>(Map.of("error", "Invalid credentials"), HttpStatus.UNAUTHORIZED);
     }
 
-    // Refresh token
-    @PostMapping("/refresh")
+    // Refresh token for users
+    @PostMapping("/refresh/user")
     public ResponseEntity<Map<String, String>> refreshToken(@RequestBody RefreshTokenRequest body) {
         String refreshToken = body.getRefreshToken();
         Claims claims = jwtUtil.validateToken(refreshToken);
@@ -93,14 +94,14 @@ public class AuthController {
 
         if (claims != null) {
             String id = claims.getSubject();
-
-
-            String entityTypeString = claims.get("entityType", String.class);
             
-            AuthEntityType entityType = AuthEntityType.valueOf(entityTypeString);
+           CustomUserDetails user = userService.findById(id);
+            if (user == null) {
+                return new ResponseEntity<>(Map.of("error", "User not found"), HttpStatus.NOT_FOUND);
+            }
 
-            String newAccessToken = jwtUtil.generateAccessToken(id, entityType);
-            String newRefreshToken = jwtUtil.generateRefreshToken(claims.getSubject(), entityType);
+            String newAccessToken = jwtUtil.generateAccessToken(id, AuthEntityType.USER);
+            String newRefreshToken = jwtUtil.generateRefreshToken(claims.getSubject(), AuthEntityType.USER);
 
             Map<String, String> tokens = new HashMap<>();
             tokens.put("accessToken", newAccessToken);
@@ -109,4 +110,29 @@ public class AuthController {
         }
         return new ResponseEntity<>(Map.of("error", "Invalid Refresh Token"), HttpStatus.UNAUTHORIZED);
     }
+
+    //Refresh token for pharmacies
+    @PostMapping("/refresh/pharmacy")
+    public ResponseEntity<Map<String, String>> refreshPharmacyToken(@RequestBody RefreshTokenRequest body) {
+        String refreshToken = body.getRefreshToken();
+        Claims claims = jwtUtil.validateToken(refreshToken);
+
+     
+        if (claims != null) {
+            String id = claims.getSubject();
+            CustomUserDetails pharmacy = pharmacyService.findById(id);
+            if (pharmacy == null) {
+                return new ResponseEntity<>(Map.of("error", "Pharmacy not found"), HttpStatus.NOT_FOUND);
+            }
+            String newAccessToken = jwtUtil.generateAccessToken(id, AuthEntityType.PHARMACY);
+            String newRefreshToken = jwtUtil.generateRefreshToken(claims.getSubject(), AuthEntityType.PHARMACY);
+
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("accessToken", newAccessToken);
+            tokens.put("refreshToken", newRefreshToken);
+            return new ResponseEntity<>(tokens, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(Map.of("error", "Invalid Refresh Token"), HttpStatus.UNAUTHORIZED);
+    }
+
 }

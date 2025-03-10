@@ -53,6 +53,12 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+    //getOrderById
+        public Order getOrderById(String orderId) {
+                return orderRepository.findById(new ObjectId(orderId))
+                        .orElseThrow(() -> new RuntimeException("Order not found!"));
+        }
+
     // get orders by user
     public List<Order> getOrdersByUser(String userId) {
         Sort sort = Sort.by(
@@ -96,8 +102,8 @@ public class OrderService {
         order.setStatusDoctor(statusDoctor);
         order.setUpdatedAt(LocalDateTime.now());
 
-        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), "statusDoctor", statusDoctor.name(),
-                order.getUpdatedAt());
+        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), order.getDrugPackage(), "statusDoctor", statusDoctor.name(),
+                order.getUpdatedAt().toString());
 
         // send notification to user that the prescription has been approved
         socketServer.getBroadcastOperations().sendEvent(order.getUser().getId().toString(), orderSocket);
@@ -106,8 +112,8 @@ public class OrderService {
         if (statusDoctor == Order.StatusDoctor.APPROVED) {
             Iterable<Pharmacy> pharmacies = pharmacyRepository.findAll();
             for (Pharmacy pharmacy : pharmacies) {
-                OrderSocket orderSocketPharmacy = new OrderSocket(order.getId().toString(), "statusDoctor",
-                        statusDoctor.name(), order.getUpdatedAt());
+                OrderSocket orderSocketPharmacy = new OrderSocket(order.getId().toString(), order.getDrugPackage(), "statusDoctor",
+                        statusDoctor.name(), order.getUpdatedAt().toString());
                 socketServer.getBroadcastOperations().sendEvent(pharmacy.getId().toString(), orderSocketPharmacy);
             }
         }
@@ -122,8 +128,8 @@ public class OrderService {
         order.setStatusPharmacy(statusPharmacy);
         order.setUpdatedAt(LocalDateTime.now());
 
-        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), "statusPharmacy", statusPharmacy.name(),
-                order.getUpdatedAt());
+        OrderSocket orderSocket = new OrderSocket(order.getId().toString(),  order.getDrugPackage(), "statusPharmacy", statusPharmacy.name(),
+                order.getUpdatedAt().toString());
 
         // send notification to user that the prescription has been approved
         socketServer.getBroadcastOperations().sendEvent(order.getUser().getId().toString(), orderSocket);
@@ -132,8 +138,8 @@ public class OrderService {
         if (statusPharmacy == Order.StatusPharmacy.READY_FOR_PICKUP) {
             List<User> drivers = userRepository.findByRole(User.Role.DRIVER);
             for (User driver : drivers) {
-                OrderSocket orderSocketDriver = new OrderSocket(order.getId().toString(), "statusPharmacy",
-                        statusPharmacy.name(), order.getUpdatedAt());
+                OrderSocket orderSocketDriver = new OrderSocket(order.getId().toString(), order.getDrugPackage(), "statusPharmacy",
+                        statusPharmacy.name(), order.getUpdatedAt().toString());
                 socketServer.getBroadcastOperations().sendEvent(driver.getId().toString(), orderSocketDriver);
             }
         }
@@ -148,8 +154,8 @@ public class OrderService {
         order.setStatusDriver(statusDriver);
         order.setUpdatedAt(LocalDateTime.now());
 
-        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), "statusDriver", statusDriver.name(),
-                order.getUpdatedAt());
+        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), order.getDrugPackage(), "statusDriver", statusDriver.name(),
+                order.getUpdatedAt().toString());
 
         // send notification to user that the prescription has been approved
         socketServer.getBroadcastOperations().sendEvent(order.getUser().getId().toString(), orderSocket);

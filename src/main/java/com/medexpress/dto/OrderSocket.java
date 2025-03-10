@@ -1,17 +1,18 @@
 package com.medexpress.dto;
 
-import java.time.LocalDateTime;
-
 public class OrderSocket {
 
     // order id
     private String orderId;
+    private CommonDrug drugPackage;
     private String statusEntity; // "statusDoctor" or "statusPharmacy"
     private String statusMessage; // "APPROVED" or "REJECTED"
-    private LocalDateTime updateAt;
+    private String updateAt;
 
-    public OrderSocket( String orderId, String statusEntity, String statusMessage, LocalDateTime updateAt) {
+
+    public OrderSocket( String orderId, CommonDrug drugPackage, String statusEntity, String statusMessage, String updateAt) {
         this.orderId = orderId;
+        this.drugPackage = drugPackage;
         this.statusEntity = statusEntity;
         this.statusMessage = statusMessage;
         this.updateAt = updateAt;
@@ -23,6 +24,14 @@ public class OrderSocket {
 
     public void setOrderId(String orderId) {
         this.orderId = orderId;
+    }
+
+    public CommonDrug getDrugPackage() {
+        return drugPackage;
+    }
+
+    public void setDrugPackage(CommonDrug drugPackage) {
+        this.drugPackage = drugPackage;
     }
 
     public String getStatusEntity() {
@@ -41,11 +50,11 @@ public class OrderSocket {
         this.statusMessage = statusMessage;
     }
 
-    public LocalDateTime getUpdateAt() {
+    public String getUpdateAt() {
         return updateAt;
     }
 
-    public void setUpdateAt(LocalDateTime updateAt) {
+    public void setUpdateAt(String updateAt) {
         this.updateAt = updateAt;
     }
 

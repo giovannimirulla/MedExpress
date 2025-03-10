@@ -49,6 +49,12 @@ export default function Dashboard() {
 
   interface OrderSocket {
     orderId: string;
+    drugPackage: {
+      formaFarmaceutica: string;
+      medicinale: {
+        denominazioneMedicinale: string;
+      };
+    };
     statusEntity: string;
     statusMessage: string;
     updateAt: string;
@@ -409,30 +415,59 @@ console.log("status", status);
         onConnect();
       }
 
-      function onConnect() { }
-      function onDisconnect() { }
+      function onConnect() {
+        console.log("Connected to socket server");
+       }
+      function onDisconnect() { 
+        console.log("Disconnected from socket server");
+      }
       function onOrderUpdate(orderUpdate: OrderSocket) {
         console.log("Order update received", orderUpdate);
         setOrders((prevOrders) => {
-          const updatedOrders = prevOrders.map((order) => {
-            if (order.id === orderUpdate.orderId) {
-              if (orderUpdate.statusEntity === "statusDoctor") {
-                order.statusDoctor = orderUpdate.statusMessage;
-              } else if (orderUpdate.statusEntity === "statusPharmacy") {
-                order.statusPharmacy = orderUpdate.statusMessage;
-              } else if (orderUpdate.statusEntity === "statusDriver") {
-                order.statusDriver = orderUpdate.statusMessage;
+          const orderIndex = prevOrders.findIndex(order => order.id === orderUpdate.orderId);
+          if (orderIndex !== -1) {
+            // Update existing order
+            return prevOrders.map((order) => {
+              if (order.id === orderUpdate.orderId) {
+          if (orderUpdate.statusEntity === "statusDoctor") {
+            order.statusDoctor = orderUpdate.statusMessage;
+          } else if (orderUpdate.statusEntity === "statusPharmacy") {
+            order.statusPharmacy = orderUpdate.statusMessage;
+          } else if (orderUpdate.statusEntity === "statusDriver") {
+            order.statusDriver = orderUpdate.statusMessage;
+          }
+          order.updatedAt = orderUpdate.updateAt;
               }
-              order.updatedAt = orderUpdate.updateAt;
+              return order;
+            });
+          } else {
+            
+            // Create new order with minimal default values
+            const newOrder: Order = {
+              id: orderUpdate.orderId,
+              drugPackage: orderUpdate.drugPackage,
+              updatedAt: orderUpdate.updateAt,
+              statusDoctor: undefined,
+              statusPharmacy: undefined,
+              statusDriver: undefined,
+              statusUser: undefined
+            };
+            if (orderUpdate.statusEntity === "statusDoctor") {
+              newOrder.statusDoctor = orderUpdate.statusMessage;
+            } else if (orderUpdate.statusEntity === "statusPharmacy") {
+              newOrder.statusPharmacy = orderUpdate.statusMessage;
+            } else if (orderUpdate.statusEntity === "statusDriver") {
+              newOrder.statusDriver = orderUpdate.statusMessage;
             }
-            return order;
-          });
-          return updatedOrders;
+            return [...prevOrders, newOrder];
+          }
         });
+        console.log("Updated orders", orders);
       }
 
       socket.on("connect", onConnect);
       socket.on("disconnect", onDisconnect);
+      console.log("id", id);
       if (id) {
         socket.on(id, onOrderUpdate);
       }
@@ -444,7 +479,7 @@ console.log("status", status);
           socket.off(id, onOrderUpdate);
         }
       };
-    }, [id]);
+    }, [id, orders]);
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;

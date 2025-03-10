@@ -29,7 +29,6 @@ api.interceptors.response.use(
             originalRequest._retry = true;
             try {
                 let response;
-                console.log(localStorage.getItem('entityType'), AuthEntityType.User, localStorage.getItem('entityType') == AuthEntityType.User);
                 if(localStorage.getItem('entityType')== AuthEntityType.User){
                 // Chiama l'endpoint per il refresh del token
                 response = await api.post('/auth/refresh/user', {
@@ -43,18 +42,36 @@ api.interceptors.response.use(
                     entityType: localStorage.getItem('entityType'),
                 });
             }
-            console.log(response);
                 let accessToken;
+                console.log(response);
                 if (response && response.data) {
                     accessToken = response.data.accessToken;
                 // Aggiorna il localStorage e l'header per la richiesta originale
                 localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', response.data.refreshToken);
+                }
+                //if response is 401, logout
+                else{
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    localStorage.removeItem('role');
+                    localStorage.removeItem('id');
+                    localStorage.removeItem('name');
+                    localStorage.removeItem('entityType');
+                    return Promise.reject(error);
                 }
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;
                 return api(originalRequest);
             } catch (refreshError) {
-                // Eventuale logout o gestione dell'errore
+                // Se il refresh del token fallisce, effettua il logout
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('role');
+                localStorage.removeItem('id');
+                localStorage.removeItem('name');
+                localStorage.removeItem('entityType');
                 return Promise.reject(refreshError);
+             
             }
         }
         return Promise.reject(error);

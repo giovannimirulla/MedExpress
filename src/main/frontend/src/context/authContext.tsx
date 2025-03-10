@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { loginUser, loginPharmacy } from '@/services/authService';
 import { AuthEntityType } from '@/enums/AuthEntityType';
 import { Role } from '@/enums/Role';
@@ -22,8 +22,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [accessToken, setAccessToken] = useState<string | null>(
         typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
     );
-    const [refreshingToken, setRefreshingToken] = 
-        useState<string | null>(typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null);
     const [entityType, setEntityType] = useState<AuthEntityType>(
         typeof window !== 'undefined' ? localStorage.getItem('entityType') as AuthEntityType : AuthEntityType.User
     );
@@ -38,25 +36,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
         
     
-    //check if user is logged in
-    React.useEffect(() => {
-        console.log(window.location.pathname);
-     if(isLoggedIn()){
-        if(window.location.pathname === '/login' || window.location.pathname === '/login/'){
-            window.location.href = '/';
-        }else if(window.location.pathname === '/signup' || window.location.pathname === '/signup/'){
-            window.location.href = '/';
+    // is logged in
+    const isLoggedIn = useCallback(() => {
+        //with localStorage
+        if (typeof window !== 'undefined') {
+            return !!accessToken || !!localStorage.getItem('accessToken');
         }
-     }else{
-            if(window.location.pathname === '/dashboard' || window.location.pathname === '/dashboard/'){
-                window.location.href = '/login';
-     }
-    }
+        return !!accessToken;
     }, [accessToken]);
 
-
-
-
+    useEffect(() => {
+        const loggedIn = isLoggedIn();
+        if(loggedIn){
+            if(window.location.pathname === '/login' || window.location.pathname === '/login/'){
+                window.location.href = '/';
+            }else if(window.location.pathname === '/signup' || window.location.pathname === '/signup/'){
+                window.location.href = '/';
+            }
+         }else{
+                if(window.location.pathname === '/dashboard' || window.location.pathname === '/dashboard/'){
+                    window.location.href = '/login';
+         }
+        }
+    }, [isLoggedIn]);
 
     const login = async (entity: AuthEntityType, email: string, password: string) => {
 
@@ -75,7 +77,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (result && result.accessToken && result.refreshToken && result.id && result.name) {
             setName(result.name);
             setAccessToken(result.accessToken);
-            setRefreshingToken(result.refreshToken);
             setEntityType(entity);
             setId(result.id);
             localStorage.setItem('accessToken', result.accessToken);
@@ -92,7 +93,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const logout = () => {
         setAccessToken(null);
-        setRefreshingToken(null);
         setRole(null);
         setId(null);
         setName(null);
@@ -105,14 +105,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.removeItem('entityType');
     };
 
-    // is logged in
-    const isLoggedIn = () => {
-        //with localStorage
-        if (typeof window !== 'undefined') {
-            return !!accessToken || !!localStorage.getItem('accessToken');
-        }
-        return !!accessToken;
-    }
 
     //get entity type
     const getEntityType = () => {

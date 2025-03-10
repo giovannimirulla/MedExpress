@@ -14,9 +14,12 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.medexpress.dto.CommonDrug;
 import com.medexpress.entity.Order;
+import com.medexpress.entity.Pharmacy;
 import com.medexpress.entity.User;
 import com.medexpress.repository.OrderRepository;
+import com.medexpress.repository.PharmacyRepository;
 import com.medexpress.repository.UserRepository;
 import com.medexpress.security.JwtUtil;
 import com.medexpress.service.AIFAService;
@@ -27,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
 import io.jsonwebtoken.Claims;
+import reactor.core.publisher.Mono;
 
 class OrderServiceTest {
 
@@ -38,6 +42,9 @@ class OrderServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PharmacyRepository pharmacyRepository;
 
     @Mock
     private AIFAService aifaService;
@@ -298,11 +305,12 @@ class OrderServiceTest {
         String userId = "user-id-123";
         String drugId = "drug-id-lifesaving";
         String pharmacyId = "pharmacy-id-123";
-
+        Pharmacy pharmacy = new Pharmacy();
+        
         User user = new User();
         user.setId(new ObjectId(userId));
 
-        Pharmacy pharmacy = new Pharmacy();
+      
         pharmacy.setId(new ObjectId(pharmacyId));
 
         Order order = new Order();
@@ -313,9 +321,9 @@ class OrderServiceTest {
         order.setPriority(Order.Priority.HIGH); // Ordine prioritario
 
         // Mock dei metodi
-        Mockito.when(orderRepository.findById(new ObjectId(orderId))).thenReturn(Optional.of(order));
-        Mockito.when(aifaService.getPackage(drugId, order.getPackageId())).thenReturn(Mono.just(new CommonDrug()));
-        Mockito.when(pharmacyRepository.findById(new ObjectId(pharmacyId))).thenReturn(Optional.of(pharmacy));
+        when(orderRepository.findById(new ObjectId(orderId))).thenReturn(Optional.of(order));
+        when(aifaService.getPackage(drugId, order.getPackageId())).thenReturn(Mono.just(new CommonDrug()));
+        when(pharmacyRepository.findById(new ObjectId(pharmacyId))).thenReturn(Optional.of(pharmacy));
 
         // Esegui il metodo di aggiornamento dello stato
         Order updatedOrder = orderService.updateStatusPharmacy(orderId, Order.StatusPharmacy.READY_FOR_PICKUP);

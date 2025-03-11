@@ -101,7 +101,8 @@ public class OrderService {
 
         order.setStatusDoctor(statusDoctor);
         order.setUpdatedAt(LocalDateTime.now());
-
+        CommonDrug drugPackage = aifaService.getPackage(order.getDrugId(), order.getPackageId()).block();
+        order.setDrugPackage(drugPackage);
         OrderSocket orderSocket = new OrderSocket(order.getId().toString(), order.getDrugPackage(), "statusDoctor", statusDoctor.name(),
                 order.getUpdatedAt().toString());
 
@@ -127,6 +128,8 @@ public class OrderService {
 
         order.setStatusPharmacy(statusPharmacy);
         order.setUpdatedAt(LocalDateTime.now());
+        CommonDrug drugPackage = aifaService.getPackage(order.getDrugId(), order.getPackageId()).block();
+        order.setDrugPackage(drugPackage);
 
         OrderSocket orderSocket = new OrderSocket(order.getId().toString(),  order.getDrugPackage(), "statusPharmacy", statusPharmacy.name(),
                 order.getUpdatedAt().toString());
@@ -153,7 +156,9 @@ public class OrderService {
 
         order.setStatusDriver(statusDriver);
         order.setUpdatedAt(LocalDateTime.now());
-
+        CommonDrug drugPackage = aifaService.getPackage(order.getDrugId(), order.getPackageId()).block();
+        order.setDrugPackage(drugPackage);
+        
         OrderSocket orderSocket = new OrderSocket(order.getId().toString(), order.getDrugPackage(), "statusDriver", statusDriver.name(),
                 order.getUpdatedAt().toString());
 

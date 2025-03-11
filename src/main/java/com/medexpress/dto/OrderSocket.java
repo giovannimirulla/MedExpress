@@ -1,5 +1,7 @@
 package com.medexpress.dto;
 
+import com.medexpress.entity.Order;
+
 public class OrderSocket {
 
     // order id
@@ -8,14 +10,18 @@ public class OrderSocket {
     private String statusEntity; // "statusDoctor" or "statusPharmacy"
     private String statusMessage; // "APPROVED" or "REJECTED"
     private String updateAt;
+    private Order.Priority priority;
+    private String sender;
 
 
-    public OrderSocket( String orderId, CommonDrug drugPackage, String statusEntity, String statusMessage, String updateAt) {
+    public OrderSocket( String orderId, CommonDrug drugPackage, String statusEntity, String statusMessage, String updateAt, Order.Priority priority, String sender) {
         this.orderId = orderId;
         this.drugPackage = drugPackage;
         this.statusEntity = statusEntity;
         this.statusMessage = statusMessage;
         this.updateAt = updateAt;
+        this.priority = priority;
+        this.sender = sender;
     }
 
     public String getOrderId() {
@@ -58,6 +64,20 @@ public class OrderSocket {
         this.updateAt = updateAt;
     }
 
+    public Order.Priority getPriority() {
+        return priority;
+    }
 
+    public void setPriority(Order.Priority priority) {
+        this.priority = priority;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
 
 }

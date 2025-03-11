@@ -64,5 +64,11 @@ public class PharmacyService {
      public Iterable<Pharmacy> findAll() {
           return pharmacyRepository.findAll();
      }
+
+     //get pharmacy
+     public Pharmacy getPharmacy(String id) {
+          return pharmacyRepository.findById(new ObjectId(id))
+                    .orElseThrow(() -> new RuntimeException("Pharmacy not found!"));
+     }
   
 }

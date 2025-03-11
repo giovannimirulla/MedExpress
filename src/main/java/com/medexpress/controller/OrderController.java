@@ -73,6 +73,15 @@ public class OrderController {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 
+            //get name and surname of the user
+            User user = userService.getUser(userDetails.getId());
+            if (user == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            String nameAndSurname = user.getName() + " " + user.getSurname();
+
+
 
             CommonDrug drugPackage = aifaService.getPackage(body.getDrugId(), body.getPackageId()).block();
 
@@ -104,7 +113,7 @@ public class OrderController {
                     User doctor = userService.getDoctor(order.getUser().getId().toString());
                     if (doctor != null) {
                         OrderSocket orderSocket = new OrderSocket(order.getId().toString(), drugPackage,
-                                "statusDoctor", statusDoctor.name(), order.getUpdatedAt().toString());
+                                "statusDoctor", statusDoctor.name(), order.getUpdatedAt().toString(), priority, nameAndSurname);
                         socketServer.getBroadcastOperations().sendEvent(doctor.getId().toString(), orderSocket);
                     }
                 }
@@ -117,7 +126,7 @@ public class OrderController {
                 // send order to all pharmacies
                 for (Pharmacy pharmacy : pharmacies) {
                     OrderSocket orderSocket = new OrderSocket(order.getId().toString(), drugPackage,
-                            "statusPharmacy", statusPharmacy.name(), order.getUpdatedAt().toString());
+                            "statusPharmacy", statusPharmacy.name(), order.getUpdatedAt().toString(), priority, nameAndSurname);
                     socketServer.getBroadcastOperations().sendEvent(pharmacy.getId().toString(), orderSocket);
                 }
             }

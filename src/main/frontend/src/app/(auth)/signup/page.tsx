@@ -21,6 +21,7 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [entity, setEntity] = useState(AuthEntityType.User);
   const [value, setValue] = useState<UserValue[]>([]);
+  const [role, setRole] = useState(Role.Patient); //default role
 
   const authEntityOptions = Object.values(AuthEntityType).map((type) => ({
     label: (
@@ -142,14 +143,16 @@ async function fetchDoctorList(query: string): Promise<UserValue[]> {
             <Form.Item  className="dark:text-white">
                  <Select
                  placeholder="Seleziona il tuo ruolo"
+                  onChange={(val:Role) => setRole(val)}
                  prefix={<FontAwesomeIcon icon={faIdCard} className="text-gray-200 mr-2"/>}
-                 defaultValue={Object.keys(Role).length > 0 ? Object.values(Role)[0] : undefined}
+                 defaultValue={role}
                  options={Object.values(Role).map(role => ({ label: role, value: role }))}
               />
             </Form.Item>
           )}
 
-          {entity === AuthEntityType.User && (
+       { /*Don't show the doctor selection if the user is a doctor*/ }
+          {entity === AuthEntityType.User && role != Role.Doctor && (
                            <Form.Item  className="dark:text-white">
                            <DebounceSelect
                            prefix={<FontAwesomeIcon icon={faUserDoctor}  className="text-gray-200 mr-2"/>}

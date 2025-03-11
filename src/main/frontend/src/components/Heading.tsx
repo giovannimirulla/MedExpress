@@ -73,7 +73,7 @@ const Heading = ({ position = "absolute", navColor = "transparent" }: HeadingPro
                   >
                     Dashboard
                   </Link>
-                  <Button onClick={() => logout()} className="text-sm font-medium dark:text-white text-gray-700 hover:underline">
+                  <Button onClick={() => logout()} className="text-sm font-medium dark:text-white text-gray-700" type='text'>
                     Logout
                   </Button>
                 </>

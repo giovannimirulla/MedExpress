@@ -123,8 +123,8 @@ public class PharmacyTest {
         loginRequest.put("password", password);
 
         mockMvc.perform(post("/api/v1/auth/pharmacy/login") // Supponendo che l'endpoint del login sia questo
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(email))
                 .andExpect(jsonPath("$.companyName").value("Farmacia Roma")); // Verifica che il nome della farmacia sia corretto

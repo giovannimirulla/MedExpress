@@ -7,9 +7,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.medexpress.controller.AuthController;
 import com.medexpress.controller.PharmacyController;
+import com.medexpress.controller.UserController;
 import com.medexpress.dto.PharmacyDTO;
 import com.medexpress.entity.Pharmacy;
+import com.medexpress.security.JwtUtil;
 import com.medexpress.service.EncryptionService;
 import com.medexpress.service.PharmacyService;
 
@@ -25,6 +28,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
@@ -33,7 +37,12 @@ import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
 public class PharmacyTest {
+
+    @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Mock
     private PharmacyService pharmacyService;
@@ -47,12 +56,16 @@ public class PharmacyTest {
     @InjectMocks
     private PharmacyController pharmacyController;
 
-    @Autowired
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @InjectMocks
+    private AuthController authController;
+
+    @Mock
+    private JwtUtil jwtUtil;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(pharmacyController).build();
+        objectMapper = new ObjectMapper();
+        mockMvc = MockMvcBuilders.standaloneSetup(pharmacyController,authController).build();
     }
 
     @Test
@@ -92,13 +105,15 @@ public class PharmacyTest {
             throw e;
         }
 
-
-        mockMvc.perform(post("/api/v1/pharmacy")
+        MvcResult result = mockMvc.perform(post("/api/v1/pharmacy")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.companyName").value("Farmacia Centrale"))
-                .andExpect(jsonPath("$.email").value("info@farmaciacentrale.it"));
+                .andExpect(jsonPath("$.email").value("info@farmaciacentrale.it"))
+                .andReturn();
+
+        System.out.println("Test createPharmacy completato con status: " + result.getResponse().getStatus());
 
         verify(encryptionService, times(1)).encryptPassword("Password123!");
         verify(pharmacyService, times(1)).createPharmacy(anyString(), anyString(), anyString(), anyString(), anyString());
@@ -106,30 +121,46 @@ public class PharmacyTest {
     }
     @Test
     void loginPharmacy() throws Exception {
-        // Creiamo una farmacia simulata
+        // Definizione delle credenziali
         String email = "farmacia.roma@example.com";
-        String password = "Password123!";
-        String encryptedPassword = "encryptedPassword123";
-
-        Pharmacy pharmacy = new Pharmacy(new ObjectId(), "Farmacia Roma", "IT123456789", "Via Roma, 20",
-                email, encryptedPassword, LocalDateTime.now(), LocalDateTime.now());
-
+        String plainPassword = "Password123!";
+        String encryptedPassword = "encryptedPassword123"; // Simulazione della password crittografata
+    
+        // Creazione di una farmacia simulata
+        Pharmacy pharmacy = new Pharmacy(new ObjectId(), "Farmacia Roma", "IT123456789",
+                "Via Roma, 20", email, encryptedPassword, LocalDateTime.now(), LocalDateTime.now());
+    
         // Mockiamo la ricerca della farmacia per email
         when(pharmacyService.findByEmail(email)).thenReturn(pharmacy);
-
-        // Simuliamo la richiesta di login
+    
+        // Mockiamo la verifica della password
+        when(encryptionService.verifyPassword(plainPassword, encryptedPassword)).thenReturn(true);
+    
+        // Mockiamo la generazione dei token JWT
+        when(jwtUtil.generateAccessToken(anyString(), any())).thenReturn("mocked-jwt-token");
+        when(jwtUtil.generateRefreshToken(email)).thenReturn("mocked-refresh-token");
+    
+        // Simuliamo la richiesta di login (password in chiaro!)
         Map<String, String> loginRequest = new HashMap<>();
         loginRequest.put("email", email);
-        loginRequest.put("password", password);
-
-        mockMvc.perform(post("/api/v1/auth/pharmacy/login") // Supponendo che l'endpoint del login sia questo
+        loginRequest.put("password", plainPassword); // IMPORTANTE: password in chiaro
+    
+        // Eseguiamo la richiesta
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/login/pharmacy")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value(email))
-                .andExpect(jsonPath("$.companyName").value("Farmacia Roma")); // Verifica che il nome della farmacia sia corretto
+                .andExpect(status().isOk()) // Deve restituire 200 OK
+                .andExpect(jsonPath("$.access_token").value("mocked-jwt-token")) // Controlliamo i token
+                .andExpect(jsonPath("$.refresh_token").value("mocked-refresh-token"))
+                .andReturn();
 
+        System.out.println("Test loginPharmacy completato con status: " + result.getResponse().getStatus());
+    
+        // Verifichiamo che i metodi mockati siano stati chiamati
         verify(pharmacyService, times(1)).findByEmail(email);
+        verify(encryptionService, times(1)).verifyPassword(plainPassword, encryptedPassword);
+        verify(jwtUtil, times(1)).generateAccessToken(anyString(), any());
+        verify(jwtUtil, times(1)).generateRefreshToken(email);
     }
 }
 

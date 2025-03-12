@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
-import { Layout, Card, Table, ConfigProvider, Tag, Button, Typography } from 'antd';
+import { Layout, Card, Table, ConfigProvider, Tag, Button, Typography, Spin, Alert } from 'antd';
 import { CheckCircleOutlined, ExclamationCircleOutlined, CloseCircleOutlined, QuestionCircleOutlined, SendOutlined } from '@ant-design/icons';
 import DynamicDrugIcon from '@/components/DynamicDrugIcon';
 import { socket } from "@/services/socketService";
@@ -8,6 +8,7 @@ import api from '@/utils/api';
 import { useAuth } from '@/context/authContext';
 import { Role } from '@/enums/Role';
 import { AuthEntityType } from '@/enums/AuthEntityType';
+
 const { Content } = Layout;
 const { Title } = Typography;
 
@@ -481,8 +482,13 @@ console.log("status", status);
       };
     }, [id, orders]);
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
+    if (loading) return <div className='min-h-screen flex items-center flex-col justify-center gap-4'> <Spin tip="Loading.." size="large"/> <div className="text-primary font-semibold mt-2">Loading...</div></div>;
+    if (error) return <div className='min-h-screen flex items-center flex-col justify-center'><Alert
+    message="Errore"
+    description={error}
+    type="error"
+    showIcon
+  /></div>;
 
     if (entityType === AuthEntityType.Pharmacy) {
       return (

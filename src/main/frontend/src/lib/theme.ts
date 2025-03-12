@@ -26,6 +26,9 @@ export const theme: ThemeConfig = {
     Segmented: {
       itemSelectedBg: colors.primary,
       itemSelectedColor: colors.white,
+    }, 
+    Card: {
+      headerBg: colors.gray[50],
     }
   }
 

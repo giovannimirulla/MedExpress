@@ -11,19 +11,20 @@ public class OrderSocket {
     private String statusMessage; // "APPROVED" or "REJECTED"
     private String updateAt;
     private Order.Priority priority;
-    private String sender;
+    private EntityDTO updateFrom;
 
 
-    public OrderSocket( String orderId, CommonDrug drugPackage, String statusEntity, String statusMessage, String updateAt, Order.Priority priority, String sender) {
+    public OrderSocket( String orderId, CommonDrug drugPackage, String statusEntity, String statusMessage, String updateAt, Order.Priority priority, EntityDTO updateFrom) {
         this.orderId = orderId;
         this.drugPackage = drugPackage;
         this.statusEntity = statusEntity;
         this.statusMessage = statusMessage;
         this.updateAt = updateAt;
         this.priority = priority;
-        this.sender = sender;
+        this.updateFrom = updateFrom;
     }
 
+    //Getters and Setters
     public String getOrderId() {
         return orderId;
     }
@@ -72,12 +73,12 @@ public class OrderSocket {
         this.priority = priority;
     }
 
-    public String getSender() {
-        return sender;
+    public EntityDTO getUpdateFrom() {
+        return updateFrom;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
+    public void setUpdateFrom(EntityDTO updateFrom) {
+        this.updateFrom = updateFrom;
     }
 
 }

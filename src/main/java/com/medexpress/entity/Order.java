@@ -1,7 +1,6 @@
 package com.medexpress.entity;
 
 import java.time.LocalDateTime;
-
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -9,11 +8,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.medexpress.dto.CommonDrug;
-
+import com.medexpress.dto.EntityDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
+import lombok.NoArgsConstructor;
 import com.medexpress.enums.DrugPackageClasseFornitura;
 
 
@@ -36,6 +35,7 @@ public class Order {
     private StatusDriver statusDriver;
     private StatusDoctor statusDoctor;
     private Priority priority;
+    private EntityDTO updateFrom; // This is the entity that updated the order
 
     // Campo transitorio per i dettagli del package recuperato da AifaService.
     @JsonProperty("drugPackage")
@@ -43,7 +43,7 @@ public class Order {
 
     public Order(String packageId, User user, User driver, Pharmacy pharmacy, String drugId, LocalDateTime createdAt,
             LocalDateTime updatedAt, StatusPharmacy statusPharmacy, StatusDriver statusDriver,
-            StatusDoctor statusDoctor, Priority priority) {
+            StatusDoctor statusDoctor, Priority priority, EntityDTO updateFrom) {
         this.packageId = packageId;
         this.user = user;
         this.driver = driver;
@@ -55,6 +55,7 @@ public class Order {
         this.statusDriver = statusDriver;
         this.statusDoctor = statusDoctor;
         this.priority = priority;
+        this.updateFrom = updateFrom;
     }
 
     public enum StatusDoctor {

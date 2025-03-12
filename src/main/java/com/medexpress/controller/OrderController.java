@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.medexpress.service.AIFAService;
 import com.medexpress.service.OrderService;
 import com.medexpress.dto.CommonDrug;
+import com.medexpress.dto.EntityDTO;
 import com.medexpress.dto.OrderDTO;
 import com.medexpress.dto.OrderRequest;
 import com.medexpress.dto.OrderSocket;
@@ -80,7 +81,7 @@ public class OrderController {
             }
 
             String nameAndSurname = user.getName() + " " + user.getSurname();
-
+            EntityDTO entity = new EntityDTO(userDetails.getId(), userDetails.getEntityType(), nameAndSurname, user.getEmail()); 
 
 
             CommonDrug drugPackage = aifaService.getPackage(body.getDrugId(), body.getPackageId()).block();
@@ -113,7 +114,7 @@ public class OrderController {
                     User doctor = userService.getDoctor(order.getUser().getId().toString());
                     if (doctor != null) {
                         OrderSocket orderSocket = new OrderSocket(order.getId().toString(), drugPackage,
-                                "statusDoctor", statusDoctor.name(), order.getUpdatedAt().toString(), priority, nameAndSurname);
+                                "statusDoctor", statusDoctor.name(), order.getUpdatedAt().toString(), priority, entity);
                         socketServer.getBroadcastOperations().sendEvent(doctor.getId().toString(), orderSocket);
                     }
                 }
@@ -126,7 +127,7 @@ public class OrderController {
                 // send order to all pharmacies
                 for (Pharmacy pharmacy : pharmacies) {
                     OrderSocket orderSocket = new OrderSocket(order.getId().toString(), drugPackage,
-                            "statusPharmacy", statusPharmacy.name(), order.getUpdatedAt().toString(), priority, nameAndSurname);
+                            "statusPharmacy", statusPharmacy.name(), order.getUpdatedAt().toString(), priority, entity);
                     socketServer.getBroadcastOperations().sendEvent(pharmacy.getId().toString(), orderSocket);
                 }
             }

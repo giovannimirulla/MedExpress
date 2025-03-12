@@ -26,6 +26,25 @@ While most of the inheritance is fine, it also inherits unwanted elements like `
 To prevent this, the project POM contains empty overrides for these elements.
 If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
 
+# Design Pattern
+
+### Creational Patterns
+1. Singleton :
+   - The ModelMapperConfig class uses the @Bean annotation to create a singleton instance of ModelMapper . This ensures that only one instance of ModelMapper is created and shared across the application.
+   - `ModelMapperConfig.java`
+### Structural Patterns
+1. Facade :
+   - The JwtUtil class acts as a facade for JWT operations, providing a simplified interface for generating and validating tokens.
+   - `JwtUtil.java`
+### Behavioral Patterns
+1. Observer :
+   
+   - The SocketIOServer in SocketIOController uses event listeners ( addConnectListener , addDisconnectListener , addEventListener ) which are typical of the Observer pattern, where changes in state are communicated to interested parties.
+   - `SocketIOController.java`
+2. Strategy :
+   
+   - The Order class uses enums like StatusDoctor , StatusPharmacy , and StatusDriver to define different strategies for handling order statuses.
+   - `Order.java`
 
 # To DO
 
@@ -40,9 +59,9 @@ If you manually switch to a different parent and actually want the inheritance, 
 - [x] Swaggger
 - [x] List search results
 - [x] Drug details
-- [ ] Login
-- [ ] Register
-- [ ] Order drug
+- [x] Login
+- [x] Register
+- [x] Order drug
 
 ### Tests
 - [x] UC1 tests - @mariachiara98

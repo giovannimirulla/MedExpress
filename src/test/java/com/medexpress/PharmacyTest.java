@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medexpress.controller.AuthController;
 import com.medexpress.controller.PharmacyController;
-import com.medexpress.controller.UserController;
 import com.medexpress.dto.PharmacyDTO;
 import com.medexpress.entity.Pharmacy;
 import com.medexpress.security.JwtUtil;

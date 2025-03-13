@@ -9,19 +9,19 @@ public class OrderSocket {
     private CommonDrug drugPackage;
     private String statusEntity; // "statusDoctor" or "statusPharmacy"
     private String statusMessage; // "APPROVED" or "REJECTED"
-    private String updateAt;
+    private String updatedAt;
     private Order.Priority priority;
-    private EntityDTO updateFrom;
+    private EntityDTO updatedBy;
 
 
-    public OrderSocket( String orderId, CommonDrug drugPackage, String statusEntity, String statusMessage, String updateAt, Order.Priority priority, EntityDTO updateFrom) {
+    public OrderSocket( String orderId, CommonDrug drugPackage, String statusEntity, String statusMessage, String updatedAt, Order.Priority priority, EntityDTO updatedBy) {
         this.orderId = orderId;
         this.drugPackage = drugPackage;
         this.statusEntity = statusEntity;
         this.statusMessage = statusMessage;
-        this.updateAt = updateAt;
+        this.updatedAt = updatedAt;
         this.priority = priority;
-        this.updateFrom = updateFrom;
+        this.updatedBy = updatedBy;
     }
 
     //Getters and Setters
@@ -58,11 +58,11 @@ public class OrderSocket {
     }
 
     public String getUpdateAt() {
-        return updateAt;
+        return updatedAt;
     }
 
-    public void setUpdateAt(String updateAt) {
-        this.updateAt = updateAt;
+    public void setUpdateAt(String updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Order.Priority getPriority() {
@@ -74,11 +74,11 @@ public class OrderSocket {
     }
 
     public EntityDTO getUpdateFrom() {
-        return updateFrom;
+        return updatedBy;
     }
 
-    public void setUpdateFrom(EntityDTO updateFrom) {
-        this.updateFrom = updateFrom;
+    public void setUpdateFrom(EntityDTO updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
 }

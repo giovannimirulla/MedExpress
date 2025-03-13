@@ -9,6 +9,9 @@ public class EntityDTO {
     private String name;
     private String email;
 
+    public EntityDTO() {
+    }
+
     // Constructor
     public EntityDTO(String id, AuthEntityType entityType, String name, String email) {
         this.id = id;

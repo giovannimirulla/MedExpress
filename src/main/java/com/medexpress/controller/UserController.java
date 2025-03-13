@@ -45,9 +45,15 @@ public class UserController {
         UserValidator.validate(body);
 
         String encryptedPassword = encryptionService.encryptPassword(body.getPassword());
+        User user;
 
-        User user = userService.createUser(body.getName(), body.getSurname(), body.getFiscalCode(), body.getAddress(), body.getEmail(), encryptedPassword, body.getRole(), body.getDoctorId());
+        if(User.Role.valueOf(body.getRole()) == User.Role.DOCTOR && body.getDoctorId() == null) {
+           user = userService.createUser(body.getName(), body.getSurname(), body.getFiscalCode(), body.getAddress(), body.getEmail(), encryptedPassword, body.getRole(), null);
+           userService.updateDoctorId(user.getId().toString(), user.getId().toString());
+        } else {
 
+           user = userService.createUser(body.getName(), body.getSurname(), body.getFiscalCode(), body.getAddress(), body.getEmail(), encryptedPassword, body.getRole(), body.getDoctorId());
+        }
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
         
         return new ResponseEntity<>(userDTO, HttpStatus.CREATED);

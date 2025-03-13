@@ -107,4 +107,11 @@ public class UserService {
         return userRepository.findByDoctor_Id(doctor.getId());
     }
 
+    //update doctor id
+    public void updateDoctorId(String userId, String doctorId) {
+        User user = userRepository.findById(new ObjectId(userId)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + userId + " not found"));
+        User doctor = userRepository.findById(new ObjectId(doctorId)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor with id " + doctorId + " not found"));
+        user.setDoctor(doctor);
+        userRepository.save(user);
+    }
 }

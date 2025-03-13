@@ -141,7 +141,7 @@ public class OrderController {
     // get all order by user id arranged by date and status - url:
     // http://localhost:8080/api/v1/order/all
     @GetMapping("/all")
-    public ResponseEntity<List<Order>> getAllOrders() {
+    public ResponseEntity<List<OrderDTO>> getAllOrders() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -165,7 +165,22 @@ public class OrderController {
                             }
                         }
                     }
-                    return new ResponseEntity<>(orders, HttpStatus.OK);
+                    
+                    List<OrderDTO> orderDTOs = new ArrayList<>();
+                    for (Order order : orders) {
+                        OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
+                        orderDTO.setDoctor(new EntityDTO(order.getUser().getDoctor().getId().toString(), AuthEntityType.USER, order.getUser().getDoctor().getName() + " " + order.getUser().getDoctor().getSurname(), order.getUser().getDoctor().getEmail()));
+                        orderDTO.setUser(new EntityDTO(order.getUser().getId().toString(), AuthEntityType.USER, order.getUser().getName() + " " + order.getUser().getSurname(), order.getUser().getEmail()));
+                        if (order.getPharmacy() != null) {
+                            orderDTO.setPharmacy(new EntityDTO(order.getPharmacy().getId().toString(), AuthEntityType.PHARMACY, order.getPharmacy().getCompanyName(), order.getPharmacy().getEmail()));
+                        }
+                        if (order.getDriver() != null) {
+                            orderDTO.setDriver(new EntityDTO(order.getDriver().getId().toString(), AuthEntityType.USER, order.getDriver().getName() + " " + order.getDriver().getSurname(), order.getDriver().getEmail()));
+                        }
+                        orderDTOs.add(orderDTO);
+                    }
+                    return new ResponseEntity<>(orderDTOs, HttpStatus.OK);
+                    
                 }
                 // else if user is a patient, get all orders of the patient
                 else if (userDetails.getRole() == User.Role.PATIENT) {
@@ -174,7 +189,20 @@ public class OrderController {
                     for (Order order : orders) {
                         order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
                     }
-                    return new ResponseEntity<>(orders, HttpStatus.OK);
+                    List<OrderDTO> orderDTOs = new ArrayList<>();
+                    for (Order order : orders) {
+                        OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
+                        orderDTO.setDoctor(new EntityDTO(order.getUser().getDoctor().getId().toString(), AuthEntityType.USER, order.getUser().getDoctor().getName() + " " + order.getUser().getDoctor().getSurname(), order.getUser().getDoctor().getEmail()));
+                        orderDTO.setUser(new EntityDTO(order.getUser().getId().toString(), AuthEntityType.USER, order.getUser().getName() + " " + order.getUser().getSurname(), order.getUser().getEmail()));
+                        if (order.getPharmacy() != null) {
+                            orderDTO.setPharmacy(new EntityDTO(order.getPharmacy().getId().toString(), AuthEntityType.PHARMACY, order.getPharmacy().getCompanyName(), order.getPharmacy().getEmail()));
+                        }
+                        if (order.getDriver() != null) {
+                            orderDTO.setDriver(new EntityDTO(order.getDriver().getId().toString(), AuthEntityType.USER, order.getDriver().getName() + " " + order.getDriver().getSurname(), order.getDriver().getEmail()));
+                        }
+                        orderDTOs.add(orderDTO);
+                    }
+                    return new ResponseEntity<>(orderDTOs, HttpStatus.OK);
                 }
 
                 // else if driver, get all orders of the driver or statusPharmacy is
@@ -185,7 +213,20 @@ public class OrderController {
                     for (Order order : orders) {
                         order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
                     }
-                    return new ResponseEntity<>(orders, HttpStatus.OK);
+                    List<OrderDTO> orderDTOs = new ArrayList<>();
+                    for (Order order : orders) {
+                        OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
+                        orderDTO.setDoctor(new EntityDTO(order.getUser().getDoctor().getId().toString(), AuthEntityType.USER, order.getUser().getDoctor().getName() + " " + order.getUser().getDoctor().getSurname(), order.getUser().getDoctor().getEmail()));
+                        orderDTO.setUser(new EntityDTO(order.getUser().getId().toString(), AuthEntityType.USER, order.getUser().getName() + " " + order.getUser().getSurname(), order.getUser().getEmail()));
+                        if (order.getPharmacy() != null) {
+                            orderDTO.setPharmacy(new EntityDTO(order.getPharmacy().getId().toString(), AuthEntityType.PHARMACY, order.getPharmacy().getCompanyName(), order.getPharmacy().getEmail()));
+                        }
+                        if (order.getDriver() != null) {
+                            orderDTO.setDriver(new EntityDTO(order.getDriver().getId().toString(), AuthEntityType.USER, order.getDriver().getName() + " " + order.getDriver().getSurname(), order.getDriver().getEmail()));
+                        }
+                        orderDTOs.add(orderDTO);
+                    }
+                    return new ResponseEntity<>(orderDTOs, HttpStatus.OK);
                 }
 
             } else if (userDetails.getEntityType() == AuthEntityType.PHARMACY) {
@@ -194,7 +235,20 @@ public class OrderController {
                 for (Order order : orders) {
                     order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
                 }
-                return new ResponseEntity<>(orders, HttpStatus.OK);
+                List<OrderDTO> orderDTOs = new ArrayList<>();
+                for (Order order : orders) {
+                    OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
+                    orderDTO.setDoctor(new EntityDTO(order.getUser().getDoctor().getId().toString(), AuthEntityType.USER, order.getUser().getDoctor().getName() + " " + order.getUser().getDoctor().getSurname(), order.getUser().getDoctor().getEmail()));
+                    orderDTO.setUser(new EntityDTO(order.getUser().getId().toString(), AuthEntityType.USER, order.getUser().getName() + " " + order.getUser().getSurname(), order.getUser().getEmail()));
+                    if (order.getPharmacy() != null) {
+                        orderDTO.setPharmacy(new EntityDTO(order.getPharmacy().getId().toString(), AuthEntityType.PHARMACY, order.getPharmacy().getCompanyName(), order.getPharmacy().getEmail()));
+                    }
+                    if (order.getDriver() != null) {
+                        orderDTO.setDriver(new EntityDTO(order.getDriver().getId().toString(), AuthEntityType.USER, order.getDriver().getName() + " " + order.getDriver().getSurname(), order.getDriver().getEmail()));
+                    }
+                    orderDTOs.add(orderDTO);
+                }
+                return new ResponseEntity<>(orderDTOs, HttpStatus.OK);
             }
 
         }

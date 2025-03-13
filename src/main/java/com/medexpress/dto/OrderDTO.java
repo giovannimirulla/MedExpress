@@ -20,11 +20,15 @@ public class OrderDTO {
     private CommonDrug drugPackage;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private EntityDTO user;
+    private EntityDTO pharmacy;
+    private EntityDTO driver;
+    private EntityDTO doctor;
 
     public OrderDTO() {
     }
 
-    public OrderDTO(String id, String drugId, StatusPharmacy statusPharmacy, StatusDriver statusDriver, StatusDoctor statusDoctor, Priority priority, CommonDrug drugPackage, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public OrderDTO(String id, String drugId, StatusPharmacy statusPharmacy, StatusDriver statusDriver, StatusDoctor statusDoctor, Priority priority, CommonDrug drugPackage, LocalDateTime createdAt, LocalDateTime updatedAt, EntityDTO user, EntityDTO pharmacy, EntityDTO driver, EntityDTO doctor) {
         this.id = id;
         this.drugId = drugId;
         this.statusPharmacy = statusPharmacy;
@@ -34,6 +38,10 @@ public class OrderDTO {
         this.drugPackage = drugPackage;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.user = user;
+        this.pharmacy = pharmacy;
+        this.driver = driver;
+        this.doctor = doctor;
     }
 
     public String getId() {
@@ -106,6 +114,38 @@ public class OrderDTO {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public EntityDTO getUser() {
+        return user;
+    }
+
+    public void setUser(EntityDTO user) {
+        this.user = user;
+    }
+
+    public EntityDTO getPharmacy() {
+        return pharmacy;
+    }
+
+    public void setPharmacy(EntityDTO pharmacy) {
+        this.pharmacy = pharmacy;
+    }
+
+    public EntityDTO getDriver() {
+        return driver;
+    }
+
+    public void setDriver(EntityDTO driver) {
+        this.driver = driver;
+    }
+
+    public EntityDTO getDoctor() {
+        return doctor;
+    }
+
+    public void setDoctor(EntityDTO doctor) {
+        this.doctor = doctor;
     }
 
 }

@@ -25,7 +25,7 @@ public class Order {
     @Id
     private ObjectId id;
     private String packageId;
-    private User user; // This is the user who made the order
+    public User user; // This is the user who made the order
     private User driver;
     private Pharmacy pharmacy; // This is the pharmacy that will prepare the order
     private String drugId;

@@ -74,15 +74,15 @@ public class OrderController {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 
-            //get name and surname of the user
+            // get name and surname of the user
             User user = userService.getUser(userDetails.getId());
             if (user == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
             String nameAndSurname = user.getName() + " " + user.getSurname();
-            EntityDTO entity = new EntityDTO(userDetails.getId(), userDetails.getEntityType(), nameAndSurname, user.getEmail()); 
-
+            EntityDTO entity = new EntityDTO(userDetails.getId(), userDetails.getEntityType(), nameAndSurname,
+                    user.getEmail());
 
             CommonDrug drugPackage = aifaService.getPackage(body.getDrugId(), body.getPackageId()).block();
 
@@ -113,8 +113,8 @@ public class OrderController {
                 if (order.getUser() != null) {
                     User doctor = userService.getDoctor(order.getUser().getId().toString());
                     if (doctor != null) {
-                        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), drugPackage,
-                                "statusDoctor", statusDoctor.name(), order.getUpdatedAt().toString(), priority, entity);
+                        OrderSocket orderSocket = OrderSocket.fromOrder(order, entity, drugPackage);
+
                         socketServer.getBroadcastOperations().sendEvent(doctor.getId().toString(), orderSocket);
                     }
                 }
@@ -126,8 +126,8 @@ public class OrderController {
                 Iterable<Pharmacy> pharmacies = pharmacyService.findAll();
                 // send order to all pharmacies
                 for (Pharmacy pharmacy : pharmacies) {
-                    OrderSocket orderSocket = new OrderSocket(order.getId().toString(), drugPackage,
-                            "statusPharmacy", statusPharmacy.name(), order.getUpdatedAt().toString(), priority, entity);
+                    OrderSocket orderSocket = OrderSocket.fromOrder(order, entity, drugPackage);
+
                     socketServer.getBroadcastOperations().sendEvent(pharmacy.getId().toString(), orderSocket);
                 }
             }
@@ -165,22 +165,12 @@ public class OrderController {
                             }
                         }
                     }
-                    
-                    List<OrderDTO> orderDTOs = new ArrayList<>();
-                    for (Order order : orders) {
-                        OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
-                        orderDTO.setDoctor(new EntityDTO(order.getUser().getDoctor().getId().toString(), AuthEntityType.USER, order.getUser().getDoctor().getName() + " " + order.getUser().getDoctor().getSurname(), order.getUser().getDoctor().getEmail()));
-                        orderDTO.setUser(new EntityDTO(order.getUser().getId().toString(), AuthEntityType.USER, order.getUser().getName() + " " + order.getUser().getSurname(), order.getUser().getEmail()));
-                        if (order.getPharmacy() != null) {
-                            orderDTO.setPharmacy(new EntityDTO(order.getPharmacy().getId().toString(), AuthEntityType.PHARMACY, order.getPharmacy().getCompanyName(), order.getPharmacy().getEmail()));
-                        }
-                        if (order.getDriver() != null) {
-                            orderDTO.setDriver(new EntityDTO(order.getDriver().getId().toString(), AuthEntityType.USER, order.getDriver().getName() + " " + order.getDriver().getSurname(), order.getDriver().getEmail()));
-                        }
-                        orderDTOs.add(orderDTO);
-                    }
+
+                    // return list orders mapper to OrderDTO
+                    List<OrderDTO> orderDTOs = modelMapper.map(orders, new org.modelmapper.TypeToken<List<OrderDTO>>() {
+                    }.getType());
                     return new ResponseEntity<>(orderDTOs, HttpStatus.OK);
-                    
+
                 }
                 // else if user is a patient, get all orders of the patient
                 else if (userDetails.getRole() == User.Role.PATIENT) {
@@ -189,19 +179,8 @@ public class OrderController {
                     for (Order order : orders) {
                         order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
                     }
-                    List<OrderDTO> orderDTOs = new ArrayList<>();
-                    for (Order order : orders) {
-                        OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
-                        orderDTO.setDoctor(new EntityDTO(order.getUser().getDoctor().getId().toString(), AuthEntityType.USER, order.getUser().getDoctor().getName() + " " + order.getUser().getDoctor().getSurname(), order.getUser().getDoctor().getEmail()));
-                        orderDTO.setUser(new EntityDTO(order.getUser().getId().toString(), AuthEntityType.USER, order.getUser().getName() + " " + order.getUser().getSurname(), order.getUser().getEmail()));
-                        if (order.getPharmacy() != null) {
-                            orderDTO.setPharmacy(new EntityDTO(order.getPharmacy().getId().toString(), AuthEntityType.PHARMACY, order.getPharmacy().getCompanyName(), order.getPharmacy().getEmail()));
-                        }
-                        if (order.getDriver() != null) {
-                            orderDTO.setDriver(new EntityDTO(order.getDriver().getId().toString(), AuthEntityType.USER, order.getDriver().getName() + " " + order.getDriver().getSurname(), order.getDriver().getEmail()));
-                        }
-                        orderDTOs.add(orderDTO);
-                    }
+                    List<OrderDTO> orderDTOs = modelMapper.map(orders, new org.modelmapper.TypeToken<List<OrderDTO>>() {
+                    }.getType());
                     return new ResponseEntity<>(orderDTOs, HttpStatus.OK);
                 }
 
@@ -213,19 +192,8 @@ public class OrderController {
                     for (Order order : orders) {
                         order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
                     }
-                    List<OrderDTO> orderDTOs = new ArrayList<>();
-                    for (Order order : orders) {
-                        OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
-                        orderDTO.setDoctor(new EntityDTO(order.getUser().getDoctor().getId().toString(), AuthEntityType.USER, order.getUser().getDoctor().getName() + " " + order.getUser().getDoctor().getSurname(), order.getUser().getDoctor().getEmail()));
-                        orderDTO.setUser(new EntityDTO(order.getUser().getId().toString(), AuthEntityType.USER, order.getUser().getName() + " " + order.getUser().getSurname(), order.getUser().getEmail()));
-                        if (order.getPharmacy() != null) {
-                            orderDTO.setPharmacy(new EntityDTO(order.getPharmacy().getId().toString(), AuthEntityType.PHARMACY, order.getPharmacy().getCompanyName(), order.getPharmacy().getEmail()));
-                        }
-                        if (order.getDriver() != null) {
-                            orderDTO.setDriver(new EntityDTO(order.getDriver().getId().toString(), AuthEntityType.USER, order.getDriver().getName() + " " + order.getDriver().getSurname(), order.getDriver().getEmail()));
-                        }
-                        orderDTOs.add(orderDTO);
-                    }
+                    List<OrderDTO> orderDTOs = modelMapper.map(orders, new org.modelmapper.TypeToken<List<OrderDTO>>() {
+                    }.getType());
                     return new ResponseEntity<>(orderDTOs, HttpStatus.OK);
                 }
 
@@ -235,19 +203,8 @@ public class OrderController {
                 for (Order order : orders) {
                     order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
                 }
-                List<OrderDTO> orderDTOs = new ArrayList<>();
-                for (Order order : orders) {
-                    OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
-                    orderDTO.setDoctor(new EntityDTO(order.getUser().getDoctor().getId().toString(), AuthEntityType.USER, order.getUser().getDoctor().getName() + " " + order.getUser().getDoctor().getSurname(), order.getUser().getDoctor().getEmail()));
-                    orderDTO.setUser(new EntityDTO(order.getUser().getId().toString(), AuthEntityType.USER, order.getUser().getName() + " " + order.getUser().getSurname(), order.getUser().getEmail()));
-                    if (order.getPharmacy() != null) {
-                        orderDTO.setPharmacy(new EntityDTO(order.getPharmacy().getId().toString(), AuthEntityType.PHARMACY, order.getPharmacy().getCompanyName(), order.getPharmacy().getEmail()));
-                    }
-                    if (order.getDriver() != null) {
-                        orderDTO.setDriver(new EntityDTO(order.getDriver().getId().toString(), AuthEntityType.USER, order.getDriver().getName() + " " + order.getDriver().getSurname(), order.getDriver().getEmail()));
-                    }
-                    orderDTOs.add(orderDTO);
-                }
+                List<OrderDTO> orderDTOs = modelMapper.map(orders, new org.modelmapper.TypeToken<List<OrderDTO>>() {
+                }.getType());
                 return new ResponseEntity<>(orderDTOs, HttpStatus.OK);
             }
 
@@ -257,18 +214,20 @@ public class OrderController {
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
-
-
     // private User user; // This is the user who made the order
     // private User driver;
-    // private Pharmacy pharmacy; // This is the pharmacy that will prepare the order
+    // private Pharmacy pharmacy; // This is the pharmacy that will prepare the
+    // order
 
     // private StatusPharmacy statusPharmacy;
     // private StatusDriver statusDriver;
     // private StatusDoctor statusDoctor;
 
-
-    //get order only if or user is the patient that made the order or user is the doctor of the patient that made the order, or pharmacy is the pharmacy that received the order, or pharmacy not setted and statusPharmacy is PENDING, or driver is the driver that received the order, or driver not setted and statusDriver is PENDING
+    // get order only if or user is the patient that made the order or user is the
+    // doctor of the patient that made the order, or pharmacy is the pharmacy that
+    // received the order, or pharmacy not setted and statusPharmacy is PENDING, or
+    // driver is the driver that received the order, or driver not setted and
+    // statusDriver is PENDING
     @GetMapping("/{orderId}")
     public ResponseEntity<Order> getOrderById(@PathVariable String orderId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -312,11 +271,9 @@ public class OrderController {
                 if (order.getPharmacy() == null && order.getStatusPharmacy() == StatusPharmacy.PENDING) {
                     return new ResponseEntity<>(order, HttpStatus.OK);
                 }
-            } 
+            }
         }
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
 }
-
-

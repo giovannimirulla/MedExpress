@@ -20,15 +20,15 @@ public class OrderDTO {
     private CommonDrug drugPackage;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private EntityDTO user;
-    private EntityDTO pharmacy;
-    private EntityDTO driver;
-    private EntityDTO doctor;
+    private UserDTO user;
+    private UserDTO driver;
+    private PharmacyDTO pharmacy;
+    private EntityDTO updatedBy;
 
     public OrderDTO() {
     }
 
-    public OrderDTO(String id, String drugId, StatusPharmacy statusPharmacy, StatusDriver statusDriver, StatusDoctor statusDoctor, Priority priority, CommonDrug drugPackage, LocalDateTime createdAt, LocalDateTime updatedAt, EntityDTO user, EntityDTO pharmacy, EntityDTO driver, EntityDTO doctor) {
+    public OrderDTO(String id, String drugId, StatusPharmacy statusPharmacy, StatusDriver statusDriver, StatusDoctor statusDoctor, Priority priority, CommonDrug drugPackage, LocalDateTime createdAt, LocalDateTime updatedAt, EntityDTO updatedBy, UserDTO user, UserDTO driver, PharmacyDTO pharmacy) {
         this.id = id;
         this.drugId = drugId;
         this.statusPharmacy = statusPharmacy;
@@ -38,11 +38,13 @@ public class OrderDTO {
         this.drugPackage = drugPackage;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.updatedBy = updatedBy;
         this.user = user;
-        this.pharmacy = pharmacy;
         this.driver = driver;
-        this.doctor = doctor;
+        this.pharmacy = pharmacy;
     }
+
+    
 
     public String getId() {
         return id;
@@ -116,36 +118,33 @@ public class OrderDTO {
         this.updatedAt = updatedAt;
     }
 
-    public EntityDTO getUser() {
+    public EntityDTO getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(EntityDTO updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public UserDTO getUser() {
         return user;
     }
 
-    public void setUser(EntityDTO user) {
+    public void setUser(UserDTO user) {
         this.user = user;
     }
 
-    public EntityDTO getPharmacy() {
-        return pharmacy;
-    }
-
-    public void setPharmacy(EntityDTO pharmacy) {
-        this.pharmacy = pharmacy;
-    }
-
-    public EntityDTO getDriver() {
+    public UserDTO getDriver() {
         return driver;
     }
 
-    public void setDriver(EntityDTO driver) {
+    public void setDriver(UserDTO driver) {
         this.driver = driver;
     }
 
-    public EntityDTO getDoctor() {
-        return doctor;
+    public PharmacyDTO getPharmacy() {
+        return pharmacy;
     }
 
-    public void setDoctor(EntityDTO doctor) {
-        this.doctor = doctor;
-    }
 
 }

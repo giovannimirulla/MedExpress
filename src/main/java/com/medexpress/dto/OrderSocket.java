@@ -1,84 +1,51 @@
 package com.medexpress.dto;
 
+import com.medexpress.entity.Order.Priority;
+import com.medexpress.entity.Order.StatusDoctor;
+import com.medexpress.entity.Order.StatusDriver;
+import com.medexpress.entity.Order.StatusPharmacy;
+
 import com.medexpress.entity.Order;
 
-public class OrderSocket {
-
-    // order id
-    private String orderId;
-    private CommonDrug drugPackage;
-    private String statusEntity; // "statusDoctor" or "statusPharmacy"
-    private String statusMessage; // "APPROVED" or "REJECTED"
-    private String updatedAt;
-    private Order.Priority priority;
-    private EntityDTO updatedBy;
+import java.time.LocalDateTime;
 
 
-    public OrderSocket( String orderId, CommonDrug drugPackage, String statusEntity, String statusMessage, String updatedAt, Order.Priority priority, EntityDTO updatedBy) {
-        this.orderId = orderId;
-        this.drugPackage = drugPackage;
-        this.statusEntity = statusEntity;
-        this.statusMessage = statusMessage;
-        this.updatedAt = updatedAt;
-        this.priority = priority;
-        this.updatedBy = updatedBy;
+public class OrderSocket extends OrderDTO {
+    private String updatedAtString;
+    private String createdAtString;
+
+
+
+    public OrderSocket(String id, String drugId, StatusPharmacy statusPharmacy, StatusDriver statusDriver, StatusDoctor statusDoctor, Priority priority, CommonDrug drugPackage, LocalDateTime createdAt, LocalDateTime updatedAt, EntityDTO updatedBy, UserDTO user, UserDTO driver, PharmacyDTO pharmacy) {
+        super(id, drugId, statusPharmacy, statusDriver, statusDoctor, priority, drugPackage, null, null, updatedBy, user, driver, pharmacy);
+        this.updatedAtString = updatedAt.toString();
+        this.createdAtString = createdAt.toString();
     }
 
-    //Getters and Setters
-    public String getOrderId() {
-        return orderId;
+    public static OrderSocket fromOrderDTO(OrderDTO orderDTO, LocalDateTime updatedAt, EntityDTO updatedBy) {
+        return new OrderSocket(orderDTO.getId(), orderDTO.getDrugId(), orderDTO.getStatusPharmacy(), orderDTO.getStatusDriver(), orderDTO.getStatusDoctor(), orderDTO.getPriority(), orderDTO.getDrugPackage(), orderDTO.getCreatedAt(), updatedAt, updatedBy, orderDTO.getUser(), orderDTO.getDriver(), orderDTO.getPharmacy());
     }
 
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
+    public static OrderSocket fromOrder(Order order,  EntityDTO updatedBy, CommonDrug drugPackage) {
+        return new OrderSocket(order.getId().toString(), order.getDrugId(), order.getStatusPharmacy(), order.getStatusDriver(), order.getStatusDoctor(), order.getPriority(), drugPackage, order.getCreatedAt(), order.getUpdatedAt(), updatedBy, UserDTO.fromUser(order.getUser()), UserDTO.fromUser(order.getDriver()), PharmacyDTO.fromPharmacy(order.getPharmacy()));
     }
 
-    public CommonDrug getDrugPackage() {
-        return drugPackage;
+    public String getUpdatedAtString() {
+        return updatedAtString;
     }
 
-    public void setDrugPackage(CommonDrug drugPackage) {
-        this.drugPackage = drugPackage;
+    public void setUpdatedAtString(String updatedAtString) {
+        this.updatedAtString = updatedAtString;
     }
 
-    public String getStatusEntity() {
-        return statusEntity;
+    public String getCreatedAtString() {
+        return createdAtString;
     }
 
-    public void setStatusEntity(String statusEntity) {
-        this.statusEntity = statusEntity;
+    public void setCreatedAtString(String createdAtString) {
+        this.createdAtString = createdAtString;
     }
 
-    public String getStatusMessage() {
-        return statusMessage;
-    }
 
-    public void setStatusMessage(String statusMessage) {
-        this.statusMessage = statusMessage;
-    }
-
-    public String getUpdateAt() {
-        return updatedAt;
-    }
-
-    public void setUpdateAt(String updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Order.Priority getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Order.Priority priority) {
-        this.priority = priority;
-    }
-
-    public EntityDTO getUpdateFrom() {
-        return updatedBy;
-    }
-
-    public void setUpdateFrom(EntityDTO updatedBy) {
-        this.updatedBy = updatedBy;
-    }
 
 }

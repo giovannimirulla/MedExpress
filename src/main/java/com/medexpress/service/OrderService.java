@@ -26,181 +26,205 @@ import com.corundumstudio.socketio.SocketIOServer;
 @Service
 public class OrderService {
 
-    @Autowired
-    private OrderRepository orderRepository;
+        @Autowired
+        private OrderRepository orderRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    @Autowired
-    private PharmacyRepository pharmacyRepository;
+        @Autowired
+        private PharmacyRepository pharmacyRepository;
 
-    @Autowired
-    private AIFAService aifaService;
+        @Autowired
+        private AIFAService aifaService;
 
-    @Autowired
-    private SocketIOServer socketServer;
+        @Autowired
+        private SocketIOServer socketServer;
 
-    // create order
-    public Order createOrder(String packageId, String userId, String drugId, Order.StatusDoctor statusDoctor,
-            Order.Priority priority) {
+        // create order
+        public Order createOrder(String packageId, String userId, String drugId, Order.StatusDoctor statusDoctor,
+                        Order.Priority priority) {
 
-        // check if user exists
-        User user = userRepository.findById(new ObjectId(userId))
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                // check if user exists
+                User user = userRepository.findById(new ObjectId(userId))
+                                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        EntityDTO  updateFrom = new EntityDTO(user.getId().toString(), AuthEntityType.USER, user.getName(), user.getEmail());
+                String nameAndSurname = user.getName() + " " + user.getSurname();
 
-        Order order = new Order(packageId, user, null, null, drugId, LocalDateTime.now(), LocalDateTime.now(),
-                Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, statusDoctor,
-                priority, updateFrom);
-        return orderRepository.save(order);
-    }
+                EntityDTO updatedBy = new EntityDTO(user.getId().toString(), AuthEntityType.USER, nameAndSurname,
+                                user.getEmail());
 
-    //getOrderById
+                Order order = new Order(packageId, user, null, null, drugId, LocalDateTime.now(), LocalDateTime.now(),
+                                Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, statusDoctor,
+                                priority, updatedBy);
+                return orderRepository.save(order);
+        }
+
+        // getOrderById
         public Order getOrderById(String orderId) {
                 return orderRepository.findById(new ObjectId(orderId))
-                        .orElseThrow(() -> new RuntimeException("Order not found!"));
+                                .orElseThrow(() -> new RuntimeException("Order not found!"));
         }
 
-    // get orders by user
-    public List<Order> getOrdersByUser(String userId) {
-        Sort sort = Sort.by(
-                Sort.Order.desc("updatedAt"),
-                Sort.Order.asc("statusDoctor"),
-                Sort.Order.asc("statusPharmacy"),
-                Sort.Order.asc("statusDriver"));
-        return orderRepository.findByUser_Id(new ObjectId(userId), sort);
-    }
-
-    public List<Order> getOrders(String userId) {
-        List<Order> orders = getOrdersByUser(userId);
-
-        for (Order order : orders) {
-            CommonDrug drugPackage = aifaService.getPackage(order.getDrugId(), order.getPackageId()).block();
-            order.setDrugPackage(drugPackage);
-            order.setUser(null);
-            order.setPackageId(null);
+        // get orders by user
+        public List<Order> getOrdersByUser(String userId) {
+                Sort sort = Sort.by(
+                                Sort.Order.desc("updatedAt"),
+                                Sort.Order.asc("statusDoctor"),
+                                Sort.Order.asc("statusPharmacy"),
+                                Sort.Order.asc("statusDriver"));
+                return orderRepository.findByUser_Id(new ObjectId(userId), sort);
         }
 
-        return orders;
-    }
+        public List<Order> getOrders(String userId) {
+                List<Order> orders = getOrdersByUser(userId);
 
-    public Order getOrder(String orderId) {
-        Order order = orderRepository.findById(new ObjectId(orderId))
-                .orElseThrow(() -> new RuntimeException("Order not found!"));
+                for (Order order : orders) {
+                        CommonDrug drugPackage = aifaService.getPackage(order.getDrugId(), order.getPackageId())
+                                        .block();
+                        order.setDrugPackage(drugPackage);
+                        order.setUser(null);
+                        order.setPackageId(null);
+                }
 
-        CommonDrug drugPackage = aifaService.getPackage(order.getDrugId(), order.getPackageId()).block();
-        order.setDrugPackage(drugPackage);
-        order.setUser(null);
-        order.setPackageId(null);
-
-        return order;
-    }
-
-    // updateStatusDoctor
-    public Order updateStatusDoctor(String orderId, Order.StatusDoctor statusDoctor, User doctor) {
-        Order order = orderRepository.findById(new ObjectId(orderId))
-                .orElseThrow(() -> new RuntimeException("Order not found!"));
-
-        String nameAndSurname = doctor.getName() + " " + doctor.getSurname();
-        EntityDTO updateFrom = new EntityDTO(doctor.getId().toString(), AuthEntityType.USER, nameAndSurname, doctor.getEmail());
-
-        order.setStatusDoctor(statusDoctor);
-        order.setUpdatedAt(LocalDateTime.now());
-        CommonDrug drugPackage = aifaService.getPackage(order.getDrugId(), order.getPackageId()).block();
-        order.setDrugPackage(drugPackage);
-        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), order.getDrugPackage(), "statusDoctor", statusDoctor.name(),
-                order.getUpdatedAt().toString(), order.getPriority(), updateFrom);
-
-        // send notification to user that the prescription has been approved
-        socketServer.getBroadcastOperations().sendEvent(order.getUser().getId().toString(), orderSocket);
-
-        // if Order.StatusDoctor.APPROVED, send notification to all pharmacies
-        if (statusDoctor == Order.StatusDoctor.APPROVED) {
-            Iterable<Pharmacy> pharmacies = pharmacyRepository.findAll();
-            for (Pharmacy pharmacy : pharmacies) {
-                OrderSocket orderSocketPharmacy = new OrderSocket(order.getId().toString(), order.getDrugPackage(), "statusDoctor",
-                        statusDoctor.name(), order.getUpdatedAt().toString(), order.getPriority(), updateFrom);
-                socketServer.getBroadcastOperations().sendEvent(pharmacy.getId().toString(), orderSocketPharmacy);
-            }
+                return orders;
         }
-        return orderRepository.save(order);
-    }
 
-    // updateStatusPharmacy
-    public Order updateStatusPharmacy(String orderId, Order.StatusPharmacy statusPharmacy, Pharmacy pharmacy) {
-        Order order = orderRepository.findById(new ObjectId(orderId))
-                .orElseThrow(() -> new RuntimeException("Order not found!"));
+        public Order getOrder(String orderId) {
+                Order order = orderRepository.findById(new ObjectId(orderId))
+                                .orElseThrow(() -> new RuntimeException("Order not found!"));
 
-        String companyName = pharmacy.getCompanyName();
-        EntityDTO updateFrom = new EntityDTO(pharmacy.getId().toString(), AuthEntityType.PHARMACY, companyName, pharmacy.getEmail());
+                CommonDrug drugPackage = aifaService.getPackage(order.getDrugId(), order.getPackageId()).block();
+                order.setDrugPackage(drugPackage);
+                order.setUser(null);
+                order.setPackageId(null);
 
-        order.setStatusPharmacy(statusPharmacy);
-        order.setUpdatedAt(LocalDateTime.now());
-        CommonDrug drugPackage = aifaService.getPackage(order.getDrugId(), order.getPackageId()).block();
-        order.setDrugPackage(drugPackage);
-
-        OrderSocket orderSocket = new OrderSocket(order.getId().toString(),  order.getDrugPackage(), "statusPharmacy", statusPharmacy.name(),
-                order.getUpdatedAt().toString(), order.getPriority(), updateFrom);
-
-        // send notification to user that the prescription has been approved
-        socketServer.getBroadcastOperations().sendEvent(order.getUser().getId().toString(), orderSocket);
-
-        // if Order.StatusPharmacy.READY_FOR_PICKUP, send notification to all drivers
-        if (statusPharmacy == Order.StatusPharmacy.READY_FOR_PICKUP) {
-            List<User> drivers = userRepository.findByRole(User.Role.DRIVER);
-            for (User driver : drivers) {
-                OrderSocket orderSocketDriver = new OrderSocket(order.getId().toString(), order.getDrugPackage(), "statusPharmacy",
-                        statusPharmacy.name(), order.getUpdatedAt().toString(), order.getPriority(), updateFrom);
-                socketServer.getBroadcastOperations().sendEvent(driver.getId().toString(), orderSocketDriver);
-            }
+                return order;
         }
-        return orderRepository.save(order);
-    }
 
-    // updateStatusDriver
-    public Order updateStatusDriver(String orderId, Order.StatusDriver statusDriver, User driver) {
-        Order order = orderRepository.findById(new ObjectId(orderId))
-                .orElseThrow(() -> new RuntimeException("Order not found!"));
+        // updateStatusDoctor
+        public Order updateStatusDoctor(String orderId, Order.StatusDoctor statusDoctor, User doctor) {
+                Order order = orderRepository.findById(new ObjectId(orderId))
+                                .orElseThrow(() -> new RuntimeException("Order not found!"));
 
-        String nameAndSurname = driver.getName() + " " + driver.getSurname();
-        EntityDTO updateFrom = new EntityDTO(driver.getId().toString(), AuthEntityType.USER, nameAndSurname, driver.getEmail());
+                String nameAndSurname = doctor.getName() + " " + doctor.getSurname();
+                EntityDTO updatedBy = new EntityDTO(doctor.getId().toString(), AuthEntityType.USER, nameAndSurname,
+                                doctor.getEmail());
 
-        order.setStatusDriver(statusDriver);
-        order.setUpdatedAt(LocalDateTime.now());
-        CommonDrug drugPackage = aifaService.getPackage(order.getDrugId(), order.getPackageId()).block();
-        order.setDrugPackage(drugPackage);
-        
-        OrderSocket orderSocket = new OrderSocket(order.getId().toString(), order.getDrugPackage(), "statusDriver", statusDriver.name(),
-                order.getUpdatedAt().toString(), order.getPriority(), updateFrom);
+                order.setStatusDoctor(statusDoctor);
+                order.setUpdatedBy(updatedBy);
+                order.setUpdatedAt(LocalDateTime.now());
+                CommonDrug drugPackage = aifaService.getPackage(order.getDrugId(), order.getPackageId()).block();
+                order.setDrugPackage(drugPackage);
+                OrderSocket orderSocket = OrderSocket.fromOrder(order, updatedBy,
+                                drugPackage);
 
-        // send notification to user that the prescription has been approved
-        socketServer.getBroadcastOperations().sendEvent(order.getUser().getId().toString(), orderSocket);
-        return orderRepository.save(order);
-    }
+                // send notification to user that the prescription has been approved
+                socketServer.getBroadcastOperations().sendEvent(order.getUser().getId().toString(), orderSocket);
 
-    // get all orders of the driver or statusPharmacy is DELIVERED_TO_DRIVER
-    public List<Order> getOrdersByDriver(String driverId) {
-        Sort sort = Sort.by(
-                Sort.Order.desc("updatedAt"),
-                Sort.Order.asc("statusDoctor"),
-                Sort.Order.asc("statusPharmacy"),
-                Sort.Order.asc("statusDriver"));
-        return orderRepository.findByDriver_IdOrDriverIsNullAndStatusPharmacy(new ObjectId(driverId),
-                Order.StatusPharmacy.DELIVERED_TO_DRIVER, sort);
-    }
+                // if Order.StatusDoctor.APPROVED, send notification to all pharmacies
+                if (statusDoctor == Order.StatusDoctor.APPROVED) {
+                        Iterable<Pharmacy> pharmacies = pharmacyRepository.findAll();
+                        for (Pharmacy pharmacy : pharmacies) {
+                                OrderSocket orderSocketPharmacy = OrderSocket.fromOrder(order, updatedBy, drugPackage);
 
-    // get all orders of the pharmacy or statusDoctor is NO_APPROVAL_NEEDED or
-    // APPROVED
-    public List<Order> getOrdersByPharmacy(String pharmacyId) {
-        Sort sort = Sort.by(
-                Sort.Order.desc("updatedAt"),
-                Sort.Order.asc("statusDoctor"),
-                Sort.Order.asc("statusPharmacy"),
-                Sort.Order.asc("statusDriver"));
-        return orderRepository.findByPharmacy_IdOrPharmacyIsNullAndStatusDoctorIn(new ObjectId(pharmacyId),
-                List.of(Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.StatusDoctor.APPROVED), sort);
-    }
+                                socketServer.getBroadcastOperations().sendEvent(pharmacy.getId().toString(),
+                                                orderSocketPharmacy);
+                        }
+                }
+                return orderRepository.save(order);
+        }
+
+        // updateStatusPharmacy
+        public Order updateStatusPharmacy(String orderId, Order.StatusPharmacy statusPharmacy, Pharmacy pharmacy) {
+                Order order = orderRepository.findById(new ObjectId(orderId))
+                                .orElseThrow(() -> new RuntimeException("Order not found!"));
+
+                String companyName = pharmacy.getCompanyName();
+                EntityDTO updatedBy = new EntityDTO(pharmacy.getId().toString(), AuthEntityType.PHARMACY, companyName,
+                                pharmacy.getEmail());
+
+                order.setStatusPharmacy(statusPharmacy);
+                order.setPharmacy(pharmacy);
+                order.setUpdatedBy(updatedBy);
+                order.setUpdatedAt(LocalDateTime.now());
+                CommonDrug drugPackage = aifaService.getPackage(order.getDrugId(), order.getPackageId()).block();
+                order.setDrugPackage(drugPackage);
+
+                OrderSocket orderSocket = OrderSocket.fromOrder(order,
+                                updatedBy, drugPackage);
+
+                // send notification to user that the prescription has been approved
+                socketServer.getBroadcastOperations().sendEvent(order.getUser().getId().toString(), orderSocket);
+
+                // if Order.StatusPharmacy.READY_FOR_PICKUP, send notification to all drivers
+                if (statusPharmacy == Order.StatusPharmacy.READY_FOR_PICKUP) {
+                        List<User> drivers = userRepository.findByRole(User.Role.DRIVER);
+                        for (User driver : drivers) {
+
+                                OrderSocket orderSocketDriver = OrderSocket.fromOrder(order, updatedBy, drugPackage);
+                                socketServer.getBroadcastOperations().sendEvent(driver.getId().toString(),
+                                                orderSocketDriver);
+                        }
+                }
+                return orderRepository.save(order);
+        }
+
+        // updateStatusDriver
+        public Order updateStatusDriver(String orderId, Order.StatusDriver statusDriver, User driver) {
+                Order order = orderRepository.findById(new ObjectId(orderId))
+                                .orElseThrow(() -> new RuntimeException("Order not found!"));
+
+                String nameAndSurname = driver.getName() + " " + driver.getSurname();
+                EntityDTO updatedBy = new EntityDTO(driver.getId().toString(), AuthEntityType.USER, nameAndSurname,
+                                driver.getEmail());
+
+                order.setStatusDriver(statusDriver);
+                if (statusDriver == Order.StatusDriver.TAKEN_OVER) {
+                        order.setStatusPharmacy(Order.StatusPharmacy.DELIVERED_TO_DRIVER);
+                }
+                order.setDriver(driver);
+                order.setUpdatedBy(updatedBy);
+                order.setUpdatedAt(LocalDateTime.now());
+                CommonDrug drugPackage = aifaService.getPackage(order.getDrugId(), order.getPackageId()).block();
+                order.setDrugPackage(drugPackage);
+
+                OrderSocket orderSocket = OrderSocket.fromOrder(order, updatedBy,
+                                drugPackage);
+
+                // send notification to user that the prescription has been approved
+                socketServer.getBroadcastOperations().sendEvent(order.getUser().getId().toString(), orderSocket);
+                if (statusDriver == Order.StatusDriver.TAKEN_OVER) {
+
+                        OrderSocket orderSocketPharmacy = OrderSocket.fromOrder(order, updatedBy, drugPackage);
+
+                        socketServer.getBroadcastOperations().sendEvent(order.getPharmacy().getId().toString(),
+                                        orderSocketPharmacy);
+                }
+                return orderRepository.save(order);
+        }
+
+        // get all orders of the driver or statusPharmacy is DELIVERED_TO_DRIVER
+        public List<Order> getOrdersByDriver(String driverId) {
+                Sort sort = Sort.by(
+                                Sort.Order.desc("updatedAt"),
+                                Sort.Order.asc("statusDoctor"),
+                                Sort.Order.asc("statusPharmacy"),
+                                Sort.Order.asc("statusDriver"));
+                return orderRepository.findByDriver_IdOrDriverIsNullAndStatusPharmacy(new ObjectId(driverId),
+                                Order.StatusPharmacy.READY_FOR_PICKUP, sort);
+        }
+
+        // get all orders of the pharmacy or statusDoctor is NO_APPROVAL_NEEDED or
+        // APPROVED
+        public List<Order> getOrdersByPharmacy(String pharmacyId) {
+                Sort sort = Sort.by(
+                                Sort.Order.desc("updatedAt"),
+                                Sort.Order.asc("statusDoctor"),
+                                Sort.Order.asc("statusPharmacy"),
+                                Sort.Order.asc("statusDriver"));
+                return orderRepository.findByPharmacy_IdOrPharmacyIsNullAndStatusDoctorIn(new ObjectId(pharmacyId),
+                                List.of(Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.StatusDoctor.APPROVED), sort);
+        }
 
 }

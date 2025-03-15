@@ -132,7 +132,7 @@ const Home = () => {
     api.post('/order', { drugId, packageId })
       .then((response) => {
       console.log('Order response', response);
-      if (response.status === 200) {
+      if (response.status === 201) {
         console.log('Order success');
         setIsModalOpen(false);
         messageApi.success('Ordine effettuato con successo');

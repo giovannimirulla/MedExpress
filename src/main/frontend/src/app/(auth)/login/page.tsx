@@ -27,7 +27,6 @@ export default function Login() {
   const onFinish = async (values: { email: string; password: string; remember?: boolean }) => {
     setLoading(true);
     const success = await login(entity, values.email, values.password);
-    console.log(success);
     if (success) {
       messageApi.success("Login effettuato con successo!");
       router.push('/dashboard');

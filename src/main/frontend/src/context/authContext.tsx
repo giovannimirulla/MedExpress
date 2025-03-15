@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { loginUser, loginPharmacy } from '@/services/authService';
+import { loginUserApi, loginPharmacyApi, signupPharmacyApi, signupUserApi } from '@/services/authService';
 import { AuthEntityType } from '@/enums/AuthEntityType';
 import { Role } from '@/enums/Role';
 
@@ -14,6 +14,23 @@ interface AuthContextType {
     getRole: () => Role | null;
     getId: () => string | null;
     getName: () => string | null;
+    signupUser: (user: {
+        name: string,
+        surname: string,
+        fiscalCode: string,
+        address: string,
+        email: string,
+        password: string,
+        role: string,
+        doctorId?: string,
+    }) => Promise<boolean | null>;
+    signupPharmacy: (pharmacy: {    
+        nameCompany: string,
+        vatNumber: string,
+        address: string,
+        email: string,
+        password: string,
+    }) => Promise<boolean | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -64,11 +81,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         let result;
         if (entity === AuthEntityType.User) {
-            result = await loginUser(email, password);
+            result = await loginUserApi(email, password);
             setRole(result?.role || Role.Patient);
             localStorage.setItem('role', result?.role || Role.Patient);
         } else {
-            result = await loginPharmacy(email, password);
+            result = await loginPharmacyApi(email, password);
             setRole(null);
             localStorage.removeItem('role');
         }
@@ -90,6 +107,51 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         return false;
     };
+
+    const signupUser = async (user: {
+        name: string,
+        surname: string,
+        fiscalCode: string,
+        address: string,
+        email: string,
+        password: string,
+        role: string,
+        doctorId?: string,
+    }) => {
+        try {
+            const response = await signupUserApi(user);
+
+            if (response) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Errore di signup', error);
+            return null;
+        }
+    }
+
+    const signupPharmacy = async (pharmacy: {
+        nameCompany: string,
+        vatNumber: string,
+        address: string,
+        email: string,
+        password: string,
+    }) => {
+        try {
+            const response = await signupPharmacyApi(pharmacy);
+
+            if (response) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Errore di signup', error);
+            return null;
+        }
+    }
+
+
 
     const logout = () => {
         setAccessToken(null);
@@ -140,7 +202,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 
     return (
-        <AuthContext.Provider value={{ accessToken, login, logout, isLoggedIn, getEntityType, getRole, getId, getName }}>
+        <AuthContext.Provider value={{ accessToken, login, logout, isLoggedIn, getEntityType, getRole, getId, getName, signupUser, signupPharmacy }}>
             {children}
         </AuthContext.Provider>
     );

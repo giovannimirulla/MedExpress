@@ -35,7 +35,7 @@ public class Order {
     private StatusDriver statusDriver;
     private StatusDoctor statusDoctor;
     private Priority priority;
-    private EntityDTO updateFrom; // This is the entity that updated the order
+    private EntityDTO updatedBy;
 
     // Campo transitorio per i dettagli del package recuperato da AifaService.
     @JsonProperty("drugPackage")
@@ -43,7 +43,7 @@ public class Order {
 
     public Order(String packageId, User user, User driver, Pharmacy pharmacy, String drugId, LocalDateTime createdAt,
             LocalDateTime updatedAt, StatusPharmacy statusPharmacy, StatusDriver statusDriver,
-            StatusDoctor statusDoctor, Priority priority, EntityDTO updateFrom) {
+            StatusDoctor statusDoctor, Priority priority, EntityDTO updatedBy) {
         this.packageId = packageId;
         this.user = user;
         this.driver = driver;
@@ -55,7 +55,7 @@ public class Order {
         this.statusDriver = statusDriver;
         this.statusDoctor = statusDoctor;
         this.priority = priority;
-        this.updateFrom = updateFrom;
+        this.updatedBy = updatedBy;
     }
 
     public enum StatusDoctor {

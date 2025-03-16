@@ -69,7 +69,8 @@ public class PharmacyController {
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            if (userDetails.getEntityType() == AuthEntityType.PHARMACY) {
+            System.out.println( userDetails.getEntityType() == AuthEntityType.PHARMACY);
+            if (userDetails.getEntityType() != AuthEntityType.PHARMACY) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 

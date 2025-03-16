@@ -1,13 +1,48 @@
 package com.medexpress.dto;
 
+import com.medexpress.entity.User.Role;
+import com.medexpress.entity.User;
+
 public class UserDTO {
     private String name;
     private String surname;
     private String fiscalCode;
     private String address;
     private String email;
-    private String roleId;
-    private String doctorId;
+    private Role role;
+    private UserDTO doctor;
+
+    // Costruttore
+    public UserDTO() {
+    }
+
+    // Costruttore
+    public UserDTO(String name, String surname, String fiscalCode, String address, String email, Role role, UserDTO doctor) {
+        this.name = name;
+        this.surname = surname;
+        this.fiscalCode = fiscalCode;
+        this.address = address;
+        this.email = email;
+        this.role = role;
+        this.doctor = doctor;
+    }
+
+    
+    //fromUser
+    public static UserDTO fromUser(User user) {
+        if (user == null) {
+            return null;
+        }
+        return new UserDTO(
+            user.getName(),
+            user.getSurname(),
+            user.getFiscalCode(),
+            user.getAddress(),
+            user.getEmail(),
+            user.getRole(),
+            user.getDoctor() != null ? UserDTO.fromUser(user.getDoctor()) : null
+        );
+    }
 
     // Getter
     public String getName() {
@@ -30,12 +65,12 @@ public class UserDTO {
         return email;
     }
 
-    public String getRoleId() {
-        return roleId;
+    public Role getRole() {
+        return role;
     }
 
-    public String getDoctorId() {
-        return doctorId;
+    public UserDTO getDoctor() {
+        return doctor;
     }
 
     // Setter
@@ -59,12 +94,12 @@ public class UserDTO {
         this.email = email;
     }
 
-    public void setRoleId(String roleId) {
-        this.roleId = roleId;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
-    public void setDoctorId(String doctorId) {
-        this.doctorId = doctorId;
+    public void setDoctor(UserDTO doctor) {
+        this.doctor = doctor;
     }
 
 }

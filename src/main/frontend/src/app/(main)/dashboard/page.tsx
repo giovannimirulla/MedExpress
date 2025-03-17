@@ -1,14 +1,22 @@
 "use client";
-import React, { useState, useEffect, useMemo } from 'react';
-import { Layout, Card, Table, ConfigProvider, Tag, Button, Typography, Spin, Alert } from 'antd';
-import { CheckCircleOutlined, ExclamationCircleOutlined, CloseCircleOutlined, QuestionCircleOutlined, SendOutlined } from '@ant-design/icons';
-import DynamicDrugIcon from '@/components/DynamicDrugIcon';
-import { socket } from "@/services/socketService";
+import React, { useState, useEffect } from 'react';
+import { Layout, ConfigProvider, Spin, Alert, Typography } from 'antd';
 import api from '@/utils/api';
+import { socket } from '@/services/socketService';
 import { useAuth } from '@/context/authContext';
-import { Role } from '@/enums/Role';
+import DoctorDashboard from '@/components/dashboards/DoctorDashboard';
+import PharmacyDashboard from '@/components/dashboards/PharmacyDashboard';
+import DriverDashboard from '@/components/dashboards/DriverDashboard';
+import PatientDashboard from '@/components/dashboards/PatientDashboard';
+import { Order } from '@/interfaces/Order';
+import { OrderSocket } from '@/interfaces/OrderSocket';
 import { AuthEntityType } from '@/enums/AuthEntityType';
-import { Priority } from '@/enums/Priority';
+import { Role } from '@/enums/Role';
+
+import { castToStatusPharmacy, castFromStatusPharmacy,  StatusPharmacy } from '@/enums/StatusPharmacy';
+import { castToStatusDriver, castFromStatusDriver, StatusDriver } from '@/enums/StatusDriver';
+import { castToStatusDoctor, castFromStatusDoctor, StatusDoctor } from '@/enums/StatusDoctor';
+import { OrderResponse } from '@/interfaces/OrderResponse';
 
 const { Content } = Layout;
 const { Title } = Typography;
@@ -16,217 +24,26 @@ const { Title } = Typography;
 export default function Dashboard() {
   const { getRole, getEntityType, getId, getName } = useAuth();
   const role = getRole();
-  const id = getId();
   const entityType = getEntityType();
+  const id = getId();
   const name = getName();
 
-  const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  // Salviamo l'intero array degli ordini
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
-  interface DataType {
-    key: string;
-    name: string;
-    status: string;
-    drugPackage: Order["drugPackage"];
-    priority?: Priority;
-    updatedAt: string;
-    updatedBy?: {
-      name: string;
-      email?: string;
-      entityType?: AuthEntityType;
-      id?: string;
-    }
-  }
-
-  interface Order {
-    id: string;
-    drugPackage: {
-      formaFarmaceutica: string;
-      medicinale: {
-        denominazioneMedicinale: string;
-      };
-    };
-    priority: Priority;
-    statusDoctor?: string;
-    statusPharmacy?: string;
-    statusDriver?: string;
-    statusUser?: string;
-    updatedAt?: string;
-    updatedBy?: {
-      name: string;
-      email: string;
-      entityType: AuthEntityType;
-      id: string;
-    },
-    user: {
-      name: string;
-      surname: string;
-      address: string;
-      doctor: {
-        name: string;
-        surname: string;
-      }
-    },
-    pharmacy?: {
-      nameCompany: string;
-    }
-  }
-
-  interface OrderSocket extends Order {
-    updatedAtString: string;
-  }
-
-  const columns = [
-    {
-      title: 'Nome',
-      key: 'name',
-      dataIndex: 'name',
-      render: (_: string, record: DataType) => {
-        const diff = getTimeDifference(record.updatedAt);
-
-
-
-        return (
-          <div className="flex items-center space-x-2">
-            <DynamicDrugIcon drug={record.drugPackage} />
-            <div className='flex flex-col '>
-              <a className='font-bold'>{record.name}</a>
-              <span className='text-sm'>{record.updatedBy?.name}</span>
-              <span className='text-xs'>{diff}</span>
-            </div>
-          </div>
-
-        )
-      },
-    },
-    {
-      title: 'Stato',
-      key: 'status',
-      dataIndex: 'status',
-      render: (status: string) => {
-        let icon;
-        let color;
-        const text = status.toUpperCase();
-        if (status === "APPROVED") {
-          icon = <CheckCircleOutlined />;
-          color = 'green';
-        } else if (status === "PENDING") {
-          icon = <ExclamationCircleOutlined />;
-          color = 'orange';
-        } else if (status === "REJECTED") {
-          icon = <CloseCircleOutlined />;
-          color = 'red';
-        } else {
-          icon = <QuestionCircleOutlined />;
-          color = 'default';
-        }
-        return (
-          <Tag color={color} icon={icon}>
-            {text}
-          </Tag>
-        );
-      },
-    },
-    {
-      title: 'Azione',
-      key: 'action',
-      render: (_: string, record: DataType) => {
-        if (record.status === "PENDING" && role === Role.Driver) {
-          return <Button onClick={() => updateStatus(record.key, "TAKEN_OVER")} loading={isUpdating}>Prendi Ordine</Button>;
-        } else if (record.status === "TAKEN_OVER") {
-          return <Button onClick={() => updateStatus(record.key, "IN_DELIVERY")} loading={isUpdating}>In consegna</Button>;
-        } else if (record.status === "IN_DELIVERY") {
-          return <Button onClick={() => updateStatus(record.key, "DELIVERED_TO_USER")} loading={isUpdating}>Consegnato</Button>;
-        } else if (record.status === "PENDING" && role === Role.Doctor) {
-          return (
-            <div className="flex space-x-2">
-              <Button onClick={() => updateStatus(record.key, "APPROVED")} icon={<CheckCircleOutlined />} variant="solid" color="green" loading={isUpdating}>Approva</Button>
-              <Button onClick={() => updateStatus(record.key, "REJECTED")} icon={<CloseCircleOutlined />} variant="solid" color="red" loading={isUpdating}>Rifiuta</Button>
-            </div>
-          );
-        } else if (record.status === "PENDING" && entityType === AuthEntityType.Pharmacy) {
-          return <Button onClick={() => updateStatus(record.key, "UNDER_PREPARATION")} icon={<SendOutlined />} variant="solid" color="green" loading={isUpdating}>Accetta</Button>;
-        } else if (record.status === "UNDER_PREPARATION" && entityType === AuthEntityType.Pharmacy) {
-          return <Button onClick={() => updateStatus(record.key, "READY_FOR_PICKUP")} variant="solid" color="orange" loading={isUpdating}>Pronto per il ritiro</Button>;
-        }
-        return null;
-      },
-    }
-  ];
-
-  function getTimeDifference(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
-
-    if (date.toDateString() === now.toDateString()) {
-      const diffMs = now.getTime() - date.getTime();
-      const diffMins = Math.floor(diffMs / 60000);
-      if (diffMins < 1) return "just now";
-      if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
-      const diffHrs = Math.floor(diffMins / 60);
-      return `${diffHrs} hr${diffHrs > 1 ? "s" : ""} ago`;
-    } else {
-      const diffDays = Math.floor((now.getTime() - date.getTime()) / (24 * 60 * 60 * 1000));
-      if (diffDays < 30) {
-        return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-      } else {
-        const diffMonths = Math.floor(diffDays / 30);
-        return `${diffMonths} month${diffMonths > 1 ? "s" : ""} ago`;
-      }
-    }
-  }
-
-  function updateStatus(orderId: string, status: string) {
-    //if role is driver url is /api/v1/driver/updateStatus else if role is doctor url is /api/v1/doctor/updateStatus
-    console.log("orderId", orderId);
-    console.log("status", status);
-    let url = '';
-    if (entityType === AuthEntityType.Pharmacy) {
-      url = '/pharmacy/updateStatus';
-    }
-    else if (role === Role.Driver) {
-      url = '/driver/updateStatus';
-    } else if (role === Role.Doctor) {
-      url = '/doctor/updateStatus';
-    }
-    setIsUpdating(true);
-
-    api.post(url, {
-      orderId: orderId,
-      status: status
-    })
-      .then(() => {
-        setOrders((prevOrders: Order[]) => prevOrders.map((order: Order) => {
-          if (order.id === orderId) {
-            if (entityType === AuthEntityType.Pharmacy) {
-              order.statusPharmacy = status;
-            } else if (role === Role.Driver) {
-              order.statusDriver = status;
-            } else if (role === Role.Doctor) {
-              order.statusDoctor = status;
-            }
-          }
-          return order;
-        }))
-        setIsUpdating(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setIsUpdating(false);
-      });
-  }
-
-
-
-
+  // Recupero iniziale degli ordini
   useEffect(() => {
     api.get("/order/all")
       .then(response => {
-        console.log(response.data);
-        setOrders(response.data);
+        setOrders(response.data.map((order: OrderResponse) => ({
+          ...order,
+          statusDoctor: castToStatusDoctor(order.statusDoctor),
+          statusPharmacy: castToStatusPharmacy(order.statusPharmacy),
+          statusDriver: castToStatusDriver(order.statusDriver)
+        })));
+        console.log("response.data", response.data);
         setLoading(false);
       })
       .catch(err => {
@@ -235,419 +52,8 @@ export default function Dashboard() {
       });
   }, [getId]);
 
-  // UseMemo per il ruolo Doctor (già esistente)
-  const doctorPendingOrders: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) => order.statusDoctor === "PENDING")
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        // Order by updatedAt descending (recent first)
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusDoctor!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: order.updatedBy,
-        priority: order.priority
-      })),
-    [orders]
-  );
-
-  const doctorApprovedOrders: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) => order.statusDoctor === "APPROVED")
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        // Order by updatedAt descending (recent first)
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusDoctor!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: order.updatedBy,
-        priority: order.priority
-      })),
-    [orders]);
-
-  const doctorRejectedOrders: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) => order.statusDoctor === "REJECTED")
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        // Order by updatedAt descending (recent first)
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusDoctor!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: order.updatedBy,
-        priority: order.priority
-      })),
-    [orders]);
-
-  // UseMemo per il ruolo Driver
-  const driverPendingOrders: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) => order.statusDriver === "PENDING" && order.statusPharmacy === "READY_FOR_PICKUP")
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        // Order by updatedAt descending (recent first)
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusDriver!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: order.updatedBy,
-        priority: order.priority
-      })),
-    [orders]);
-
-  const driverTakenOverOrders: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) => order.statusDriver === "TAKEN_OVER")
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        // Order by updatedAt descending (recent first)
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusDriver!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: order.updatedBy,
-        priority: order.priority
-      })),
-    [orders]);
-
-  const driverInDeliveryOrders: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) => order.statusDriver === "IN_DELIVERY")
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        // Order by updatedAt descending (recent first)
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusDriver!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: order.updatedBy,
-        priority: order.priority
-      })),
-    [orders]);
-
-  const driverCompletedOrders: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) => order.statusDriver === "DELIVERED_TO_USER")
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        // Order by updatedAt descending (recent first)
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusDriver!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: order.updatedBy,
-        priority: order.priority
-      })),
-    [orders]);
-
-  const pharmacyPendingOrders: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) =>
-        (order.statusDoctor === "APPROVED" || order.statusDoctor === "NO_APPROVAL_NEEDED") &&
-        order.statusPharmacy === "PENDING"
-      )
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        // Order by updatedAt descending (recent first)
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusPharmacy!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: { name: order.user.name + " " + order.user.surname },
-        priority: order.priority
-      })),
-    [orders]
-  );
-
-  const pharmacyUnderPreparationOrders: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) => order.statusPharmacy === "UNDER_PREPARATION")
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        // Order by updatedAt descending (recent first)
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusPharmacy!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: order.user ? { name: order.user.name + " " + order.user.surname } : { name: "Non specificato" },
-        priority: order.priority
-      })),
-    [orders]
-  );
-
-  const pharmacyReadyOrders: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) =>
-        order.statusPharmacy === "READY_FOR_PICKUP"
-      )
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        // Order by updatedAt descending (recent first)
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusPharmacy!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: order.user ? { name: order.user.name + " " + order.user.surname } : { name: "Non specificato" },
-        priority: order.priority
-      })),
-    [orders]
-  );
-
-  const pharmacyDeliveredOrders: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) =>
-        order.statusPharmacy === "DELIVERED_TO_DRIVER"
-      )
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        // Order by updatedAt descending (recent first)
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusPharmacy!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: order.updatedBy,
-        priority: order.priority
-      })),
-    [orders]
-  );
-
-
-  // UseMemo per altri ruoli (pharmacy, etc.) se necessario...
-
-  const ordersForDoctorApproval: DataType[] = useMemo(() => orders
-    .filter((order) => order.statusDoctor === "PENDING" || order.statusDoctor === "REJECTED")
-    .sort((a, b) => {
-      const dateA = new Date(a.updatedAt!).getTime();
-      const dateB = new Date(b.updatedAt!).getTime();
-      // Order by updatedAt descending (recent first)
-      if (dateB !== dateA) {
-        return dateB - dateA;
-      }
-      // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-      const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-      return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-    })
-    .map((order): DataType => ({
-      key: order.id,
-      name: order.drugPackage.medicinale.denominazioneMedicinale,
-      status: order.statusDoctor!,
-      drugPackage: order.drugPackage,
-      updatedAt: order.updatedAt!,
-      updatedBy: { name: order.user.doctor.name + " " + order.user.doctor.surname },
-      priority: order.priority
-    }))
-    , [orders]);
-
-  const ordersForPharmacyProcessing: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) => {
-        const isApprovedDoctor = order.statusDoctor === "APPROVED" || order.statusDoctor === "NO_APPROVAL_NEEDED";
-        const isValidPharmacyStatus =
-          order.statusPharmacy === "PENDING" ||
-          order.statusPharmacy === "UNDER_PREPARATION" ||
-          order.statusPharmacy === "READY_FOR_PICKUP";
-        const isExcluded = order.statusPharmacy === "READY_FOR_PICKUP" && order.statusDriver === "TAKEN_OVER";
-        return isApprovedDoctor && isValidPharmacyStatus && !isExcluded;
-      })
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusPharmacy!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: order.pharmacy
-          ? { name: order.pharmacy.nameCompany }
-          : order.updatedBy
-            ? order.updatedBy
-            : { name: "Non specificato" },
-        priority: order.priority
-      })),
-    [orders]);
-
-  const ordersForDriverPickup: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) =>
-        (order.statusDoctor === "APPROVED" || order.statusDoctor === "NO_APPROVAL_NEEDED") &&
-        (order.statusPharmacy === "DELIVERED_TO_DRIVER" || order.statusDriver === "TAKEN_OVER" || order.statusDriver === "IN_DELIVERY")
-      )
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        // Order by updatedAt descending (recent first)
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusPharmacy!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: order.updatedBy,
-        priority: order.priority
-      })),
-    [orders]);
-
-  const ordersCompleted: DataType[] = useMemo(() =>
-    orders
-      .filter((order: Order) =>
-        (order.statusDoctor === "APPROVED" || order.statusDoctor === "NO_APPROVAL_NEEDED") &&
-        order.statusPharmacy === "DELIVERED_TO_DRIVER" &&
-        order.statusDriver === "DELIVERED_TO_USER"
-      )
-      .sort((a, b) => {
-        const dateA = new Date(a.updatedAt!).getTime();
-        const dateB = new Date(b.updatedAt!).getTime();
-        // Order by updatedAt descending (recent first)
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        // Then order by priority descending (assuming Priority.HIGH > Priority.NORMAL)
-        const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-      })
-      .map((order: Order): DataType => ({
-        key: order.id,
-        name: order.drugPackage.medicinale.denominazioneMedicinale,
-        status: order.statusDriver!,
-        drugPackage: order.drugPackage,
-        updatedAt: order.updatedAt!,
-        updatedBy: order.updatedBy,
-        priority: order.priority
-      })),
-    [orders]);
-
+  // Gestione delle connessioni socket
   useEffect(() => {
-    if (socket.connected) {
-      onConnect();
-    }
-
     function onConnect() {
       console.log("Connected to socket server");
     }
@@ -656,189 +62,102 @@ export default function Dashboard() {
     }
     function onOrderUpdate(orderUpdate: OrderSocket) {
       console.log("Order update received", orderUpdate);
-      setOrders((prevOrders) => {
-        const orderIndex = prevOrders.findIndex(order => order.id === orderUpdate.id);
-        if (orderIndex !== -1) {
-          // Update existing order
-          return prevOrders.map(order => {
-            if (order.id === orderUpdate.id) {
-              return {
-                ...order,
-                updatedAt: orderUpdate.updatedAtString,
-              };
-            }
-            return order;
-          });
-        } else {
-
-
-          // Create new order
-          const newOrder: Order = {
-           ...orderUpdate,
-            updatedAt: orderUpdate.updatedAtString,
-          };
-          return [...prevOrders, newOrder];
+      setOrders(prevOrders => {
+        const idx = prevOrders.findIndex(order => order.id === orderUpdate.id);
+        if (idx !== -1) {
+          return prevOrders.map(order =>
+            order.id === orderUpdate.id ? { 
+              ...order, 
+              updatedAt: orderUpdate.updatedAtString,
+              statusDoctor: castToStatusDoctor(orderUpdate.statusDoctor),
+              statusPharmacy: castToStatusPharmacy(orderUpdate.statusPharmacy),
+              statusDriver: castToStatusDriver(orderUpdate.statusDriver)
+             } : order
+          );
         }
+        return [...prevOrders, { ...orderUpdate, updatedAt: orderUpdate.updatedAtString, statusDoctor: castToStatusDoctor(orderUpdate.statusDoctor), statusPharmacy: castToStatusPharmacy(orderUpdate.statusPharmacy), statusDriver: castToStatusDriver(orderUpdate.statusDriver) }];
       });
-      console.log("Updated orders", orders);
     }
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
-    console.log("id", id);
     if (id) {
       socket.on(id, onOrderUpdate);
     }
-
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      if (id) {
-        socket.off(id, onOrderUpdate);
-      }
+      if (id) socket.off(id, onOrderUpdate);
     };
-  }, [id, orders]);
+  }, [id]);
 
-  if (loading) return <div className='min-h-[80vh] flex items-center flex-col justify-center gap-4'> <Spin tip="Loading.." size="large" /> <div className="text-primary font-semibold mt-2">Loading...</div></div>;
-  if (error) return <div className='min-h-[80vh] flex items-center flex-col justify-center'><Alert
-    message="Errore"
-    description={error}
-    type="error"
-    showIcon
-  /></div>;
+  function updateStatus<T extends StatusPharmacy | StatusDriver | StatusDoctor>(orderId: string, status: T) {
+    // if role is driver url is /api/v1/driver/updateStatus 
+    // else if role is doctor url is /api/v1/doctor/updateStatus
+    console.log("orderId", orderId);
+    console.log("status", status);
+    let url = '';
+    let statusString = '';
+    if (entityType === AuthEntityType.Pharmacy) {
+      statusString = castFromStatusPharmacy(status as StatusPharmacy);
+      url = '/pharmacy/updateStatus';
+    } else if (role === Role.Driver) {
+      statusString = castFromStatusDriver(status as StatusDriver);
+      url = '/driver/updateStatus';
+    } else if (role === Role.Doctor) {
+      statusString = castFromStatusDoctor(status as StatusDoctor);
+      url = '/doctor/updateStatus';
+    }
+    setIsUpdating(true);
+console.log("statusString", statusString);
+    api.post(url, { orderId, status: statusString })
+      .then(() => {
+        setOrders((prevOrders: Order[]) =>
+          prevOrders.map((order: Order) => {
+            if (order.id === orderId) {
+              if (entityType === AuthEntityType.Pharmacy) {
+                order.statusPharmacy = status as StatusPharmacy;
+              } else if (role === Role.Driver) {
+                order.statusDriver = status as StatusDriver;
+              } else if (role === Role.Doctor) {
+                order.statusDoctor = status as StatusDoctor;
+              }
+              order.updatedAt = new Date().toISOString();
+            }
+            return order;
+          })
+        );
+        setIsUpdating(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setIsUpdating(false);
+      });
+  }
 
+  if (loading) return (
+    <div className='min-h-[80vh] flex items-center justify-center gap-4'>
+      <Spin tip="Loading.." size="large" />
+      <div className="text-primary font-semibold">Loading...</div>
+    </div>
+  );
+  if (error) return (
+    <div className='min-h-[80vh] flex items-center justify-center'>
+      <Alert message="Errore" description={error} type="error" showIcon />
+    </div>
+  );
+
+  // Selezione del dashboard in base al ruolo
+  let dashboardContent;
   if (entityType === AuthEntityType.Pharmacy) {
-    return (
-      <ConfigProvider theme={{ components: { Card: { bodyPadding: 0 } } }}>
-        <Layout className="min-h-screen">
-          <Content className="px-16 pt-8">
-            <div className='mb-8'>
-              <Title>Benvenuto {name}</Title>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <Card title={`In attesa (${pharmacyPendingOrders.length})`} variant="borderless">
-                <Table<DataType>
-                  columns={columns}
-                  dataSource={pharmacyPendingOrders}
-                  pagination={false}
-                />
-              </Card>
-              <Card title={`In preparazione (${pharmacyUnderPreparationOrders.length})`} variant="borderless">
-                <Table<DataType>
-                  columns={columns}
-                  dataSource={pharmacyUnderPreparationOrders}
-                  pagination={false}
-                />
-              </Card>
-              <Card title={`Pronto per la consegna (${pharmacyReadyOrders.length})`} variant="borderless">
-                <Table<DataType>
-                  columns={columns.filter(col => col.key !== 'action')}
-                  dataSource={pharmacyReadyOrders}
-                  pagination={false}
-                />
-              </Card>
-            </div>
-            <div className="grid grid-cols-1">
-              <Card title={`Consegna completata (${pharmacyDeliveredOrders.length})`} variant="borderless">
-                <Table<DataType>
-                  columns={columns.filter(col => col.key !== 'action')}
-                  dataSource={pharmacyDeliveredOrders}
-                  pagination={false}
-                />
-              </Card>
-            </div>
-          </Content>
-        </Layout>
-      </ConfigProvider>
-    );
+    dashboardContent = <PharmacyDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} />;
+  } else if (role === Role.Doctor) {
+    dashboardContent = <DoctorDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} />;
+  } else if (role === Role.Driver) {
+    dashboardContent = <DriverDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} />;
+  } else {
+    dashboardContent = <PatientDashboard orders={orders} />;
   }
-
-  // Render per il ruolo Doctor
-  if (role === Role.Doctor) {
-    return (
-      <ConfigProvider theme={{ components: { Card: { bodyPadding: 0 } } }}>
-        <Layout className="min-h-[80vh]">
-          <Content className="px-16 pt-8">
-            <div className='mb-8'>
-              <Title>Benvenuto {name}</Title>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <Card title={`In attesa (${doctorPendingOrders.length})`} variant="borderless">
-                <Table<DataType>
-                  columns={columns.filter(col => col.key !== 'status')}
-                  dataSource={doctorPendingOrders}
-                  pagination={false}
-                />
-              </Card>
-              <Card title={`Approvati (${doctorApprovedOrders.length})`} variant="borderless">
-                <Table<DataType>
-                  columns={columns.filter(col => col.key !== 'action')}
-                  dataSource={doctorApprovedOrders}
-                  pagination={false}
-                />
-              </Card>
-              <Card title={`Rifiutati (${doctorRejectedOrders.length})`} variant="borderless">
-                <Table<DataType>
-                  columns={columns.filter(col => col.key !== 'action')}
-                  dataSource={doctorRejectedOrders}
-                  pagination={false}
-                />
-              </Card>
-            </div>
-          </Content>
-        </Layout>
-      </ConfigProvider>
-    );
-  }
-
-  // Render per il ruolo Driver
-  if (role === Role.Driver) {
-    return (
-      <ConfigProvider theme={{ components: { Card: { bodyPadding: 0 } } }}>
-        <Layout className="min-h-screen">
-          <Content className="px-16 pt-8">
-            <div className='mb-8'>
-              <Title>Benvenuto {name}</Title>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <Card title={`In attesa (${driverPendingOrders.length})`} variant="borderless">
-                <Table<DataType>
-                  columns={columns}
-                  dataSource={driverPendingOrders}
-                  pagination={false}
-                />
-              </Card>
-              <Card title={`Preso in carico (${driverTakenOverOrders.length})`} variant="borderless">
-                <Table<DataType>
-                  columns={columns}
-                  dataSource={driverTakenOverOrders}
-                  pagination={false}
-                />
-              </Card>
-              <Card title={`In consegna (${driverInDeliveryOrders.length})`} variant="borderless">
-                <Table<DataType>
-                  columns={columns}
-                  dataSource={driverInDeliveryOrders}
-                  pagination={false}
-                />
-              </Card>
-            </div>
-            {/* Sezione inferiore: completati */}
-            <div className="grid grid-cols-1">
-              <Card title={`Consegna completata (${driverCompletedOrders.length})`} variant="borderless">
-                <Table<DataType>
-                  columns={columns}
-                  dataSource={driverCompletedOrders}
-                  pagination={false}
-                />
-              </Card>
-            </div>
-          </Content>
-        </Layout>
-      </ConfigProvider>
-    );
-  }
-
 
   return (
     <ConfigProvider theme={{ components: { Card: { bodyPadding: 0 } } }}>
@@ -847,38 +166,7 @@ export default function Dashboard() {
           <div className='mb-8'>
             <Title>Benvenuto {name}</Title>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <Card title={`In attesa autorizzazione medico (${ordersForDoctorApproval.length})`} variant="borderless">
-              <Table<DataType>
-                columns={columns.filter(col => col.key !== 'action')}
-                dataSource={ordersForDoctorApproval}
-                pagination={false}
-              />
-            </Card>
-            <Card title={`Da evadere dalla farmacia (${ordersForPharmacyProcessing.length})`} variant="borderless">
-              <Table<DataType>
-                columns={columns.filter(col => col.key !== 'action')}
-                dataSource={ordersForPharmacyProcessing}
-                pagination={false}
-              />
-            </Card>
-            <Card title={`Da consegnare dal driver (${ordersForDriverPickup.length})`} variant="borderless">
-              <Table<DataType>
-                columns={columns.filter(col => col.key !== 'action')}
-                dataSource={ordersForDriverPickup}
-                pagination={false}
-              />
-            </Card>
-          </div>
-          <div className="grid grid-cols-1">
-            <Card title={`Ordini Completati (${ordersCompleted.length})`} variant="borderless">
-              <Table<DataType>
-                columns={columns.filter(col => col.key !== 'action')}
-                dataSource={ordersCompleted}
-                pagination={false}
-              />
-            </Card>
-          </div>
+          {dashboardContent}
         </Content>
       </Layout>
     </ConfigProvider>

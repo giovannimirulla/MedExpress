@@ -146,5 +146,9 @@ public class OrderDTO {
         return pharmacy;
     }
 
+    public void setPharmacy(PharmacyDTO pharmacy) {
+        this.pharmacy = pharmacy;
+    }
+
 
 }

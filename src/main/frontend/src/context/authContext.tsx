@@ -1,13 +1,13 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import Cookies from 'js-cookie';
 import { loginUserApi, loginPharmacyApi, signupPharmacyApi, signupUserApi } from '@/services/authService';
 import { AuthEntityType } from '@/enums/AuthEntityType';
 import { Role } from '@/enums/Role';
 
-
 interface AuthContextType {
     accessToken: string | null;
-    login: (entity: AuthEntityType, username: string, password: string) => Promise<boolean>;
+    login: (entity: AuthEntityType, email: string, password: string) => Promise<boolean>;
     logout: () => void;
     isLoggedIn: () => boolean;
     getEntityType: () => AuthEntityType;
@@ -37,74 +37,68 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [accessToken, setAccessToken] = useState<string | null>(
-        typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+        typeof window !== 'undefined' ? Cookies.get('accessToken') || null : null
     );
     const [entityType, setEntityType] = useState<AuthEntityType>(
-        typeof window !== 'undefined' ? localStorage.getItem('entityType') as AuthEntityType : AuthEntityType.User
+        typeof window !== 'undefined' ? (Cookies.get('entityType') as AuthEntityType) || AuthEntityType.User : AuthEntityType.User
     );
     const [role, setRole] = useState<Role | null>(
-        typeof window !== 'undefined' ? localStorage.getItem('role') as Role : null
+        typeof window !== 'undefined' ? (Cookies.get('role') as Role) || null : null
     );
     const [id, setId] = useState<string | null>(
-        typeof window !== 'undefined' ? localStorage.getItem('id') : null
+        typeof window !== 'undefined' ? Cookies.get('id') || null : null
     );
-    const [name, setName] =     useState<string | null>(
-        typeof window !== 'undefined' ? localStorage.getItem('name') : null
+    const [name, setName] = useState<string | null>(
+        typeof window !== 'undefined' ? Cookies.get('name') || null : null
     );
-        
-    
+
     // is logged in
     const isLoggedIn = useCallback(() => {
-        //with localStorage
         if (typeof window !== 'undefined') {
-            return !!accessToken || !!localStorage.getItem('accessToken');
+            return !!accessToken || !!Cookies.get('accessToken');
         }
         return !!accessToken;
     }, [accessToken]);
 
     useEffect(() => {
         const loggedIn = isLoggedIn();
-        if(loggedIn){
-            if(window.location.pathname === '/login' || window.location.pathname === '/login/'){
+        if (loggedIn) {
+            if (window.location.pathname === '/login' || window.location.pathname === '/login/') {
                 window.location.href = '/';
-            }else if(window.location.pathname === '/signup' || window.location.pathname === '/signup/'){
+            } else if (window.location.pathname === '/signup' || window.location.pathname === '/signup/') {
                 window.location.href = '/';
             }
-         }else{
-                if(window.location.pathname === '/dashboard' || window.location.pathname === '/dashboard/'){
-                    window.location.href = '/login';
-         }
+        } else {
+            if (window.location.pathname === '/dashboard' || window.location.pathname === '/dashboard/') {
+                window.location.href = '/login';
+            }
         }
     }, [isLoggedIn]);
 
     const login = async (entity: AuthEntityType, email: string, password: string) => {
-
         let result;
         if (entity === AuthEntityType.User) {
             result = await loginUserApi(email, password);
             setRole(result?.role || Role.Patient);
-            localStorage.setItem('role', result?.role || Role.Patient);
+            Cookies.set('role', result?.role || Role.Patient);
         } else {
             result = await loginPharmacyApi(email, password);
             setRole(null);
-            localStorage.removeItem('role');
+            Cookies.remove('role');
         }
-
 
         if (result && result.accessToken && result.refreshToken && result.id && result.name) {
             setName(result.name);
             setAccessToken(result.accessToken);
             setEntityType(entity);
             setId(result.id);
-            localStorage.setItem('accessToken', result.accessToken);
-            localStorage.setItem('refreshToken', result.refreshToken);
-            localStorage.setItem('id', result.id);
-            localStorage.setItem('name', result.name);
-            localStorage.setItem('entityType', entity);
+            Cookies.set('accessToken', result.accessToken);
+            Cookies.set('refreshToken', result.refreshToken);
+            Cookies.set('id', result.id);
+            Cookies.set('name', result.name);
+            Cookies.set('entityType', entity);
             return true;
         }
-
-
         return false;
     };
 
@@ -120,16 +114,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }) => {
         try {
             const response = await signupUserApi(user);
-
-            if (response) {
-                return true;
-            }
-            return false;
+            return response ? true : false;
         } catch (error) {
             console.error('Errore di signup', error);
             return null;
         }
-    }
+    };
 
     const signupPharmacy = async (pharmacy: {
         nameCompany: string,
@@ -140,18 +130,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }) => {
         try {
             const response = await signupPharmacyApi(pharmacy);
-
-            if (response) {
-                return true;
-            }
-            return false;
+            return response ? true : false;
         } catch (error) {
             console.error('Errore di signup', error);
             return null;
         }
-    }
-
-
+    };
 
     const logout = () => {
         setAccessToken(null);
@@ -159,47 +143,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setId(null);
         setName(null);
         setEntityType(AuthEntityType.User);
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('role');
-        localStorage.removeItem('id');
-        localStorage.removeItem('name');
-        localStorage.removeItem('entityType');
+        Cookies.remove('accessToken');
+        Cookies.remove('refreshToken');
+        Cookies.remove('role');
+        Cookies.remove('id');
+        Cookies.remove('name');
+        Cookies.remove('entityType');
+        // Eventuale reindirizzamento alla pagina di login:
+        window.location.href = '/login';
     };
 
-
-    //get entity type
+    // get entity type
     const getEntityType = () => {
         if (typeof window !== 'undefined') {
-            return entityType || localStorage.getItem('entityType') as AuthEntityType;
+            return entityType || (Cookies.get('entityType') as AuthEntityType) || AuthEntityType.User;
         }
         return entityType;
-    }
+    };
 
-    //get role
+    // get role
     const getRole = () => {
         if (typeof window !== 'undefined') {
-            return role || localStorage.getItem('role') as Role;
+            return role || (Cookies.get('role') as Role) || null;
         }
         return role;
-    }
+    };
 
-    //get id
+    // get id
     const getId = () => {
         if (typeof window !== 'undefined') {
-            return id || localStorage.getItem('id');
+            return id || Cookies.get('id') || null;
         }
         return id;
-    }
+    };
 
-    //get name
+    // get name
     const getName = () => {
         if (typeof window !== 'undefined') {
-            return name || localStorage.getItem('name');
+            return name || Cookies.get('name') || null;
         }
         return name;
-    }
-
+    };
 
     return (
         <AuthContext.Provider value={{ accessToken, login, logout, isLoggedIn, getEntityType, getRole, getId, getName, signupUser, signupPharmacy }}>

@@ -74,16 +74,3 @@ export const signupPharmacyApi = async (pharmacy: {
     return null;
   }
 }
-
-export const refreshAccessToken = async (refreshToken: string) => {
-  try {
-    const response = await api.post('/auth/refresh', { refreshToken });
-    return {
-      accessToken: response.data.accessToken,
-      refreshToken: response.data.refreshToken
-    };
-  } catch (error) {
-    console.error('Errore nel refresh token', error);
-    return null;
-  }
-};

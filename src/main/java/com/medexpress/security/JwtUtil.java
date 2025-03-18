@@ -52,12 +52,13 @@ public class JwtUtil {
     }
 
     // Refresh Token generation
-    public String generateRefreshToken(String id) {
+    public String generateRefreshToken(String id, AuthEntityType entityType) {
         return Jwts.builder()
                 .subject(id)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtRefreshExpirationMs))
-                .signWith(key)  
+                .claim("entityType", entityType.toString())
+                .signWith(key, algorithm)
                 .compact();
     }
 

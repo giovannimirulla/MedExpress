@@ -30,8 +30,7 @@ public class User {
     private String email;
     private String password;
     private Role role;
-    @Nullable
-    private User doctor;
+    public User doctor;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

@@ -1,6 +1,8 @@
 package com.medexpress.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +16,8 @@ import com.medexpress.dto.PharmacyRequest;
 import com.medexpress.dto.UpdateStatusPharmacyRequest;
 import com.medexpress.entity.Order;
 import com.medexpress.entity.Pharmacy;
+import com.medexpress.enums.AuthEntityType;
+import com.medexpress.security.CustomUserDetails;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -62,8 +66,21 @@ public class PharmacyController {
 
     @PostMapping("/updateStatus")
     public ResponseEntity<Order> updateStatus(@RequestBody UpdateStatusPharmacyRequest body) {
-        Order order = orderService.updateStatusPharmacy(body.getOrderId(), body.getStatus());
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            System.out.println( userDetails.getEntityType() == AuthEntityType.PHARMACY);
+            if (userDetails.getEntityType() != AuthEntityType.PHARMACY) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+
+            //get pharmacy
+            Pharmacy pharmacy = pharmacyService.getPharmacy(userDetails.getId());
+
+        Order order = orderService.updateStatusPharmacy(body.getOrderId(), body.getStatus(), pharmacy);
         return new ResponseEntity<Order>(order, HttpStatus.OK);
+    }
+    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
 }

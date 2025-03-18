@@ -1,60 +1,53 @@
 package com.medexpress.config;
 
-import javax.annotation.PreDestroy;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-
 import com.corundumstudio.socketio.Configuration;
-import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import javax.annotation.PreDestroy;
 
-@CrossOrigin // This annotation is used to handle the request from a different origin
-@Component  // This annotation is used to mark the class as a Spring component
-
+@CrossOrigin // Gestisce le richieste da origini diverse
+@org.springframework.context.annotation.Configuration  // Usa questa annotazione per le configurazioni di bean
 public class SocketIOConfig {
-
-	@Value("${socket.host}") // This annotation is used to inject the value from the application.properties file
-	private String SOCKETHOST;
-	@Value("${socket.port}") 
-	private int SOCKETPORT;
-	private SocketIOServer server;
-
-	@Bean // It is an object that is instantiated, assembled, and otherwise managed by a Spring IoC container
-
-    // This method is used to create the SocketIOServer instance
-	public SocketIOServer socketIOServer() {
-		Configuration config = new Configuration();
-		config.setHostname(SOCKETHOST);
-		config.setPort(SOCKETPORT);
-		server = new SocketIOServer(config);
-		server.start();
-		server.addConnectListener(new ConnectListener() { // This method is used to add a listener to the server to connect the client
-			@Override
-			public void onConnect(SocketIOClient client) { //
-
-			}
-		});
+    @Value("${socket.host}") 
+    private String SOCKETHOST;
     
-        // This method is used to add a listener to the server to disconnect the client
-		server.addDisconnectListener(new DisconnectListener() {
-			@Override
-			public void onDisconnect(SocketIOClient client) {
-				client.getNamespace().getAllClients().stream().forEach(data-> { 
-				});
-			}
-		});
-		return server;
-	}
+    @Value("${socket.port}") 
+    private int SOCKETPORT;
     
-	@PreDestroy // This annotation is used to perform the operations before the bean is destroyed
-	public void stopSocketIOServer() {
-		this.server.stop();
-	}
-
+    private SocketIOServer server;
+    
+    @Bean
+    public SocketIOServer socketIOServer() {
+        Configuration config = new Configuration();
+        config.setHostname(SOCKETHOST);
+        config.setPort(SOCKETPORT);
+        
+        server = new SocketIOServer(config);
+        
+        // Aggiungiamo il listener per la connessione
+        server.addConnectListener((ConnectListener) client -> 
+            System.out.println("Client connesso: " + client.getSessionId())
+        );
+        
+        // Aggiungiamo il listener per la disconnessione
+        server.addDisconnectListener((DisconnectListener) client -> 
+            System.out.println("Client disconnesso: " + client.getSessionId())
+        );
+        
+        server.start();
+        return server;
+    }
+    
+    @PreDestroy
+    public void stopSocketIOServer() {
+        if (this.server != null) {
+            this.server.stop();
+            System.out.println("Socket.IO Server arrestato.");
+        }
+    }
 }

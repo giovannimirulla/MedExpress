@@ -1,7 +1,6 @@
 package com.medexpress.entity;
 
 import java.time.LocalDateTime;
-
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -9,11 +8,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.medexpress.dto.CommonDrug;
-
+import com.medexpress.dto.EntityDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
+import lombok.NoArgsConstructor;
 import com.medexpress.enums.DrugPackageClasseFornitura;
 
 
@@ -26,7 +25,7 @@ public class Order {
     @Id
     private ObjectId id;
     private String packageId;
-    private User user; // This is the user who made the order
+    public User user; // This is the user who made the order
     private User driver;
     private Pharmacy pharmacy; // This is the pharmacy that will prepare the order
     private String drugId;
@@ -36,6 +35,7 @@ public class Order {
     private StatusDriver statusDriver;
     private StatusDoctor statusDoctor;
     private Priority priority;
+    private EntityDTO updatedBy;
 
     // Campo transitorio per i dettagli del package recuperato da AifaService.
     @JsonProperty("drugPackage")
@@ -43,7 +43,7 @@ public class Order {
 
     public Order(String packageId, User user, User driver, Pharmacy pharmacy, String drugId, LocalDateTime createdAt,
             LocalDateTime updatedAt, StatusPharmacy statusPharmacy, StatusDriver statusDriver,
-            StatusDoctor statusDoctor, Priority priority) {
+            StatusDoctor statusDoctor, Priority priority, EntityDTO updatedBy) {
         this.packageId = packageId;
         this.user = user;
         this.driver = driver;
@@ -55,6 +55,7 @@ public class Order {
         this.statusDriver = statusDriver;
         this.statusDoctor = statusDoctor;
         this.priority = priority;
+        this.updatedBy = updatedBy;
     }
 
     public enum StatusDoctor {
@@ -115,24 +116,24 @@ public class Order {
     public static Order.StatusDoctor getStatusDoctor(DrugPackageClasseFornitura drugPackageClasseFornitura) {
         switch (drugPackageClasseFornitura) {
             case OTC:
-                return Order.StatusDoctor.PENDING;
+                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
             case SOP:
-                return Order.StatusDoctor.PENDING;
+                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
             case RR:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
             case RNR:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
             case RMR:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
             case RRL:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
             case RNRL:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
             case OSP:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
             case USPL:
-                return Order.StatusDoctor.NO_APPROVAL_NEEDED;
+                return Order.StatusDoctor.PENDING;
         }
-        return Order.StatusDoctor.NO_APPROVAL_NEEDED; // Add a default return statement to avoid compilation error
+        return Order.StatusDoctor.PENDING; // Add a default return statement to avoid compilation error
     }
 }

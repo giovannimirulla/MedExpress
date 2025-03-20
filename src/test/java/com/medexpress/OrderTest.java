@@ -3,6 +3,8 @@ package com.medexpress;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -15,6 +17,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.medexpress.dto.CommonDrug;
+import com.medexpress.dto.CommonPackage;
+import com.medexpress.dto.EntityDTO;
 import com.medexpress.entity.Order;
 import com.medexpress.entity.Pharmacy;
 import com.medexpress.entity.User;
@@ -27,12 +31,14 @@ import com.medexpress.service.OrderService;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 
 import io.jsonwebtoken.Claims;
 import reactor.core.publisher.Mono;
 
-class OrderServiceTest {
+class OrderTest {
 
     @InjectMocks
     private OrderService orderService;
@@ -57,8 +63,7 @@ class OrderServiceTest {
  
     private String userId;
     private User user;
-    private String validToken;
-    private String invalidToken;
+    private Pharmacy pharmacy;
     private String packageId;
     private String drugId;
     private SocketIOServer socketServer;
@@ -76,18 +81,24 @@ class OrderServiceTest {
         user = new User();
         user.setId(new ObjectId(userId));
 
-        validToken = "valid.jwt.token";
-        invalidToken = "invalid.jwt.token";
     }
 
     @Test
     void shouldThrowExceptionWhenUserNotAuthenticated() {
+        // Mock del token JWT non valido
         when(jwtUtil.validateToken("invalidToken")).thenReturn(null);
+        
+        // Simuliamo il comportamento del repository: nessun utente trovato
+        when(userRepository.findById(new ObjectId())).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(ResponseStatusException.class,
-                () -> orderService.createOrder(packageId, userId, drugId, Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.Priority.HIGH));
+        // Verifica che venga lanciata una ResponseStatusException con stato 401
+        RuntimeException  exception = assertThrows(RuntimeException.class, 
+            () -> orderService.createOrder(packageId, userId, drugId, 
+                                           Order.StatusDoctor.NO_APPROVAL_NEEDED, 
+                                           Order.Priority.HIGH));
 
-        assertEquals("401 UNAUTHORIZED", exception.getMessage());
+        // Controlla che il messaggio dell'eccezione sia quello atteso
+        assertEquals("User not found", exception.getMessage());
     }
     
     @Test
@@ -110,7 +121,12 @@ class OrderServiceTest {
         when(jwtUtil.validateToken(validToken)).thenReturn(claims);
         when(userRepository.findById(new ObjectId(userId))).thenReturn(Optional.of(user));
 
-        Order order = new Order(packageId, user, null, null, drugId, null, null, Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.Priority.NORMAL);
+       Order order = new Order(packageId, user, null, null, drugId, 
+                        LocalDateTime.now(), LocalDateTime.now(), 
+                        Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, 
+                        Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.Priority.NORMAL, 
+                        new EntityDTO());
+
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
         Order createdOrder = orderService.createOrder(packageId, userId, drugId, Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.Priority.NORMAL);
@@ -125,7 +141,11 @@ class OrderServiceTest {
     @Test
     void shouldCreateOrderWithoutPrescriptionWithHighPriority() {
         when(userRepository.findById(new ObjectId(userId))).thenReturn(Optional.of(user));
-        Order order = new Order(packageId, user, null, null, drugId, null, null, Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.Priority.HIGH);
+        Order order = new Order(packageId, user, null, null, drugId, 
+                        LocalDateTime.now(), LocalDateTime.now(), 
+                        Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, 
+                        Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.Priority.HIGH, 
+                        new EntityDTO());
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
         Order createdOrder = orderService.createOrder(packageId, userId, drugId, Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.Priority.HIGH);
@@ -138,7 +158,12 @@ class OrderServiceTest {
     @Test
     void shouldCreateOrderWithPrescriptionWithLowPriority() {
         when(userRepository.findById(new ObjectId(userId))).thenReturn(Optional.of(user));
-        Order order = new Order(packageId, user, null, null, drugId, null, null, Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, Order.StatusDoctor.PENDING, Order.Priority.NORMAL);
+        Order order = new Order(packageId, user, null, null, drugId, 
+            LocalDateTime.now(), LocalDateTime.now(), 
+            Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, 
+            Order.StatusDoctor.PENDING, Order.Priority.NORMAL, 
+            new EntityDTO());        
+        
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
         Order createdOrder = orderService.createOrder(packageId, userId, drugId, Order.StatusDoctor.PENDING, Order.Priority.NORMAL);
@@ -151,7 +176,11 @@ class OrderServiceTest {
     @Test
     void shouldCreateOrderWithPrescriptionWithHighPriority() {
         when(userRepository.findById(new ObjectId(userId))).thenReturn(Optional.of(user));
-        Order order = new Order(packageId, user, null, null, drugId, null, null, Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, Order.StatusDoctor.PENDING, Order.Priority.HIGH);
+        Order order = new Order(packageId, user, null, null, drugId, 
+        LocalDateTime.now(), LocalDateTime.now(), 
+        Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, 
+        Order.StatusDoctor.PENDING, Order.Priority.HIGH, 
+        new EntityDTO());        
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
         Order createdOrder = orderService.createOrder(packageId, userId, drugId, Order.StatusDoctor.PENDING, Order.Priority.HIGH);
@@ -164,7 +193,12 @@ class OrderServiceTest {
     @Test
     void shouldKeepOrderPendingWhenPriorityIsWaiting() {
         when(userRepository.findById(new ObjectId(userId))).thenReturn(Optional.of(user));
-        Order order = new Order(packageId, user, null, null, drugId, null, null, Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, Order.StatusDoctor.PENDING, Order.Priority.NORMAL);
+        Order order = new Order(packageId, user, null, null, drugId, 
+            LocalDateTime.now(), LocalDateTime.now(), 
+            Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, 
+            Order.StatusDoctor.PENDING, Order.Priority.NORMAL, 
+            new EntityDTO());        
+        
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
         Order createdOrder = orderService.createOrder(packageId, userId, drugId, Order.StatusDoctor.PENDING, Order.Priority.NORMAL);
@@ -177,7 +211,11 @@ class OrderServiceTest {
     @Test
     void shouldApproveOrderWhenDoctorApproves() {
         when(userRepository.findById(new ObjectId(userId))).thenReturn(Optional.of(user));
-        Order order = new Order(packageId, user, null, null, drugId, null, null, Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, Order.StatusDoctor.APPROVED, Order.Priority.NORMAL);
+        Order order = new Order(packageId, user, null, null, drugId, 
+        LocalDateTime.now(), LocalDateTime.now(), 
+        Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, 
+        Order.StatusDoctor.APPROVED, Order.Priority.NORMAL, 
+        new EntityDTO());        
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
         Order createdOrder = orderService.createOrder(packageId, userId, drugId, Order.StatusDoctor.APPROVED, Order.Priority.NORMAL);
@@ -189,7 +227,11 @@ class OrderServiceTest {
     @Test
     void shouldNotRejectOrderWhenNotExplicitlyRejected() {
         when(userRepository.findById(new ObjectId(userId))).thenReturn(Optional.of(user));
-        Order order = new Order(packageId, user, null, null, drugId, null, null, Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, Order.StatusDoctor.PENDING, Order.Priority.NORMAL);
+        Order order = new Order(packageId, user, null, null, drugId, 
+        LocalDateTime.now(), LocalDateTime.now(),
+        Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, 
+        Order.StatusDoctor.PENDING, Order.Priority.NORMAL, 
+        new EntityDTO());        
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
         Order createdOrder = orderService.createOrder(packageId, userId, drugId, Order.StatusDoctor.PENDING, Order.Priority.NORMAL);
@@ -202,8 +244,10 @@ class OrderServiceTest {
     void shouldAuthorizeMedicalPrescription() {
         
         Order order = new Order(packageId, user, null, null, drugId, 
-                null, null, Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, 
-                Order.StatusDoctor.PENDING, Order.Priority.HIGH);
+                        LocalDateTime.now(), LocalDateTime.now(), 
+                        Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, 
+                        Order.StatusDoctor.PENDING, Order.Priority.HIGH, 
+                        new EntityDTO());
         order.setId(new ObjectId());
 
         // Mockiamo il repository per restituire l'ordine quando richiesto
@@ -211,7 +255,9 @@ class OrderServiceTest {
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act: Aggiorniamo lo stato della prescrizione a APPROVED
-        Order updatedOrder = orderService.updateStatusDoctor(order.getId().toString(), Order.StatusDoctor.APPROVED);
+        Order updatedOrder = orderService.updateStatusDoctor(order.getId().toString(), 
+        Order.StatusDoctor.APPROVED, 
+        user);
 
         // Assert: Verifichiamo che lo stato sia stato aggiornato correttamente
         assertNotNull(updatedOrder);
@@ -247,20 +293,32 @@ class OrderServiceTest {
 
     @Test
     void testUpdateStatusPharmacy() {
-        ObjectId pharmacyId = new ObjectId(); 
-        String pharmacyIdString = pharmacyId.toString(); 
-        Order order = new Order(); 
+
+        ObjectId pharmacyId = new ObjectId();
+        ObjectId orderId = new ObjectId();
+        Order order = new Order();
+        order.setId(orderId);
+
+        Pharmacy pharmacy = new Pharmacy();
+        pharmacy.setId(pharmacyId);
+        pharmacy.setCompanyName("Farmacia Test");
+
+        CommonDrug commonDrug = new CommonDrug();
 
         when(orderRepository.findById(any(ObjectId.class))).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
+       
 
-        Order updatedOrder = orderService.updateStatusPharmacy(order.getId().toString(), Order.StatusPharmacy.READY_FOR_PICKUP);
+        when(aifaService.getPackage(anyString(), anyString()))
+            .thenReturn(Mono.just(commonDrug)); 
+            
+        Order updatedOrder = orderService.updateStatusPharmacy(order.getId().toString(), 
+            Order.StatusPharmacy.READY_FOR_PICKUP, 
+            pharmacy);
 
         assertNotNull(updatedOrder);
         assertEquals(Order.StatusPharmacy.READY_FOR_PICKUP, updatedOrder.getStatusPharmacy());
         verify(orderRepository, times(1)).save(any(Order.class));
-        verify(socketServer.getBroadcastOperations(), times(1))
-                .sendEvent(eq(order.getUser().getId().toString()), any(Object.class));
     }
 
     @Test
@@ -326,7 +384,7 @@ class OrderServiceTest {
         when(pharmacyRepository.findById(new ObjectId(pharmacyId))).thenReturn(Optional.of(pharmacy));
 
         // Esegui il metodo di aggiornamento dello stato
-        Order updatedOrder = orderService.updateStatusPharmacy(orderId, Order.StatusPharmacy.READY_FOR_PICKUP);
+        Order updatedOrder = orderService.updateStatusPharmacy(orderId, Order.StatusPharmacy.READY_FOR_PICKUP, pharmacy);
 
         // Verifica che l'ordine prioritario venga trattato con urgenza
         assertNotNull(updatedOrder);

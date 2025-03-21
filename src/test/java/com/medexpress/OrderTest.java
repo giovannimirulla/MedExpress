@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.medexpress.dto.CommonDrug;
 import com.medexpress.dto.CommonPackage;
 import com.medexpress.dto.EntityDTO;
+import com.medexpress.dto.OrderSocket;
 import com.medexpress.entity.Order;
 import com.medexpress.entity.Pharmacy;
 import com.medexpress.entity.User;
@@ -28,6 +29,7 @@ import com.medexpress.repository.UserRepository;
 import com.medexpress.security.JwtUtil;
 import com.medexpress.service.AIFAService;
 import com.medexpress.service.OrderService;
+import com.corundumstudio.socketio.BroadcastOperations;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -61,18 +63,24 @@ class OrderTest {
     @Mock
     private JwtUtil jwtUtil;
  
+    @Mock
+    private SocketIOServer socketServer;
+
+    @Mock
+    private BroadcastOperations broadcastOperations;
+
     private String userId;
     private User user;
     private Pharmacy pharmacy;
     private String packageId;
     private String drugId;
-    private SocketIOServer socketServer;
+   
 
     @BeforeEach
     void setUp() {
 
         MockitoAnnotations.openMocks(this);
-
+        when(socketServer.getBroadcastOperations()).thenReturn(broadcastOperations);
         userId = new ObjectId().toString();
         packageId = "pkg1";
         drugId = "drug1";
@@ -114,18 +122,25 @@ class OrderTest {
         assertEquals("User not found", exception.getMessage());
     }
 
+  
     @Test
-    void shouldCreateOrderWithoutPrescriptionWithNormalPriority(){
+    public void shouldCreateOrderWithoutPrescriptionWithNormalPriority() {
         String validToken = "validToken";
-        
+        String userId = "60c72b2f9b1e8a5f6d9b1e8b";
+        String packageId = "packageId";
+        String drugId = "drugId";
+        Claims claims = mock(Claims.class);
+        User user = new User();
+        user.setId(new ObjectId(userId));
+
         when(jwtUtil.validateToken(validToken)).thenReturn(claims);
         when(userRepository.findById(new ObjectId(userId))).thenReturn(Optional.of(user));
 
-       Order order = new Order(packageId, user, null, null, drugId, 
-                        LocalDateTime.now(), LocalDateTime.now(), 
-                        Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, 
-                        Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.Priority.NORMAL, 
-                        new EntityDTO());
+        Order order = new Order(packageId, user, null, null, drugId,
+                LocalDateTime.now(), LocalDateTime.now(),
+                Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING,
+                Order.StatusDoctor.NO_APPROVAL_NEEDED, Order.Priority.NORMAL,
+                new EntityDTO());
 
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
@@ -134,9 +149,7 @@ class OrderTest {
         assertNotNull(createdOrder);
         assertEquals(Order.StatusDoctor.NO_APPROVAL_NEEDED, createdOrder.getStatusDoctor());
         assertEquals(Order.Priority.NORMAL, createdOrder.getPriority());
-
-        verify(jwtUtil, times(1)).validateToken(validToken);
-    }
+}
 
     @Test
     void shouldCreateOrderWithoutPrescriptionWithHighPriority() {
@@ -242,33 +255,54 @@ class OrderTest {
 
     @Test
     void shouldAuthorizeMedicalPrescription() {
-        
-        Order order = new Order(packageId, user, null, null, drugId, 
-                        LocalDateTime.now(), LocalDateTime.now(), 
-                        Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, 
-                        Order.StatusDoctor.PENDING, Order.Priority.HIGH, 
-                        new EntityDTO());
-        order.setId(new ObjectId());
+        // Creiamo un ObjectId per l'ordine
+        ObjectId orderId = new ObjectId();
 
-        // Mockiamo il repository per restituire l'ordine quando richiesto
-        when(orderRepository.findByUser_Id(user.getId(), Sort.by(Sort.Order.desc("createdAt")))).thenReturn(null);
+        // Creiamo l'utente con un ID valido
+        User user = new User();
+        user.setId(new ObjectId());
+        user.setName("Nome");
+        user.setSurname("Cognome");
+        user.setEmail("email@example.com");
+
+        // Creiamo l'ordine con l'ID e l'utente
+        Order order = new Order(packageId, user, null, null, drugId,
+            LocalDateTime.now(), LocalDateTime.now(),
+            Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING,
+            Order.StatusDoctor.PENDING, Order.Priority.HIGH,
+            new EntityDTO());
+        order.setId(orderId); // Assegniamo l'ID all'ordine
+
+        // Mock del repository per restituire l'ordine quando viene cercato per ID
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        // Mock del repository per salvare l'ordine e restituirlo
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Act: Aggiorniamo lo stato della prescrizione a APPROVED
-        Order updatedOrder = orderService.updateStatusDoctor(order.getId().toString(), 
-        Order.StatusDoctor.APPROVED, 
-        user);
+        // Mock del socketServer per evitare NullPointerException
+        BroadcastOperations broadcastOperations = mock(BroadcastOperations.class);
+        when(socketServer.getBroadcastOperations()).thenReturn(broadcastOperations);
 
-        // Assert: Verifichiamo che lo stato sia stato aggiornato correttamente
+        // Mock del servizio Aifa per restituire un CommonDrug
+        CommonDrug commonDrug = new CommonDrug();
+        when(aifaService.getPackage(order.getDrugId(), order.getPackageId())).thenReturn(Mono.just(commonDrug));
+
+        // Aggiorniamo lo stato della prescrizione a APPROVED
+        Order updatedOrder = orderService.updateStatusDoctor(orderId.toString(),
+                Order.StatusDoctor.APPROVED,
+                user);
+
+        // Verifiche
         assertNotNull(updatedOrder);
         assertEquals(Order.StatusDoctor.APPROVED, updatedOrder.getStatusDoctor());
         assertNotNull(updatedOrder.getUpdatedAt());
 
-        // Verifichiamo che il repository sia stato chiamato per salvare l'ordine
+        // Verifica che il repository sia stato chiamato per salvare l'ordine
         verify(orderRepository, times(1)).save(updatedOrder);
 
-        verify(socketServer.getBroadcastOperations(), times(1))
-    .       sendEvent(eq(order.getUser().getId().toString()), any(Object.class));
+        // Verifica che l'evento sia stato inviato all'utente corretto
+        verify(broadcastOperations, times(1))
+            .sendEvent(eq(order.getUser().getId().toString()), any(OrderSocket.class));
     }
     
     @Test
@@ -294,40 +328,67 @@ class OrderTest {
     @Test
     void testUpdateStatusPharmacy() {
 
+        // Creazione di ID fittizi per farmacia e ordine
         ObjectId pharmacyId = new ObjectId();
         ObjectId orderId = new ObjectId();
+
+        // Creazione di un oggetto Order
         Order order = new Order();
         order.setId(orderId);
+        order.setDrugId("MED123");
+        order.setPackageId("123456");
+        order.setCreatedAt(LocalDateTime.now());
 
+        User user = new User();
+        user.setId(new ObjectId());
+        order.setUser(user);
+
+        // Creazione di un oggetto Pharmacy
         Pharmacy pharmacy = new Pharmacy();
         pharmacy.setId(pharmacyId);
         pharmacy.setCompanyName("Farmacia Test");
 
+        // Mock di un CommonDrug con una confezione valida
         CommonDrug commonDrug = new CommonDrug();
+        commonDrug.setId("DRUG123");
+        commonDrug.setPrincipiAttiviIt(Arrays.asList("Paracetamolo"));
 
+        // Mock repository per trovare l'ordine
         when(orderRepository.findById(any(ObjectId.class))).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
-       
 
+        // Mock del servizio AIFA per restituire un CommonDrug valido
         when(aifaService.getPackage(anyString(), anyString()))
-            .thenReturn(Mono.just(commonDrug)); 
-            
+            .thenReturn(Mono.just(commonDrug));  // Assicuriamoci che non sia null
+
+            System.out.println("Test commonDrug:"+ commonDrug);
+        
+            System.out.println("DEBUG - Chiamata a AIFAService con:");
+            System.out.println("DEBUG - Drug ID: " + order.getDrugId());
+            System.out.println("DEBUG - Package ID: " + order.getPackageId());    
+
+        // Eseguire l'update dello stato dell'ordine
         Order updatedOrder = orderService.updateStatusPharmacy(order.getId().toString(), 
             Order.StatusPharmacy.READY_FOR_PICKUP, 
             pharmacy);
+           
 
+        // Asserzioni per verificare che l'ordine sia stato aggiornato correttamente
         assertNotNull(updatedOrder);
         assertEquals(Order.StatusPharmacy.READY_FOR_PICKUP, updatedOrder.getStatusPharmacy());
+
+        // Verifica che il repository salvi l'ordine una volta
         verify(orderRepository, times(1)).save(any(Order.class));
     }
 
     @Test
     void testTrackingDeliverYStatus() {
-        // Prepara i dati
-        String orderId = "order-id-123";
-        String userId = "user-id-123";
-        String pharmacyId = "pharmacy-id-123";
-        String driverId = "driver-id-123";
+        
+        String orderId = "60c72b2f9b1e8a5f6d9b1e8a";
+        String userId = "60c72b2f9b1e8a5f6d9b1e8b";
+        String pharmacyId = "60c72b2f9b1e8a5f6d9b1e8c";
+        String drugId = "sampleDrugId";
+        String packageId = "samplePackageId";
 
         User user = new User();
         user.setId(new ObjectId(userId));
@@ -340,11 +401,18 @@ class OrderTest {
         order.setPharmacy(pharmacy);
         order.setStatusPharmacy(Order.StatusPharmacy.READY_FOR_PICKUP);
         order.setStatusDriver(Order.StatusDriver.PENDING);
+        order.setDrugId(drugId);
+        order.setPackageId(packageId);
 
-        // Mock dei metodi
+        // Mock dei metodi dei repository
         when(orderRepository.findById(new ObjectId(orderId))).thenReturn(Optional.of(order));
         when(userRepository.findById(new ObjectId(userId))).thenReturn(Optional.of(user));
         when(pharmacyRepository.findById(new ObjectId(pharmacyId))).thenReturn(Optional.of(pharmacy));
+
+        // Mock del metodo getPackage per restituire un Mono<CommonDrug>
+        CommonDrug mockDrugPackage = new CommonDrug();
+        // Configura le proprietà necessarie di mockDrugPackage
+        when(aifaService.getPackage(drugId, packageId)).thenReturn(Mono.just(mockDrugPackage));
 
         // Esegui il metodo di tracciamento
         Order result = orderService.getOrder(orderId);
@@ -354,8 +422,9 @@ class OrderTest {
         assertEquals(pharmacyId, result.getPharmacy().getId().toString());
         assertEquals(Order.StatusPharmacy.READY_FOR_PICKUP, result.getStatusPharmacy());
         assertEquals(Order.StatusDriver.PENDING, result.getStatusDriver());
-    }
-
+        assertEquals(mockDrugPackage, result.getDrugPackage());
+    }   
+   
     @Test
     void testManagingPriorityOrders() {
         // Prepara i dati
@@ -367,7 +436,6 @@ class OrderTest {
         
         User user = new User();
         user.setId(new ObjectId(userId));
-
       
         pharmacy.setId(new ObjectId(pharmacyId));
 

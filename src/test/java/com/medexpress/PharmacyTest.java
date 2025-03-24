@@ -11,6 +11,7 @@ import com.medexpress.controller.AuthController;
 import com.medexpress.controller.PharmacyController;
 import com.medexpress.dto.PharmacyDTO;
 import com.medexpress.entity.Pharmacy;
+import com.medexpress.enums.AuthEntityType;
 import com.medexpress.security.JwtUtil;
 import com.medexpress.service.EncryptionService;
 import com.medexpress.service.PharmacyService;
@@ -136,8 +137,8 @@ public class PharmacyTest {
         when(encryptionService.verifyPassword(plainPassword, encryptedPassword)).thenReturn(true);
     
         // Mockiamo la generazione dei token JWT
-        when(jwtUtil.generateAccessToken(anyString(), any())).thenReturn("mocked-jwt-token");
-        when(jwtUtil.generateRefreshToken(email)).thenReturn("mocked-refresh-token");
+        when(jwtUtil.generateAccessToken(eq(pharmacy.getId().toString()), eq(AuthEntityType.PHARMACY))).thenReturn("mocked-jwt-token");
+                when(jwtUtil.generateRefreshToken(eq(pharmacy.getId().toString()), eq(AuthEntityType.PHARMACY))).thenReturn("mocked-refresh-token");
     
         // Simuliamo la richiesta di login (password in chiaro!)
         Map<String, String> loginRequest = new HashMap<>();
@@ -149,17 +150,18 @@ public class PharmacyTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk()) // Deve restituire 200 OK
-                .andExpect(jsonPath("$.access_token").value("mocked-jwt-token")) // Controlliamo i token
-                .andExpect(jsonPath("$.refresh_token").value("mocked-refresh-token"))
+                .andExpect(jsonPath("$.accessToken").value("mocked-jwt-token"))
+                .andExpect(jsonPath("$.refreshToken").value("mocked-refresh-token"))
                 .andReturn();
+
 
         System.out.println("Test loginPharmacy completato con status: " + result.getResponse().getStatus());
     
         // Verifichiamo che i metodi mockati siano stati chiamati
         verify(pharmacyService, times(1)).findByEmail(email);
         verify(encryptionService, times(1)).verifyPassword(plainPassword, encryptedPassword);
-        verify(jwtUtil, times(1)).generateAccessToken(anyString(), any());
-        verify(jwtUtil, times(1)).generateRefreshToken(email);
+        verify(jwtUtil, times(1)).generateAccessToken(eq(pharmacy.getId().toString()), eq(AuthEntityType.PHARMACY));
+        verify(jwtUtil, times(1)).generateRefreshToken(eq(pharmacy.getId().toString()), eq(AuthEntityType.PHARMACY));
     }
 }
 

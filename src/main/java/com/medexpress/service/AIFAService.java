@@ -17,8 +17,7 @@ public class AIFAService {
     private final WebClient webClient;
 
     public AIFAService(WebClient.Builder webClientBuilder) {
-        //this.webClient = webClientBuilder.baseUrl("https://api.aifa.gov.it/")/*.baseUrl("")*/.build();
-        this.webClient = webClientBuilder.baseUrl("").build();
+        this.webClient = webClientBuilder.baseUrl("https://api.aifa.gov.it/")/*.baseUrl("")*/.build();
     }
 
 public Mono<AIFAAutocompleteResponse> getAutocompleteResults(String query, int nos) {

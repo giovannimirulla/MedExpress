@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-import java.util.List;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,29 +31,31 @@ import com.medexpress.service.AIFAService;
 
 @ExtendWith(MockitoExtension.class)
 class AIFAServiceTest {
+
         
-    @InjectMocks
+    // @InjectMocks
     private AIFAService aifaService;
-
-    @Mock
-    private WebClient webClient;
-
-    @Mock
-    private WebClient.RequestHeadersUriSpec<?> requestHeadersUriSpec;
-
-    @Mock
-    private WebClient.RequestHeadersSpec<?> requestHeadersSpec;
-
-    @Mock
-    private WebClient.ResponseSpec responseSpec;
-
-    @Mock
+        
+    // @Mock
+    // private WebClient.Builder webClientBuilder;
+    // @Mock
+    // private WebClient webClient;
+    // @Mock
+    // private RequestHeadersUriSpec requestHeadersUriSpec;
+    // @Mock
+    // private RequestHeadersSpec requestHeadersSpec;
+    // @Mock
+    // private ResponseSpec responseSpec;
+                
     private WebClient.Builder webClientBuilder;
                 
     @BeforeEach
     void setUp() {
-        when(webClientBuilder.baseUrl(anyString())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
+        MockitoAnnotations.openMocks(this);
+        webClientBuilder = WebClient.builder();
+        // webClientBuilder.baseUrl("https://api.aifa.gov.it/");
+
+        
         aifaService = new AIFAService(webClientBuilder);
     }
 
@@ -62,30 +63,10 @@ class AIFAServiceTest {
     void testGetAutocompleteResults_Success() {
         String query = "tachipi";
         int nos = 5;
-
-        // Creazione della risposta mock
-        AIFAAutocompleteResponse mockResponse = new AIFAAutocompleteResponse();
-        mockResponse.setStatus(200);
-        mockResponse.setData(List.of("Paracetamolo", "Ibuprofene"));
-
-        // Mock degli step della catena WebClient
-        WebClient.RequestHeadersUriSpec mockUriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-        WebClient.RequestHeadersSpec mockHeadersSpec = mock(WebClient.RequestHeadersSpec.class);
-        WebClient.ResponseSpec mockResponseSpec = mock(WebClient.ResponseSpec.class);
-
-        // Fix: Cast esplicito a (WebClient.RequestHeadersUriSpec<?>)
-        when(webClient.get()).thenReturn(mockUriSpec);
-        when(mockUriSpec.uri(any(Function.class))).thenReturn((WebClient.RequestHeadersSpec<?>) mockHeadersSpec);
-        when(mockHeadersSpec.retrieve()).thenReturn(mockResponseSpec);
-        when(mockResponseSpec.bodyToMono(AIFAAutocompleteResponse.class)).thenReturn(Mono.just(mockResponse));
-
-        // Eseguiamo il test
         AIFAAutocompleteResponse result = aifaService.getAutocompleteResults(query, nos).block();
-
-        // Verifiche
         assertNotNull(result);
-        assertEquals(200, result.getStatus());
-        assertFalse(result.getData().isEmpty());
+        assertEquals(result.getStatus(), HttpStatus.OK.value());
+        assertTrue(result.getData().size() > 0);
     }
 
     @Test

@@ -403,6 +403,7 @@ class OrderTest {
         order.setStatusDriver(Order.StatusDriver.PENDING);
         order.setDrugId(drugId);
         order.setPackageId(packageId);
+        order.setCreatedAt(LocalDateTime.now());
 
         // Mock dei metodi dei repository
         when(orderRepository.findById(new ObjectId(orderId))).thenReturn(Optional.of(order));
@@ -428,10 +429,10 @@ class OrderTest {
     @Test
     void testManagingPriorityOrders() {
         // Prepara i dati
-        String orderId = "order-id-123";
-        String userId = "user-id-123";
-        String drugId = "drug-id-lifesaving";
-        String pharmacyId = "pharmacy-id-123";
+        String orderId = "60c72b2f9b1e8a5f6d9b1e8a";
+        String userId = "60c72b2f9b1e8a5f6d9b1e8b";
+        String drugId = "sampleDrugId";
+        String pharmacyId = "60c72b2f9b1e8a5f6d9b1e8c";
         Pharmacy pharmacy = new Pharmacy();
         
         User user = new User();
@@ -445,14 +446,18 @@ class OrderTest {
         order.setDrugId(drugId);  // Farmaco salvavita
         order.setPharmacy(pharmacy);
         order.setPriority(Order.Priority.HIGH); // Ordine prioritario
+        order.setCreatedAt(LocalDateTime.now());
 
         // Mock dei metodi
         when(orderRepository.findById(new ObjectId(orderId))).thenReturn(Optional.of(order));
         when(aifaService.getPackage(drugId, order.getPackageId())).thenReturn(Mono.just(new CommonDrug()));
         when(pharmacyRepository.findById(new ObjectId(pharmacyId))).thenReturn(Optional.of(pharmacy));
+        when(orderRepository.save(any(Order.class))).thenReturn(order);  // Mock per il salvataggio dell'ordine
 
         // Esegui il metodo di aggiornamento dello stato
-        Order updatedOrder = orderService.updateStatusPharmacy(orderId, Order.StatusPharmacy.READY_FOR_PICKUP, pharmacy);
+        Order updatedOrder = orderService.updateStatusPharmacy(order.getId().toString(), 
+            Order.StatusPharmacy.READY_FOR_PICKUP, 
+            pharmacy);
 
         // Verifica che l'ordine prioritario venga trattato con urgenza
         assertNotNull(updatedOrder);

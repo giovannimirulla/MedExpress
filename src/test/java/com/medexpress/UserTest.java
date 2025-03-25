@@ -194,7 +194,7 @@ class UserTest {
 
                 when(modelMapper.map(any(User.class), eq(UserDTO.class))).thenReturn(userDTO);
 
-                MvcResult result = mockMvc.perform(post("/api/v1/users")
+                MvcResult result = mockMvc.perform(post("/api/v1/user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestBody)))
                         .andExpect(status().isCreated())

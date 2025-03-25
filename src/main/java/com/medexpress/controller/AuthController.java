@@ -104,8 +104,8 @@ public class AuthController {
             String newRefreshToken = jwtUtil.generateRefreshToken(claims.getSubject(), AuthEntityType.USER);
 
             Map<String, String> tokens = new HashMap<>();
-            tokens.put("access_token", newAccessToken);
-            tokens.put("refresh_token", newRefreshToken);
+            tokens.put("accessToken", newAccessToken);
+            tokens.put("refreshToken", newRefreshToken);
             return new ResponseEntity<>(tokens, HttpStatus.OK);
         }
         return new ResponseEntity<>(Map.of("error", "Invalid Refresh Token"), HttpStatus.UNAUTHORIZED);

@@ -14,10 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.medexpress.dto.CommonDrug;
-import com.medexpress.dto.CommonPackage;
 import com.medexpress.dto.EntityDTO;
 import com.medexpress.dto.OrderSocket;
 import com.medexpress.entity.Order;
@@ -71,7 +69,6 @@ class OrderTest {
 
     private String userId;
     private User user;
-    private Pharmacy pharmacy;
     private String packageId;
     private String drugId;
    

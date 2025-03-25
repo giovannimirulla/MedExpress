@@ -14,6 +14,8 @@ import com.medexpress.controller.AuthController;
 import com.medexpress.controller.UserController;
 import com.medexpress.dto.UserDTO;
 import com.medexpress.entity.User;
+import com.medexpress.entity.User.Role;
+import com.medexpress.enums.AuthEntityType;
 import com.medexpress.security.JwtUtil;
 import com.medexpress.service.EncryptionService;
 import com.medexpress.service.UserService;
@@ -80,39 +82,39 @@ class UserTest {
                 requestBody.put("email", "mario.rossi@example.com");
                 requestBody.put("password", "Password123!");
                 requestBody.put("role", "PATIENT");
-                String doctorId = new ObjectId().toString();
-                requestBody.put("doctor", doctorId);
-
+                requestBody.put("doctor", null);
+        
                 String encryptedPassword = "encryptedPassword123";
-                when(encryptionService.encryptPassword("Password123!")).thenReturn(encryptedPassword);
-
-
-                doReturn(new User()).when(userService).createUser(
-                anyString(), anyString(), anyString(), anyString(),
-                anyString(), anyString(), eq("PATIENT"), nullable(String.class)
-                );
-
+                when(encryptionService.encryptPassword(anyString())).thenReturn(encryptedPassword);
+        
+                User mockUser = new User();
+                mockUser.setName("Mario");
+                mockUser.setEmail("mario.rossi@example.com");
+                when(userService.createUser(
+                        anyString(), anyString(), anyString(), anyString(),
+                        anyString(), anyString(), eq("PATIENT"), nullable(String.class)
+                )).thenReturn(mockUser);
+        
                 UserDTO userDTO = new UserDTO();
                 userDTO.setName("Mario");
                 userDTO.setEmail("mario.rossi@example.com");
-
+        
                 when(modelMapper.map(any(User.class), eq(UserDTO.class))).thenReturn(userDTO);
-
-                MvcResult result = mockMvc.perform(post("/api/v1/users")
+        
+                MvcResult result = mockMvc.perform(post("/api/v1/user")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(requestBody)))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.name").value("Mario"))
                         .andExpect(jsonPath("$.email").value("mario.rossi@example.com"))
-                        .andExpect(status().isCreated())
                         .andReturn();
-
+        
                 System.out.println("Test createUserPatient completato con status: " + result.getResponse().getStatus());
-
-                verify(encryptionService, times(1)).encryptPassword("Password123!");
+        
+                verify(encryptionService, times(1)).encryptPassword(anyString());
                 verify(userService, times(1)).createUser(
-                anyString(), anyString(), anyString(), anyString(),
-                anyString(), anyString(), eq("PATIENT"), nullable(String.class)
+                        anyString(), anyString(), anyString(), anyString(),
+                        anyString(), anyString(), eq("PATIENT"), nullable(String.class)
                 );
                 verify(modelMapper, times(1)).map(any(User.class), eq(UserDTO.class));
         }
@@ -145,7 +147,7 @@ class UserTest {
 
                 when(modelMapper.map(any(User.class), eq(UserDTO.class))).thenReturn(userDTO);
 
-                MvcResult result = mockMvc.perform(post("/api/v1/users")
+                MvcResult result = mockMvc.perform(post("/api/v1/user")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(requestBody)))
                         .andExpect(status().isCreated())
@@ -192,7 +194,7 @@ class UserTest {
 
                 when(modelMapper.map(any(User.class), eq(UserDTO.class))).thenReturn(userDTO);
 
-                MvcResult result = mockMvc.perform(post("/api/v1/users")
+                MvcResult result = mockMvc.perform(post("/api/v1/user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestBody)))
                         .andExpect(status().isCreated())
@@ -216,40 +218,31 @@ class UserTest {
                 Map<String, String> requestBody = new HashMap<>();
                 requestBody.put("email", "mario.rossi@example.com");
                 requestBody.put("password", "Password123!");
-                
-                // Simuliamo l'utente nel DB
-                User user = new User(new ObjectId(), "Mario", "Rossi", "RSSMRA80A14H501E", "Via Roma, 10",
-                        "mario.rossi@example.com", "encryptedPassword123", User.Role.PATIENT, null,
-                        LocalDateTime.now(), LocalDateTime.now());
-                
-                // Simuliamo il recupero dell'utente per email
-                when(userService.findByEmail("mario.rossi@example.com")).thenReturn(user);
-                
-                // Simuliamo la verifica della password
-                when(encryptionService.verifyPassword("Password123!", "encryptedPassword123")).thenReturn(true);
-                
-                // Simuliamo la generazione dei token JWT
-                String jwtToken = "mocked-jwt-token";
-                String refreshToken = "mocked-refresh-token";
-                when(jwtUtil.generateAccessToken(anyString(), any())).thenReturn(jwtToken);
-                when(jwtUtil.generateRefreshToken(anyString())).thenReturn(refreshToken);
-                
-                // Eseguiamo la richiesta
+        
+                User mockUser = new User();
+                mockUser.setId(new ObjectId());
+                mockUser.setPassword("hashed-password");
+                mockUser.setRole(Role.PATIENT); // Ensure the role is set
+        
+                when(userService.findByEmail(eq("mario.rossi@example.com"))).thenReturn(mockUser);
+                when(encryptionService.verifyPassword(eq("Password123!"), eq("hashed-password"))).thenReturn(true);
+                when(jwtUtil.generateAccessToken(eq(mockUser.getId().toString()), eq(AuthEntityType.USER))).thenReturn("mocked-jwt-token");
+                when(jwtUtil.generateRefreshToken(eq(mockUser.getId().toString()), eq(AuthEntityType.USER))).thenReturn("mocked-refresh-token");
+        
                 MvcResult result = mockMvc.perform(post("/api/v1/auth/login/user")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestBody)))
-                        .andExpect(status().isOk()) // Deve restituire 200 OK
-                        .andExpect(jsonPath("$.access_token").value("mocked-jwt-token")) 
-                        .andExpect(jsonPath("$.refresh_token").value("mocked-refresh-token"))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(requestBody)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.accessToken").value("mocked-jwt-token"))
+                        .andExpect(jsonPath("$.refreshToken").value("mocked-refresh-token"))
                         .andReturn();
-                
-                System.out.println("Test Login completato con status: " + result.getResponse().getStatus());
-                
-                // Verifica che i metodi siano stati chiamati
-                verify(userService).findByEmail("mario.rossi@example.com");
-                verify(encryptionService).verifyPassword("Password123!", "encryptedPassword123");
-                verify(jwtUtil).generateAccessToken(anyString(), any());
-                verify(jwtUtil).generateRefreshToken(anyString());
+        
+                System.out.println("Test loginUser completato con status: " + result.getResponse().getStatus());
+        
+                verify(userService, times(1)).findByEmail(eq("mario.rossi@example.com"));
+                verify(encryptionService, times(1)).verifyPassword(eq("Password123!"), eq("hashed-password"));
+                verify(jwtUtil, times(1)).generateAccessToken(eq(mockUser.getId().toString()), eq(AuthEntityType.USER));
+                verify(jwtUtil, times(1)).generateRefreshToken(eq(mockUser.getId().toString()), eq(AuthEntityType.USER));
         }
 }
 

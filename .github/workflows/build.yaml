@@ -37,19 +37,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-    #print secrets
-      - name: Print secrets
-        run: |
-            echo $MONGODB_DATABASE
-            echo $MONGODB_USERNAME
-            echo $MONGODB_PASSWORD
-            echo $MONGODB_HOST
-            echo $JWT_SECRET_KEY
-            echo $NEXTAUTH_URL
-            echo $NEXTAUTH_SECRET
-            echo $NEXT_PUBLIC_SOCKET_URL
-
       - name: Build JAR
+        env:
+            MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+            MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
+            MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
+            MONGODB_HOST: ${{ secrets.MONGODB_HOST }}
+            JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+            NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+            NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+            NEXT_PUBLIC_SOCKET_URL: ${{ secrets.NEXT_PUBLIC_SOCKET_URL }}
         run: ./mvnw package -DskipTests -f pom.xml
 
       - name: Upload JAR Artifact

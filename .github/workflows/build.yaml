@@ -1,0 +1,52 @@
+name: Build and Release JAR
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger per i tag che iniziano con "v"
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '21' # Versione Java specificata nel tuo progetto
+
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Build JAR
+      run: mvn clean package
+
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: softprops/action-gh-release@v2
+      env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+            make_latest: true
+            tag_name: ${{ github.ref_name }}
+            draft: false
+            prerelease: false
+            body_path: "CHANGELOG.md"
+
+    - name: Upload JAR to Release
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: target/medexpress-0.0.1-SNAPSHOT.jar
+        asset_name: medexpress-${{ github.ref_name }}.jar
+        asset_content_type: application/java-archive

@@ -21,7 +21,7 @@ import com.medexpress.service.PharmacyService;
 import com.medexpress.service.UserService;
 
 import com.medexpress.security.JwtAuthEntryPoint;
-import com.medexpress.security.JwtFilter;   
+import com.medexpress.security.JwtFilter;
 
 @Configuration
 public class WebSecurityConfig {
@@ -30,49 +30,46 @@ public class WebSecurityConfig {
     @Autowired
     PharmacyService pharmacyService;
 
+
     @Autowired
     private JwtAuthEntryPoint unauthorizedHandler;
-    
+
+
     @Bean
     public JwtFilter authenticationJwtTokenFilter() {
         return new JwtFilter();
     }
-    
+
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration authenticationConfiguration
-    ) throws Exception {
+            AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
-    
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // Updated configuration for Spring Security 6.x
         http
                 .csrf(csrf -> csrf.disable()) // Disabilita CSRF
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Abilita CORS (verrà utilizzato il bean corsConfigurationSource)
-                .exceptionHandling(exceptionHandling ->
-                        exceptionHandling.authenticationEntryPoint(unauthorizedHandler)
-                )
-                .sessionManagement(sessionManagement ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests
-                                .requestMatchers("/**").permitAll() // Permetti tutte le richieste
-                                .anyRequest().authenticated()
-                );
-                
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Abilita CORS (verrà utilizzato il
+                                                                                   // bean corsConfigurationSource)
+                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(
+                        sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                .requestMatchers("/api/**").authenticated() // Protegge solo le richieste API
+                .requestMatchers("/", "/static/**", "/**").permitAll()); // Permette l'accesso alle risorse statiche);
+
         // Aggiungi il filtro JWT prima del filtro Spring Security predefinito
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-    
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

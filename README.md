@@ -1,7 +1,47 @@
-# MedExpress
-University Project for Drug Delivery
+<h1 align="center">MedExpress</h1>
+<p align="center">
+  University Project for Drug Delivery
+</p>
 
-### Reference Documentation
+- - -
+<div align="center">
+  <!-- Java -->
+  <img src="https://img.shields.io/badge/Java-21-%23ED8B00.svg?logo=openjdk&logoColor=white"/>
+  <!-- Spring Boot -->
+  <img src="https://img.shields.io/badge/Spring%20Boot-3.4.2-%236DB33F.svg?logo=springboot&logoColor=white"/>
+  <!-- Maven -->
+  <img src="https://img.shields.io/badge/Maven-3.8.6-C71A36.svg?logo=apachemaven&logoColor=white"/>
+  <!-- Next.js -->
+  <img src="https://img.shields.io/badge/Next.js-15.2.4-black?logo=next.js&logoColor=white"/>
+  <!-- React -->
+  <img src="https://img.shields.io/badge/React-19.0.0-%2361DAFB.svg?logo=react&logoColor=white"/>
+  <!-- MongoDB -->
+  <img src="https://img.shields.io/badge/MongoDB-%2347A248.svg?logo=mongodb&logoColor=white"/>
+  <!-- Socket.io -->
+  <img src="https://img.shields.io/badge/Socket.io-4.8.1-%23000000.svg?logo=socket.io&logoColor=white"/>
+  <!-- Tailwind CSS -->
+  <img src="https://img.shields.io/badge/TailwindCSS-3.4.1-%2338B2AC.svg?logo=tailwindcss&logoColor=white"/>
+  <!-- TypeScript -->
+  <img src="https://img.shields.io/badge/TypeScript-5.0.0-%23007ACC.svg?logo=typescript&logoColor=white"/>
+</div>
+<br>
+
+<p align="center">
+<img src="docs/images/screenshot.png" alt="screenshot">
+</p><br>
+
+# How to run the project
+
+### Requirements
+- Java 21
+
+### Run the project
+1. Download .jar from [MedExpress Releases](https://github.com/giovannimirulla/MedExpress/releases)
+2. Run the jar with the command `java -jar <file>.jar`
+
+<br>
+
+# Reference Documentation
 For further reference, please consider the following sections:
 
 * [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
@@ -28,6 +68,8 @@ While most of the inheritance is fine, it also inherits unwanted elements like `
 To prevent this, the project POM contains empty overrides for these elements.
 If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
 
+<br>
+
 # Design Pattern
 
 ### Creational Patterns
@@ -48,6 +90,8 @@ If you manually switch to a different parent and actually want the inheritance, 
    - The Order class uses enums like StatusDoctor , StatusPharmacy , and StatusDriver to define different strategies for handling order statuses.
    - `Order.java`
 
+   <br>
+
 # To DO
 
 ### Uses Cases
@@ -55,15 +99,37 @@ If you manually switch to a different parent and actually want the inheritance, 
 - [x] UC2: Pharmacy Registration - @agatarosselli
 - [x] UC3: Search for a drug - @giovannimirulla
 - [x] UC4: Order drug - @agatarosselli
+- [x] UC5: Request a prescription - @agatarosselli
+- [x] UC6: Autorize a prescription - @giovannimirulla
+- [x] UC7: Communicate authorization status - @giovannimirulla
+- [x] UC8: Manage evasion and status order registration - @giovannimirulla
+- [x] UC9: Take charge of the order - @giovannimirulla
+- [x] UC10: Track delivery status - @giovannimirulla
+- [x] UC11: Track priority orders - @giovannimirulla
 
-### Frontend - @giovannimirulla
-- [x] Home - Search drugs page 
-- [x] Swaggger
-- [x] List search results
-- [x] Drug details
-- [x] Login
-- [x] Register
-- [x] Order drug
+### Frontend
+- [x] Home - Search drugs page - @giovannimirulla
+- [x] Swagger - @giovannimirulla
+- [x] Search drug - @giovannimirulla
+- [x] Drug details - @giovannimirulla
+- [x] Login - @giovannimirulla
+- [x] Sign up pharmacy - @giovannimirulla
+- [x] Sign up user - @giovannimirulla
+- [x] Order drug - @giovannimirulla
+- [x] Dashboard pharmacy - @giovannimirulla
+- [x] Dashboard patient - @giovannimirulla
+- [x] Dashboard doctor - @giovannimirulla
+- [x] Dashboard driver - @giovannimirulla
 
 ### Tests
-- [x] UC1 tests - @mariachiara98
+- [x] UC1 Test - @mariachiara98
+- [x] UC2 Test - @mariachiara98
+- [x] UC3 Test - @mariachiara98
+- [x] UC4 Test - @mariachiara98
+- [x] UC5 Test - @mariachiara98
+- [x] UC6 Test - @mariachiara98
+- [x] UC7 Test - @mariachiara98
+- [x] UC8 Test - @mariachiara98
+- [x] UC9 Test - @mariachiara98
+- [x] UC10 Test - @mariachiara98
+- [x] UC11 Test - @mariachiara98

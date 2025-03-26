@@ -9,6 +9,16 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
 
+    env: # Esporta le variabili d'ambiente dai secrets
+      MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+      MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
+      MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
+      MONGODB_HOST: ${{ secrets.MONGODB_HOST }}
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      NEXT_PUBLIC_SOCKET_URL: ${{ secrets.NEXT_PUBLIC_SOCKET_URL }}
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -29,7 +39,6 @@ jobs:
 
     - name: Build JAR
       run: mvn clean package
-
 
     - name: Create GitHub Release
       id: create_release

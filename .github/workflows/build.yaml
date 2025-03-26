@@ -37,17 +37,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+
       - name: Build JAR
-        env:
-            MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
-            MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
-            MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
-            MONGODB_HOST: ${{ secrets.MONGODB_HOST }}
-            JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-            NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
-            NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-            NEXT_PUBLIC_SOCKET_URL: ${{ secrets.NEXT_PUBLIC_SOCKET_URL }}
-        run: ./mvnw package -DskipTests -f pom.xml
+        run: ./mvnw package -DskipTests -DMONGODB_DATABASE=${{ env.MONGODB_DATABASE }} -DMONGODB_USERNAME=${{ env.MONGODB_USERNAME }} -DMONGODB_PASSWORD=${{ env.MONGODB_PASSWORD }} -DMONGODB_HOST=${{ env.MONGODB_HOST }} -DJWT_SECRET_KEY=${{ env.JWT_SECRET_KEY }} -DNEXTAUTH_URL=${{ env.NEXTAUTH_URL }} -DNEXTAUTH_SECRET=${{ env.NEXTAUTH_SECRET }} -DNEXT_PUBLIC_SOCKET_URL=${{ env.NEXT_PUBLIC_SOCKET_URL }} -f pom.xml
 
       - name: Upload JAR Artifact
         uses: actions/upload-artifact@v4

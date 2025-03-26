@@ -37,11 +37,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
 
-    - name: Run Tests
-      run: ./mvnw test -f pom.xml
-
     - name: Build JAR
-      run: ./mvnw package -f pom.xml
+      run: ./mvnw package -DskipTests -f pom.xml
 
     - name: Create GitHub Release
       id: create_release

@@ -37,6 +37,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+    #print secrets
+      - name: Print secrets
+        run: |
+            echo $MONGODB_DATABASE
+            echo $MONGODB_USERNAME
+            echo $MONGODB_PASSWORD
+            echo $MONGODB_HOST
+            echo $JWT_SECRET_KEY
+            echo $NEXTAUTH_URL
+            echo $NEXTAUTH_SECRET
+            echo $NEXT_PUBLIC_SOCKET_URL
+
       - name: Build JAR
         run: ./mvnw package -DskipTests -f pom.xml
 

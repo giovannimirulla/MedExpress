@@ -41,6 +41,10 @@
 
 <br>
 
+# Swagger
+The Swagger UI is available at the following URL: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+<br>
+
 # Reference Documentation
 For further reference, please consider the following sections:
 

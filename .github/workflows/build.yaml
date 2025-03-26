@@ -37,9 +37,51 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Get secrets
+        run: |
+                mkdir -p ~/tmp
+                cat <<EOF > ~/tmp/mongodb-host-in-file
+                ${{ secrets.MONGODB_HOST}}
+                EOF
+                cat <<EOF > ~/tmp/mongodb-database-in-file
+                ${{ secrets.MONGODB_DATABASE}}
+                EOF
+                cat <<EOF > ~/tmp/mongodb-username-in-file
+                ${{ secrets.MONGODB_USERNAME}}
+                EOF
+                cat <<EOF > ~/tmp/mongodb-password-in-file
+                ${{ secrets.MONGODB_PASSWORD}}
+                EOF
+                cat <<EOF > ~/tmp/jwt-secret-key-in-file
+                ${{ secrets.JWT_SECRET_KEY}}
+                EOF
+                cat <<EOF > ~/tmp/nextauth-url-in-file
+                ${{ secrets.NEXTAUTH_URL}}
+                EOF
+                cat <<EOF > ~/tmp/nextauth-secret-in-file
+                ${{ secrets.NEXTAUTH_SECRET}}
+                EOF
+                cat <<EOF > ~/tmp/next-public-socket-url-in-file
+                ${{ secrets.NEXT_PUBLIC_SOCKET_URL}}
+                EOF
+
+      - name: Save artifacts
+        uses: actions/upload-artifact@v4
+        with:
+                name: my-secrets
+                path: ~/tmp/
 
       - name: Build JAR
-        run: ./mvnw package -DskipTests -DMONGODB_DATABASE=${{ secrets.MONGODB_DATABASE }} -DMONGODB_USERNAME=${{ secrets.MONGODB_USERNAME }} -DMONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }} -DMONGODB_HOST=${{ secrets.MONGODB_HOST }} -DJWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} -DNEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }} -DNEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }} -DNEXT_PUBLIC_SOCKET_URL=${{ secrets.NEXT_PUBLIC_SOCKET_URL }} -f pom.xml
+        run: |
+            export MONGODB_HOST=${{ secrets.MONGODB_HOST }}
+            export MONGODB_DATABASE=${{ secrets.MONGODB_DATABASE }}
+            export MONGODB_USERNAME=${{ secrets.MONGODB_USERNAME }}
+            export MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}
+            export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            export NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
+            export NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+            export NEXT_PUBLIC_SOCKET_URL=${{ secrets.NEXT_PUBLIC_SOCKET_URL }}
+            ./mvnw package -DskipTests -f pom.xml
 
       - name: Upload JAR Artifact
         uses: actions/upload-artifact@v4

@@ -1,4 +1,4 @@
-name: Build, Test, and Release JAR
+name: Build and Release JAR
 
 on:
   push:
@@ -6,32 +6,7 @@ on:
       - 'v*' # Trigger per i tag che iniziano con "v"
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Set up Java
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '21'
-
-    - name: Cache Maven dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-
-    - name: Run tests
-      run: mvn test -Dspring.profiles.active=test
-
   build-and-release:
-    needs: test
     runs-on: ubuntu-latest
 
     env: # Esporta le variabili d'ambiente dai secrets
@@ -52,7 +27,7 @@ jobs:
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: '21'
+        java-version: '21' # Versione Java specificata nel tuo progetto
 
     - name: Cache Maven dependencies
       uses: actions/cache@v3
@@ -62,20 +37,23 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
 
+    - name: Run Tests
+      run: ./mvnw test -f pom.xml
+
     - name: Build JAR
-      run: mvn clean package
+      run: ./mvnw package -f pom.xml
 
     - name: Create GitHub Release
       id: create_release
       uses: softprops/action-gh-release@v2
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        make_latest: true
-        tag_name: ${{ github.ref_name }}
-        draft: false
-        prerelease: false
-        body_path: "CHANGELOG.md"
+            make_latest: true
+            tag_name: ${{ github.ref_name }}
+            draft: false
+            prerelease: false
+            body_path: "CHANGELOG.md"
 
     - name: Upload JAR to Release
       uses: actions/upload-release-asset@v1

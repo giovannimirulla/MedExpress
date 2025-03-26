@@ -44,4 +44,14 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: medexpress-${{ github.ref_name }}.jar
-        path: target/medexpress-0.0.1-SNAPSHOT.jar            
+        path: target/medexpress-0.0.1-SNAPSHOT.jar     
+        
+    - name: Upload JAR to Existing Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/latest/assets
+        asset_path: target/medexpress-0.0.1-SNAPSHOT.jar
+        asset_name: medexpress-${{ github.ref_name }}.jar
+        asset_content_type: application/java-archive

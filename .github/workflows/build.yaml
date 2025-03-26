@@ -32,12 +32,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build JAR
+      - name: Create .env file in src/main/resources
         run: |
-             ./mvnw package -DskipTests -f pom.xml \
-              -Dspring.data.mongodb.database=${{ secrets.MONGODB_DATABASE }} \
-              -Dspring.data.mongodb.uri="mongodb+srv://${{ secrets.MONGODB_USERNAME }}:${{ secrets.MONGODB_PASSWORD }}@${{ secrets.MONGODB_HOST}}" \
-              -Djwt.secret=${{ secrets.JWT_SECRET_KEY }}
+                  mkdir -p src/main/resources
+                  cat <<EOF > src/main/resources/.env
+                  MONGODB_DATABASE=${{ secrets.MONGODB_DATABASE }}
+                  MONGODB_USERNAME=${{ secrets.MONGODB_USERNAME }}
+                  MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}
+                  MONGODB_HOST=${{ secrets.MONGODB_HOST }}
+                  JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+                  EOF
+              
+      - name: Build JAR
+        run: ./mvnw package -DskipTests -f pom.xml
+              
               
 
       - name: Upload JAR Artifact

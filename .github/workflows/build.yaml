@@ -49,11 +49,10 @@ jobs:
       - name: Install GitHub CLI
         run: sudo apt-get install -y gh
 
-      - name: Create GitHub Release and Upload JAR
+      - name: Upload JAR to Latest Release
         run: |
-          gh release create v${{ github.ref_name }} target/medexpress-0.0.1-SNAPSHOT.jar \
-            --title "Release ${{ github.ref_name }}" \
-            --notes "Questa è una release automatica con il file JAR."
+          gh release upload $(gh release list --limit 1 --json tagName -q '.[0].tagName') target/medexpress-0.0.1-SNAPSHOT.jar \
+            --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash

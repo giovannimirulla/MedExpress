@@ -4,6 +4,7 @@ import Cookies from 'js-cookie';
 import { loginUserApi, loginPharmacyApi, signupPharmacyApi, signupUserApi } from '@/services/authService';
 import { AuthEntityType } from '@/enums/AuthEntityType';
 import { Role } from '@/enums/Role';
+import { Response } from '@/types/Response';
 
 interface AuthContextType {
     accessToken: string | null;
@@ -23,14 +24,14 @@ interface AuthContextType {
         password: string,
         role: string,
         doctorId?: string,
-    }) => Promise<boolean | null>;
+    }) => Promise<Response>;
     signupPharmacy: (pharmacy: {    
         nameCompany: string,
         vatNumber: string,
         address: string,
         email: string,
         password: string,
-    }) => Promise<boolean | null>;
+    }) => Promise<Response>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -112,9 +113,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         role: string,
         doctorId?: string,
     }) => {
+        //return  error.response.data in case of error
+        //return true in case of success
+        
         try {
             const response = await signupUserApi(user);
-            return response ? true : false;
+            return response;
         } catch (error) {
             console.error('Errore di signup', error);
             return null;
@@ -130,7 +134,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }) => {
         try {
             const response = await signupPharmacyApi(pharmacy);
-            return response ? true : false;
+            return response;
         } catch (error) {
             console.error('Errore di signup', error);
             return null;

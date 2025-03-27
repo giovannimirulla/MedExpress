@@ -8,7 +8,7 @@ import type { AutoCompleteProps } from 'antd';
 import { motion } from 'framer-motion';
 import CardDrug from '@/components/CardDrug';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTruckFast } from '@fortawesome/free-solid-svg-icons';
+import { faUserDoctor, faTruckFast } from '@fortawesome/free-solid-svg-icons';
 import DynamicDrugIcon from '@/components/DynamicDrugIcon';
 import api from '@/utils/api';
 import { useAuth } from '@/context/authContext';
@@ -125,7 +125,7 @@ const Home = () => {
 
   const handleOrder = (drugId: string, packageId: string): void => {
     if (!isLoggedIn()) {
-      messageApi.error('Devi effettuare il login per ordinare un farmaco');
+      messageApi.error('Devi effettuare il login per ordinare un farmaco!');
       return;
     }
 
@@ -135,7 +135,7 @@ const Home = () => {
       if (response.status === 201) {
         console.log('Order success');
         setIsModalOpen(false);
-        messageApi.success('Ordine effettuato con successo');
+        messageApi.success('Ordine effettuato con successo!');
       } else {
         console.error('Order failed');
         messageApi.error('Errore durante l\'ordine');
@@ -176,7 +176,8 @@ const Home = () => {
               variant="solid"
               onClick={() => selectedDrug?.id && handleOrder(selectedDrug.id, item.id)}
             >
-              <FontAwesomeIcon icon={faTruckFast} /> Ordina
+              <FontAwesomeIcon icon={item.prescription ? faUserDoctor: faTruckFast} /> 
+              {item.prescription ? "Richiedi" :"Ordina"}
             </Button>
           ]}
         >
@@ -191,7 +192,7 @@ const Home = () => {
       <br/>
       <Alert
       message="Avviso"
-      description="I farmaci con il pulsante 'Ordina' arancione richiedono la prescrizione del medico. Cliccando su 'Ordina' verrà inviata una richiesta al medico di base."
+      description="I farmaci con il pulsante 'Richiedi' arancione richiedono la prescrizione del medico. Cliccando su 'Richiedi' verrà inviata una richiesta al medico di base."
       type="warning"
       showIcon
       closable

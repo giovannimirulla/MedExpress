@@ -11,6 +11,7 @@ import { useAuth } from '@/context/authContext';
 
 import { AuthEntityType, AuthEntityTypeIcon } from '@/enums/AuthEntityType';
 import { Role } from "@/enums/Role";
+import { Response } from "@/types/Response";
 
 
 
@@ -90,10 +91,10 @@ export default function Signup() {
     companyName: string
   }) => {
     setLoading(true);
-    let success = false;
+    let response: Response | boolean = false;
     if(entity === AuthEntityType.Pharmacy){
 console.log('pharmacy', values);
-      success =  await signupPharmacy({
+      response =  await signupPharmacy({
         nameCompany: values.companyName,
         vatNumber: values.vatNumber,
         address: values.address,
@@ -106,7 +107,7 @@ console.log('pharmacy', values);
       if (role != Role.Doctor && doctor.length > 0) {
         doctorValue = doctor[0].value;
       }
-      success =  await signupUser({
+      response =  await signupUser({
         name: values.name,
         surname: values.surname,
         fiscalCode: values.fiscalCode,
@@ -117,7 +118,8 @@ console.log('pharmacy', values);
         doctorId: doctorValue,
       }) ?? false;
     }
-    if (success) {
+    console.log('response', response);
+    if (typeof response === 'boolean' && response === true) {
       messageApi.success("Account creato con successo! Effettua il login.");
       //wait 5 seconds
       setTimeout(() => {
@@ -125,7 +127,7 @@ console.log('pharmacy', values);
       }
       , 5000);
     } else {
-      messageApi.error("Errore durante la creazione dell'account. Riprova più tardi.");
+      messageApi.error(response.message ? response.message : "Errore durante la creazione dell'account!");
     }
     setLoading(false);
 

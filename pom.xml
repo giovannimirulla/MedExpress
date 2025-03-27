@@ -211,7 +211,7 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<delete dir="${project.resources[0].directory}/static" />
+								<delete dir="${project.resources[0].directory}/static" failOnError="false" />
 							</tasks>
 						</configuration>
 					</execution>
@@ -253,8 +253,16 @@
 								<resource>
 									<directory>${frontend-src-dir}/out</directory>
 									<filtering>false</filtering>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<excludes>
+										<exclude>**/_next/static/**/_buildManifest.js</exclude>
+										<exclude>**/_next/static/**/_ssgManifest.js</exclude>
+									</excludes>
 								</resource>
 							</resources>
+							<overwrite>true</overwrite>
 						</configuration>
 					</execution>
 				</executions>

@@ -56,7 +56,6 @@ out/
 .mvn/
 mvnw
 
-
 types.d.ts
 index.html
 .env

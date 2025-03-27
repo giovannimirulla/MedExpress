@@ -45,13 +45,13 @@ export const signupUserApi = async (user: {
   try {
     const response = await api.post('/user', user);
 
-    if (response.status === 201) {
+    if (response.status === 201) { // 201 Created
       return true;
     }
     return false;
   } catch (error) {
     console.error('Errore di signup', error);
-    return null;
+    return (error as any).response.data; // It returns the error message from the server
   }
 }
 
@@ -71,6 +71,6 @@ export const signupPharmacyApi = async (pharmacy: {
     return false;
   } catch (error) {
     console.error('Errore di signup', error);
-    return null;
+    return (error as any).response.data; // It returns the error message from the server
   }
 }

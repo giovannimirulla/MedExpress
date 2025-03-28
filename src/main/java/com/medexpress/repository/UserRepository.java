@@ -17,7 +17,8 @@ public interface UserRepository extends MongoRepository <User, ObjectId> {
     public boolean existsByFiscalCode(String fiscalCode);
     Optional<User> findByEmail(String email);
     List<User> findByRole(User.Role role);
-    List<User> findByRoleAndNameContainingIgnoreCaseOrSurnameContainingIgnoreCase(User.Role role, String name, String surname);
+    List<User> findByRoleAndNameContainingIgnoreCase(User.Role role, String name);
+    List<User> findByRoleAndSurnameContainingIgnoreCase(User.Role role, String surname);
     List<User> findByRoleAndDoctor(User.Role role, ObjectId doctorId);
 
     //find by doctor id

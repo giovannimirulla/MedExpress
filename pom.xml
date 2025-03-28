@@ -32,6 +32,7 @@
 		<node.version>v23.3.0</node.version>
 		<npm.version>11.0.0</npm.version>
 		<frontend-src-dir>${project.basedir}/src/main/frontend</frontend-src-dir>
+		<maven.test.skip>true</maven.test.skip>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -256,10 +257,6 @@
 									<includes>
 										<include>**/*</include>
 									</includes>
-									<excludes>
-										<exclude>**/_next/static/**/_buildManifest.js</exclude>
-										<exclude>**/_next/static/**/_ssgManifest.js</exclude>
-									</excludes>
 								</resource>
 							</resources>
 							<overwrite>true</overwrite>

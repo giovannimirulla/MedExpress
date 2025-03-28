@@ -2,6 +2,8 @@ package com.medexpress.service;
 
 import java.util.List;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,8 +34,13 @@ public class UserService {
         return userRepository.findByRole(User.Role.DOCTOR);
     }
 
+    // search doctor by name or surname using one query string
     public List<User> searchDoctor(String query) {
-        return userRepository.findByRoleAndNameContainingIgnoreCaseOrSurnameContainingIgnoreCase(User.Role.DOCTOR, query, query);
+        List<User> byName = userRepository.findByRoleAndNameContainingIgnoreCase(User.Role.DOCTOR, query);
+        List<User> bySurname = userRepository.findByRoleAndSurnameContainingIgnoreCase(User.Role.DOCTOR, query);
+        return Stream.concat(byName.stream(), bySurname.stream())
+                     .distinct()
+                     .collect(Collectors.toList());
     }
 
     // create user

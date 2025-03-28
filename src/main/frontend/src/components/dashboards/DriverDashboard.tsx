@@ -100,7 +100,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ orders, updateStatus,
             <div className="grid grid-cols-1">
                 <Card title={`Consegna completata (${driverCompletedOrders.length})`} variant="borderless">
                     <Table<OrderDataType>
-                        columns={columns}
+                        columns={columns.filter((col) => col.key !== 'action')} // Remove action column for completed orders
                         dataSource={driverCompletedOrders}
                         pagination={false}
                     />

@@ -1,4 +1,5 @@
 import api from '@/utils/api';
+import { AxiosError } from 'axios';
 
 export const loginUserApi = async (email: string, password: string) => {
   try {
@@ -48,10 +49,9 @@ export const signupUserApi = async (user: {
     if (response.status === 201) { // 201 Created
       return true;
     }
-    return false;
   } catch (error) {
     console.error('Errore di signup', error);
-    return (error as any).response.data; // It returns the error message from the server
+    return (error as AxiosError).response?.data; // It returns the error message from the server
   }
 }
 
@@ -71,6 +71,6 @@ export const signupPharmacyApi = async (pharmacy: {
     return false;
   } catch (error) {
     console.error('Errore di signup', error);
-    return (error as any).response.data; // It returns the error message from the server
+    return (error as AxiosError).response?.data; // It returns the error message from the server
   }
 }

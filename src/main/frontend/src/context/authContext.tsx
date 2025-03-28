@@ -25,7 +25,7 @@ interface AuthContextType {
         role: string,
         doctorId?: string,
     }) => Promise<Response>;
-    signupPharmacy: (pharmacy: {    
+    signupPharmacy: (pharmacy: {
         nameCompany: string,
         vatNumber: string,
         address: string,
@@ -113,16 +113,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         role: string,
         doctorId?: string,
     }) => {
-        //return  error.response.data in case of error
-        //return true in case of success
-        
-        try {
-            const response = await signupUserApi(user);
-            return response;
-        } catch (error) {
-            console.error('Errore di signup', error);
-            return null;
-        }
+        return await signupUserApi(user) as Response;
+
     };
 
     const signupPharmacy = async (pharmacy: {
@@ -132,13 +124,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email: string,
         password: string,
     }) => {
-        try {
-            const response = await signupPharmacyApi(pharmacy);
-            return response;
-        } catch (error) {
-            console.error('Errore di signup', error);
-            return null;
-        }
+        return await signupPharmacyApi(pharmacy) as Response;
     };
 
     const logout = () => {

@@ -7,8 +7,6 @@ import { faTruckFast } from '@fortawesome/free-solid-svg-icons';
 import { Drug } from '@/types/Drug';
 import DynamicDrugIcon from './DynamicDrugIcon';
 
-
-
 //props key and drug
 interface CardDrugProps {
     key: number;
@@ -17,26 +15,51 @@ interface CardDrugProps {
 }
 
 const CardDrug: React.FC<CardDrugProps> = ({ drug, showModel }) => {
-
     return (
-        <Card title={drug.medicinale.denominazioneMedicinale}
-        variant='borderless' 
+        <Card
+            title={<h2 className="text-lg font-bold text-gray-800">{drug.medicinale.denominazioneMedicinale}</h2>}
+            variant="borderless"
+            className="shadow-lg rounded-lg border border-gray-200"
             actions={[
-                <div key={drug.medicinale.denominazioneMedicinale} className='w-full h-full' onClick={() => showModel(drug)}><FontAwesomeIcon icon={faTruckFast} /> Ordina</div>
-            ]}>
+                <div
+                    key={drug.medicinale.denominazioneMedicinale}
+                    className="w-full h-full text-center text-blue-600 hover:text-blue-800 cursor-pointer"
+                    onClick={() => showModel(drug)}
+                >
+                    <FontAwesomeIcon icon={faTruckFast} /> Ordina
+                </div>
+            ]}
+        >
             <Meta
-                // avatar={<Avatar src="https://api.dicebear.com/7.x/miniavs/svg?seed=8" />}
                 avatar={
-                // <FontAwesomeIcon icon={solidIcons[iconName] as IconDefinition || solidIcons.faExclamationTriangle} size="2x" />
-                <DynamicDrugIcon drug={drug} />
-            
-            } //http://localhost:8080/api/v1/icon/type/${drug.formaFarmaceutica}
-                title={drug.descrizioneFormaDosaggio}
-                description= {<div><p><strong>Somministrazione: </strong>{drug.vieSomministrazione}</p><br/><p><strong>formaFarmaceutica: </strong>{drug.formaFarmaceutica}</p></div>}
-            />
+                    <DynamicDrugIcon drug={drug} />
+                }
+                title={<p className="text-sm text-gray-500 italic">{drug.descrizioneFormaDosaggio}</p>}
+                description={<>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4 items-start text-gray-700">
+                        {/* Somministrazione */}
+                        <p className="font-semibold">Somministrazione:</p>
+                        <p className="text-right">{drug.vieSomministrazione}</p>
 
+                        {/* Dosaggio */}
+                        <p className="font-semibold">Dosaggio:</p>
+                        <p className="text-right">{drug.descrizioneFormaDosaggio}</p>
+                    </div>
+
+                    {/* Principi attivi */}
+                    <div className="text-gray-700">
+                        <p className="font-semibold col-span-2 ">Principi attivi:</p>
+                        <ul className="list-disc pl-6 col-span-2 text-sm">
+                            {drug.principiAttiviIt.map((principio: string, index: number) => (
+                                <li key={index}>{principio}</li>
+                            ))}
+                        </ul>
+                    </div>
+                </>}
+
+            />
         </Card>
-    )
-}
+    );
+};
 
 export default CardDrug;

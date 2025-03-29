@@ -6,6 +6,7 @@ export interface Drug {
     formaFarmaceutica: string;
     vieSomministrazione: string;
     descrizioneFormaDosaggio: string;
+    principiAttiviIt:string[];
     confezioni: {
       idPackage: string;
       denominazionePackage: string;

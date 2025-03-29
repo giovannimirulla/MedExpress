@@ -1,7 +1,7 @@
 "use client";
 import Container from '@/components/Container';
 import { useState } from 'react';
-import { App,AutoComplete, Input, Pagination, PaginationProps, Spin, Modal, List, Button, Alert, message } from 'antd';
+import { App, AutoComplete, Input, Pagination, PaginationProps, Spin, Modal, List, Button, Alert, message } from 'antd';
 import { Drug } from '@/types/Drug';
 import type { AutoCompleteProps } from 'antd';
 
@@ -54,7 +54,7 @@ const Home = () => {
           id: confezione.idPackage,
           title: confezione.denominazionePackage,
           description: confezione.descrizioneRf.join(', '),
-          prescription: confezione.classeFornitura === 'RR' || confezione.classeFornitura === 'RNR' 
+          prescription: confezione.classeFornitura === 'RR' || confezione.classeFornitura === 'RNR'
         }
       ]);
     });
@@ -131,145 +131,140 @@ const Home = () => {
 
     api.post('/order', { drugId, packageId })
       .then((response) => {
-      console.log('Order response', response);
-      if (response.status === 201) {
-        console.log('Order success');
-        setIsModalOpen(false);
-        messageApi.success('Ordine effettuato con successo!');
-      } else {
-        console.error('Order failed');
-        messageApi.error('Errore durante l\'ordine');
-      }
+        console.log('Order response', response);
+        if (response.status === 201) {
+          console.log('Order success');
+          setIsModalOpen(false);
+          messageApi.success('Ordine effettuato con successo!');
+        } else {
+          console.error('Order failed');
+          messageApi.error('Errore durante l\'ordine');
+        }
       })
       .catch((error) => {
-      console.error('Order error', error);
+        console.error('Order error', error);
       });
   }
   return (
     <App>
-       {contextHolder}
-    <main className="relative min-h-screen w-screen" id="home">
-      <div aria-hidden="true" className="absolute inset-0 grid grid-cols-2 -space-x-52 opacity-40 dark:opacity-20">
-        <div className="blur-[106px] h-56 bg-gradient-to-br from-primary to-purple-400 dark:from-blue-700"></div>
-        <div className="blur-[106px] h-32 bg-gradient-to-r from-cyan-400 to-sky-300 dark:to-indigo-600"></div>
-      </div>
-      <Container fullScreen>
-        <Modal title={<span className='flex items-center'>{selectedDrug && <div className='mr-4'><DynamicDrugIcon drug={selectedDrug} /></div>} {selectedDrug ? selectedDrug.medicinale.denominazioneMedicinale : ''}</span>} open={isModalOpen} onCancel={handleCancel}  footer={null}>
-          {/* {selectedDrug && selectedDrug.confezioni.map((confezione, index) => (
-            <div key={index} className="mb-4">
-              <p><strong>Denominazione Package:</strong> {confezione.denominazionePackage}</p>
-              <p><strong>Classe Fornitura:</strong> {confezione.classeFornitura}</p>
-              <p><strong>AIC:</strong> {confezione.aic}</p>
-              <p><strong>Descrizione RF:</strong> {confezione.descrizioneRf.join(', ')}</p>
-            </div>
-            
-          ))} */}
-           <List
-      itemLayout="horizontal"
-      dataSource={list}
-      renderItem={(item) => (
-        <List.Item
-          actions={[
-            <Button 
-              key={item.key} 
-              color={item.prescription ? "orange" : "primary"} 
-              variant="solid"
-              onClick={() => selectedDrug?.id && handleOrder(selectedDrug.id, item.id)}
-            >
-              <FontAwesomeIcon icon={item.prescription ? faUserDoctor: faTruckFast} /> 
-              {item.prescription ? "Richiedi" :"Ordina"}
-            </Button>
-          ]}
-        >
-            <List.Item.Meta
-              title={<p><strong>{item.title}</strong></p>}
-              description={item.description}
+      {contextHolder}
+      <main className="relative min-h-screen w-screen" id="home">
+        <div aria-hidden="true" className="absolute inset-0 grid grid-cols-2 -space-x-52 opacity-40 dark:opacity-20">
+          <div className="blur-[106px] h-56 bg-gradient-to-br from-primary to-purple-400 dark:from-blue-700"></div>
+          <div className="blur-[106px] h-32 bg-gradient-to-r from-cyan-400 to-sky-300 dark:to-indigo-600"></div>
+        </div>
+        <Container fullScreen>
+          <Modal title={<span className='flex items-center'>{selectedDrug && <div className='mr-4'><DynamicDrugIcon drug={selectedDrug} /></div>} {selectedDrug ? selectedDrug.medicinale.denominazioneMedicinale : ''}</span>} open={isModalOpen} onCancel={handleCancel} footer={null}>
+            {list.some(item => item.prescription) && (
+              <>
+                <Alert
+                  message="Avviso"
+                  description="I farmaci con il pulsante 'Richiedi' arancione richiedono la prescrizione del medico. Cliccando su 'Richiedi' verrà inviata una richiesta al medico di base."
+                  type="warning"
+                  showIcon
+                  closable
+                />
+                <br />
+              </>
+            )}
+            <List
+              itemLayout="horizontal"
+              dataSource={list}
+              renderItem={(item) => (
+                <List.Item
+                  actions={[
+                    <Button
+                      key={item.key}
+                      color={item.prescription ? "orange" : "primary"}
+                      variant="solid"
+                      onClick={() => selectedDrug?.id && handleOrder(selectedDrug.id, item.id)}
+                    >
+                      <FontAwesomeIcon icon={item.prescription ? faUserDoctor : faTruckFast} />
+                      {item.prescription ? "Richiedi" : "Ordina"}
+                    </Button>
+                  ]}
+                >
+                  <List.Item.Meta
+                    title={<p><strong>{item.title}</strong></p>}
+                    description={item.description}
+                  />
+                </List.Item>
+              )}
             />
-        </List.Item>
-      )}
-    />
 
-      <br/>
-      <Alert
-      message="Avviso"
-      description="I farmaci con il pulsante 'Richiedi' arancione richiedono la prescrizione del medico. Cliccando su 'Richiedi' verrà inviata una richiesta al medico di base."
-      type="warning"
-      showIcon
-      closable
-    />
 
-        </Modal>
+          </Modal>
 
-        <motion.div
-          className="ml-auto h flex flex-col items-center justify-center "
-          initial={{ height: '80vh' }}
-          animate={{ height: selected ? '6rem' : '80vh' }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className=" text-center mx-auto h-full flex flex-col items-center justify-center w-3/4">
-            <motion.div
-              className="mb-8"
-              initial={{ opacity: 1 }}
-              animate={{
-                opacity: selected ? 0 : 1,
-                transitionEnd: {
-                  display: selected ? 'none' : 'block',
-                },
-              }}
-              transition={{ duration: 0.5 }}
-
-            >
-              <h1 className="text-body dark:text-white font-bold text-5xl md:text-6xl xl:text-7xl">Cerca qui il tuo <span className="text-primary">farmaco</span></h1>
-            </motion.div>
-
-            <AutoComplete
-              className={`z-20 w-2/3 h-auto`}
-              options={options}
-              onSelect={onSelect}
-              onSearch={handleSearch}
-
-              autoFocus
-            >
-              <Input.Search size="large" placeholder="es. Tachipirina" enterButton />
-            </AutoComplete>
-          </div>
-        </motion.div>
-        <div className="flex items-start justify-center">
-          {selected && drugs.length === 0 && (
-            <motion.div
-              className="flex items-center justify-center h-[80vh] z-50"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Spin size="large" />
-            </motion.div>
-          )}
-          <motion.div className={` grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4  ${selected ? 'block' : 'hidden'}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: loading ? 0.5 : (selected ? 1 : 0) }}
+          <motion.div
+            className="ml-auto h flex flex-col items-center justify-center "
+            initial={{ height: '80vh' }}
+            animate={{ height: selected ? '6rem' : '80vh' }}
             transition={{ duration: 0.5 }}
           >
-            {drugs.map((drug, index) => (
-              <CardDrug key={index} drug={drug} showModel={showModal} />
-            ))}
+            <div className=" text-center mx-auto h-full flex flex-col items-center justify-center w-3/4">
+              <motion.div
+                className="mb-8"
+                initial={{ opacity: 1 }}
+                animate={{
+                  opacity: selected ? 0 : 1,
+                  transitionEnd: {
+                    display: selected ? 'none' : 'block',
+                  },
+                }}
+                transition={{ duration: 0.5 }}
+
+              >
+                <h1 className="text-body dark:text-white font-bold text-5xl md:text-6xl xl:text-7xl">Cerca qui il tuo <span className="text-primary">farmaco</span></h1>
+              </motion.div>
+
+              <AutoComplete
+                className={`z-20 w-2/3 h-auto`}
+                options={options}
+                onSelect={onSelect}
+                onSearch={handleSearch}
+
+                autoFocus
+              >
+                <Input.Search size="large" placeholder="es. Tachipirina" enterButton />
+              </AutoComplete>
+            </div>
           </motion.div>
-        </div>
-        <motion.div className={`relative flex justify-center my-8 ${selected ? 'block' : 'hidden'}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: selected ? 1 : 0 }}
+          <div className="flex items-start justify-center">
+            {selected && drugs.length === 0 && (
+              <motion.div
+                className="flex items-center justify-center h-[80vh] z-50"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Spin size="large" />
+              </motion.div>
+            )}
+            <motion.div className={` grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4  ${selected ? 'block' : 'hidden'}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: loading ? 0.5 : (selected ? 1 : 0) }}
+              transition={{ duration: 0.5 }}
+            >
+              {drugs.map((drug, index) => (
+                <CardDrug key={index} drug={drug} showModel={showModal} />
+              ))}
+            </motion.div>
+          </div>
+          <motion.div className={`relative flex justify-center my-8 ${selected ? 'block' : 'hidden'}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: selected ? 1 : 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Pagination className="pagination" pageSize={pageSize} total={totalElements} onChange={onChange} showSizeChanger={false} />
+          </motion.div>
+        </Container>
+        <motion.div
+          className={`absolute bottom-0 w-full h-[30%] bg-pattern -z-10`}
+          initial={{ opacity: 1 }}
+          animate={{ opacity: selected ? 0.4 : 1 }}
           transition={{ duration: 0.5 }}
-        >
-          <Pagination className="pagination" pageSize={pageSize} total={totalElements} onChange={onChange} showSizeChanger={false} />
-        </motion.div>
-      </Container>
-      <motion.div
-        className={`absolute bottom-0 w-full h-[30%] bg-pattern -z-10`}
-        initial={{ opacity: 1 }}
-        animate={{ opacity: selected ? 0.4 : 1 }}
-        transition={{ duration: 0.5 }}
-      ></motion.div>
-    </main>
+        ></motion.div>
+      </main>
     </App>
   )
 }

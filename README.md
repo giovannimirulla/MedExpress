@@ -22,8 +22,6 @@
   <img src="https://img.shields.io/badge/TypeScript-5.0.0-%23007ACC.svg?logo=typescript&logoColor=white"/>
   <!-- JUnit -->
   <img src="https://img.shields.io/badge/JUnit-5.10.0-%2325A162.svg?logo=junit5&logoColor=white"/>
-  <!-- Mockito -->
-  <img src="https://img.shields.io/badge/Mockito-5.5.0-%2300B4AB.svg?logo=mockito&logoColor=white"/>
   <!-- Reactor Test -->
   <img src="https://img.shields.io/badge/Reactor%20Test-3.5.10-%2361DAFB.svg?logo=reactivex&logoColor=white"/>
   <!-- Spring Security -->

@@ -32,7 +32,6 @@
 		<node.version>v23.3.0</node.version>
 		<npm.version>11.0.0</npm.version>
 		<frontend-src-dir>${project.basedir}/src/main/frontend</frontend-src-dir>
-		<maven.test.skip>true</maven.test.skip>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -146,6 +145,35 @@
 			<version>4.1.86.Final</version>
 			<classifier>osx-x86_64</classifier>
 		</dependency>
+		<!-- JUnit 5 -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.10.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Mockito -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>5.5.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>5.5.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Reactor Test (per testare Mono/Flux) -->
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<version>3.5.10</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -212,7 +240,8 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<delete dir="${project.resources[0].directory}/static" failOnError="false" />
+								<delete dir="${project.resources[0].directory}/static"
+									failOnError="false" />
 							</tasks>
 						</configuration>
 					</execution>

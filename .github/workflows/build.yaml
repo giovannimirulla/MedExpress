@@ -44,7 +44,7 @@ jobs:
                   EOF
               
       - name: Build JAR
-        run: ./mvnw package -DskipTests -f pom.xml
+        run: ./mvnw clean package -f pom.xml
               
               
 

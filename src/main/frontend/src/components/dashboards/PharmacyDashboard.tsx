@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Tag, Button } from 'antd';
+import { Card, Table, Tag, Button, Badge } from 'antd';
 import { usePharmacyOrders } from '@/hooks/usePharmacyOrders';
 import { OrderDataType } from '@/interfaces/OrderDataType';
 import { Order } from '@/interfaces/Order';
@@ -9,6 +9,7 @@ import { getTimeDifference } from '@/utils/dateUtils';
 import { StatusPharmacy } from '@/enums/StatusPharmacy';
 import { StatusDriver } from '@/enums/StatusDriver';
 import { StatusDoctor } from '@/enums/StatusDoctor';
+import { Priority } from '@/enums/Priority';
 
 import { SendOutlined } from '@ant-design/icons';
 
@@ -41,7 +42,23 @@ const PharmacyDashboard: React.FC<PharmacyDashboardProps> = ({ orders, updateSta
                 const diff = getTimeDifference(record.updatedAt);
                 return (
                     <div className="flex items-center space-x-2">
-                        <DynamicDrugIcon drug={record.drugPackage} />
+                        {
+                        record.priority === Priority.HIGH ? (
+
+                            <Badge
+                                count={null} // Usa null per un pallino
+                                dot
+                                offset={[-5, 5]} // Regola la posizione del badge
+                                style={{ width: '14px', height: '14px' }} // Aumenta la dimensione del badge
+                                status="processing"
+                                color="red"
+                            >
+                                <DynamicDrugIcon drug={record.drugPackage} />
+                            </Badge>
+                        ) : (
+                            <DynamicDrugIcon drug={record.drugPackage} />
+                        )
+                    }
                         <div className='flex flex-col '>
                             <a className='font-bold'>{record.name}</a>
                             <span className='text-sm'>{record.statusUser}</span>

@@ -16,6 +16,7 @@ import { Role } from '@/enums/Role';
 import { castToStatusPharmacy, castFromStatusPharmacy,  StatusPharmacy } from '@/enums/StatusPharmacy';
 import { castToStatusDriver, castFromStatusDriver, StatusDriver } from '@/enums/StatusDriver';
 import { castToStatusDoctor, castFromStatusDoctor, StatusDoctor } from '@/enums/StatusDoctor';
+import { castToPriority, Priority } from '@/enums/Priority';
 import { OrderResponse } from '@/interfaces/OrderResponse';
 
 const { Content } = Layout;
@@ -41,7 +42,8 @@ export default function Dashboard() {
           ...order,
           statusDoctor: castToStatusDoctor(order.statusDoctor),
           statusPharmacy: castToStatusPharmacy(order.statusPharmacy),
-          statusDriver: castToStatusDriver(order.statusDriver)
+          statusDriver: castToStatusDriver(order.statusDriver),
+          priority: castToPriority(order.priority)
         })));
         console.log("response.data", response.data);
         setLoading(false);
@@ -71,11 +73,12 @@ export default function Dashboard() {
               updatedAt: orderUpdate.updatedAtString,
               statusDoctor: castToStatusDoctor(orderUpdate.statusDoctor),
               statusPharmacy: castToStatusPharmacy(orderUpdate.statusPharmacy),
-              statusDriver: castToStatusDriver(orderUpdate.statusDriver)
+              statusDriver: castToStatusDriver(orderUpdate.statusDriver),
+              priority: castToPriority(orderUpdate.priority),
              } : order
           );
         }
-        return [...prevOrders, { ...orderUpdate, updatedAt: orderUpdate.updatedAtString, statusDoctor: castToStatusDoctor(orderUpdate.statusDoctor), statusPharmacy: castToStatusPharmacy(orderUpdate.statusPharmacy), statusDriver: castToStatusDriver(orderUpdate.statusDriver) }];
+        return [...prevOrders, { ...orderUpdate, updatedAt: orderUpdate.updatedAtString, statusDoctor: castToStatusDoctor(orderUpdate.statusDoctor), statusPharmacy: castToStatusPharmacy(orderUpdate.statusPharmacy), statusDriver: castToStatusDriver(orderUpdate.statusDriver), priority: castToPriority(orderUpdate.priority) }];
       });
     }
 
@@ -162,7 +165,7 @@ console.log("statusString", statusString);
   return (
     <ConfigProvider theme={{ components: { Card: { bodyPadding: 0 } } }}>
       <Layout className="min-h-screen">
-        <Content className="px-16 pt-8">
+        <Content className="px-16 py-8">
           <div className='mb-8'>
             <Title>Benvenuto {name}</Title>
           </div>

@@ -14,12 +14,14 @@ export function usePharmacyOrders(orders: Order[]) {
     return orders
       .filter(filterFn)
       .sort((a, b) => {
+        // Sort by priority first
+        const priorityComparison = (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+        if (priorityComparison !== 0) return priorityComparison;
+
+        // Then sort by date (most recent first)
         const dateA = new Date(a.updatedAt!).getTime();
         const dateB = new Date(b.updatedAt!).getTime();
-        if (dateB !== dateA) {
-          return dateB - dateA;
-        }
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+        return dateB - dateA;
       })
       .map((order: Order): OrderDataType => {
         const defaultMapping: OrderDataType = {

@@ -264,6 +264,7 @@
 									<filtering>false</filtering>
 								</resource>
 							</resources>
+							<overwrite>true</overwrite>
 						</configuration>
 					</execution>
 				</executions>

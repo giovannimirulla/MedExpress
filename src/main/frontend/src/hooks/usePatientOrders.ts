@@ -13,20 +13,24 @@ export function usePatientOrders(orders: Order[]) {
     mapper?: (order: Order, defaultMapping: OrderDataType) => OrderDataType
   ): OrderDataType[] => {
     const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
+
     return orders
       .filter(filterFn)
       .sort((a, b) => {
+        // Sort by priority first
+        const priorityComparison = (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+        if (priorityComparison !== 0) return priorityComparison;
+
+        // Then sort by date (most recent first)
         const dateA = new Date(a.updatedAt!).getTime();
         const dateB = new Date(b.updatedAt!).getTime();
-        if (dateB !== dateA) return dateB - dateA;
-        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+        return dateB - dateA;
       })
       .map((order: Order): OrderDataType => {
         const defaultMapping: OrderDataType = {
           key: order.id,
           id: order.id,
           name: order.drugPackage.medicinale.denominazioneMedicinale,
-          // Utilizzo dei label/color/icon del dottore per la visualizzazione
           statusLabel: StatusDoctorLabel[order.statusDoctor! as StatusDoctor],
           statusColor: StatusDoctorColor[order.statusDoctor! as StatusDoctor],
           statusIcon: StatusDoctorIcon[order.statusDoctor! as StatusDoctor],

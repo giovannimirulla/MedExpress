@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Tag, Button } from 'antd';
+import { Card, Table, Tag, Button,Badge } from 'antd';
 import DynamicDrugIcon from '@/components/DynamicDrugIcon';
 import { getTimeDifference } from '@/utils/dateUtils';
 import { StatusDriver } from '@/enums/StatusDriver';
@@ -11,6 +11,7 @@ import { Order } from '@/interfaces/Order';
 
 import { StatusPharmacy } from '@/enums/StatusPharmacy';
 import { StatusDoctor } from '@/enums/StatusDoctor';
+import { Priority } from '@/enums/Priority';
 
 interface DriverDashboardProps {
     orders: Order[];
@@ -37,7 +38,23 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ orders, updateStatus,
             dataIndex: 'name',
             render: (_: string, record: OrderDataType) => (
                 <div className="flex items-center space-x-2">
-                    <DynamicDrugIcon drug={record.drugPackage} />
+                    {
+                        record.priority === Priority.HIGH ? (
+
+                            <Badge
+                                count={null} // Usa null per un pallino
+                                dot
+                                offset={[-5, 5]} // Regola la posizione del badge
+                                style={{ width: '14px', height: '14px' }} // Aumenta la dimensione del badge
+                                status="processing"
+                                color="red"
+                            >
+                                <DynamicDrugIcon drug={record.drugPackage} />
+                            </Badge>
+                        ) : (
+                            <DynamicDrugIcon drug={record.drugPackage} />
+                        )
+                    }
                     <div className='flex flex-col '>
                         <a className='font-bold'>{record.name}</a>
                         <span className='text-sm'>{record.statusUser}</span>

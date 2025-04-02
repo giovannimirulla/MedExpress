@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table } from 'antd';
+import { Card, Table, Badge } from 'antd';
 import { useDoctorOrders } from '@/hooks/useDoctorOrders';
 import { OrderDataType } from '@/interfaces/OrderDataType';
 import { Order } from '@/interfaces/Order';
@@ -10,6 +10,7 @@ import DynamicDrugIcon from '@/components/DynamicDrugIcon';
 import { StatusPharmacy } from '@/enums/StatusPharmacy';
 import { StatusDriver } from '@/enums/StatusDriver';
 import { StatusDoctor } from '@/enums/StatusDoctor';
+import { Priority } from '@/enums/Priority';
 
 import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 
@@ -40,7 +41,23 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ orders, updateStatus,
             render: (_: string, record: OrderDataType) => {
                 return (
                     <div className="flex items-center space-x-2">
-                        <DynamicDrugIcon drug={record.drugPackage} />
+                        {
+                        record.priority === Priority.HIGH ? (
+
+                            <Badge
+                                count={null} // Usa null per un pallino
+                                dot
+                                offset={[-5, 5]} // Regola la posizione del badge
+                                style={{ width: '14px', height: '14px' }} // Aumenta la dimensione del badge
+                                status="processing"
+                                color="red"
+                            >
+                                <DynamicDrugIcon drug={record.drugPackage} />
+                            </Badge>
+                        ) : (
+                            <DynamicDrugIcon drug={record.drugPackage} />
+                        )
+                    }
                         <div className='flex flex-col '>
                             <a className='font-bold'>{record.name}</a>
                             <span className='text-sm'>{record.statusUser}</span>

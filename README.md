@@ -125,8 +125,8 @@ If you manually switch to a different parent and actually want the inheritance, 
 - [x] UC3: Search for a drug - @giovannimirulla
 - [x] UC4: Order drug - @agatarosselli
 - [x] UC5: Request a prescription - @agatarosselli
-- [x] UC6: Autorize a prescription - @giovannimirulla
-- [x] UC7: Communicate authorization status - @giovannimirulla
+- [x] UC6: Autorize a prescription - @agatarosselli & @giovannimirulla
+- [x] UC7: Communicate authorization status - @agatarosselli & @giovannimirulla
 - [x] UC8: Manage evasion and status order registration - @giovannimirulla
 - [x] UC9: Take charge of the order - @giovannimirulla
 - [x] UC10: Track delivery status - @giovannimirulla
@@ -146,6 +146,8 @@ If you manually switch to a different parent and actually want the inheritance, 
 - [x] Dashboard patient - @giovannimirulla
 - [x] Dashboard doctor - @giovannimirulla
 - [x] Dashboard driver - @giovannimirulla
+- [x] Dashboard drugs - @agatarosselli
+- [x] Priority - @agatarosselli
 
 ### Tests
 

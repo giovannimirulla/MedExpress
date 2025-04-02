@@ -10,13 +10,15 @@ function processDoctorOrders(orders: Order[], status: StatusDoctor): OrderDataTy
     return orders
         .filter((order: Order) => order.statusDoctor === status)
         .sort((a, b) => {
+            // Sort by priority first
+            const priorityComparison = (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+            if (priorityComparison !== 0) return priorityComparison;
+    
+            // Then sort by date (most recent first)
             const dateA = new Date(a.updatedAt!).getTime();
             const dateB = new Date(b.updatedAt!).getTime();
-            if (dateB !== dateA) {
-                return dateB - dateA;
-            }
-            return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-        })
+            return dateB - dateA;
+          })
         .map((order: Order): OrderDataType => ({
             key: order.id,
             id: order.id,

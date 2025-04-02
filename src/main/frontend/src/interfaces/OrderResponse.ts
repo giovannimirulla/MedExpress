@@ -1,11 +1,10 @@
-import { Priority } from '@/enums/Priority';
 import { Entity } from './Entity';
 import { CommonDrug } from './CommonDrug';
 
 export interface OrderResponse {
   id: string;
   drugPackage: CommonDrug;
-  priority: Priority;
+  priority: string;
   statusDoctor: string;
   statusPharmacy: string;
   statusDriver: string;

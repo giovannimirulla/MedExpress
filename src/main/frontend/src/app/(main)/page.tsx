@@ -159,7 +159,7 @@ const Home = () => {
               <>
                 <Alert
                   message="Avviso"
-                  description="I farmaci con il pulsante 'Richiedi' arancione richiedono la prescrizione del medico. Cliccando su 'Richiedi' verrà inviata una richiesta al medico di base."
+                  description="I farmaci con il pulsante 'Richiedi' in arancione richiedono la prescrizione del medico. Cliccando su 'Richiedi' verrà inviata una richiesta al medico di base."
                   type="warning"
                   showIcon
                   closable

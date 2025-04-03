@@ -12,10 +12,11 @@ import { Priority } from '@/enums/Priority';
 
 interface PatientDashboardProps {
     orders: Order[];
+    showModal: (selectedOrder: OrderDataType) => void;
 }
 
 
-const PatientDashboard: React.FC<PatientDashboardProps> = ({ orders }) => {
+const PatientDashboard: React.FC<PatientDashboardProps> = ({ orders, showModal }) => {
 
     const [, setTick] = useState(0);
     useEffect(() => {
@@ -81,6 +82,9 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ orders }) => {
                         columns={columns}
                         dataSource={ordersForDoctorApproval}
                         pagination={false}
+                        onRow={(record: OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
                 <Card title={`Da evadere dalla farmacia (${ordersForPharmacyProcessing.length})`} variant="borderless">
@@ -88,6 +92,9 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ orders }) => {
                         columns={columns}
                         dataSource={ordersForPharmacyProcessing}
                         pagination={false}
+                        onRow={(record: OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
                 <Card title={`Da consegnare dal driver (${ordersForDriverPickup.length})`} variant="borderless">
@@ -95,6 +102,9 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ orders }) => {
                         columns={columns}
                         dataSource={ordersForDriverPickup}
                         pagination={false}
+                        onRow={(record: OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
             </div>
@@ -104,6 +114,9 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ orders }) => {
                         columns={columns}
                         dataSource={ordersCompleted}
                         pagination={false}
+                        onRow={(record: OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
             </div>

@@ -19,9 +19,10 @@ interface DoctorDashboardProps {
     orders: Order[];
     updateStatus: <T extends StatusPharmacy | StatusDriver | StatusDoctor>(orderId: string, status: T) => void;
     isUpdating: boolean;
+    showModal: (selectedOrder: OrderDataType) => void;
 }
 
-const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ orders, updateStatus, isUpdating }) => {
+const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ orders, updateStatus, isUpdating, showModal }) => {
 
     const [, setTick] = useState(0);
     useEffect(() => {
@@ -42,22 +43,22 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ orders, updateStatus,
                 return (
                     <div className="flex items-center space-x-2">
                         {
-                        record.priority === Priority.HIGH ? (
+                            record.priority === Priority.HIGH ? (
 
-                            <Badge
-                                count={null} // Usa null per un pallino
-                                dot
-                                offset={[-5, 5]} // Regola la posizione del badge
-                                style={{ width: '14px', height: '14px' }} // Aumenta la dimensione del badge
-                                status="processing"
-                                color="red"
-                            >
+                                <Badge
+                                    count={null} // Usa null per un pallino
+                                    dot
+                                    offset={[-5, 5]} // Regola la posizione del badge
+                                    style={{ width: '14px', height: '14px' }} // Aumenta la dimensione del badge
+                                    status="processing"
+                                    color="red"
+                                >
+                                    <DynamicDrugIcon drug={record.drugPackage} />
+                                </Badge>
+                            ) : (
                                 <DynamicDrugIcon drug={record.drugPackage} />
-                            </Badge>
-                        ) : (
-                            <DynamicDrugIcon drug={record.drugPackage} />
-                        )
-                    }
+                            )
+                        }
                         <div className='flex flex-col '>
                             <a className='font-bold'>{record.name}</a>
                             <span className='text-sm'>{record.statusUser}</span>
@@ -106,6 +107,9 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ orders, updateStatus,
                         columns={columns}
                         dataSource={doctorPendingOrders}
                         pagination={false}
+                        onRow={(record: OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
                 <Card title={`Approvati (${doctorApprovedOrders.length})`} variant="borderless">
@@ -113,6 +117,9 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ orders, updateStatus,
                         columns={columns.filter((column) => column.key !== 'action')}
                         dataSource={doctorApprovedOrders}
                         pagination={false}
+                        onRow={(record: OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
                 <Card title={`Rifiutati (${doctorRejectedOrders.length})`} variant="borderless">
@@ -120,6 +127,9 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ orders, updateStatus,
                         columns={columns.filter((column) => column.key !== 'action')}
                         dataSource={doctorRejectedOrders}
                         pagination={false}
+                        onRow={(record: OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
             </div>

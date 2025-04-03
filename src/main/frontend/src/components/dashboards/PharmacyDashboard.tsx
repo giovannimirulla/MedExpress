@@ -20,9 +20,11 @@ interface PharmacyDashboardProps {
     orders: Order[];
     updateStatus: <T extends StatusPharmacy | StatusDriver | StatusDoctor>(orderId: string, status: T) => void;
     isUpdating: boolean;
+    showModal: (selectedOrder: OrderDataType) => void;
+    
 }
 
-const PharmacyDashboard: React.FC<PharmacyDashboardProps> = ({ orders, updateStatus, isUpdating }) => {
+const PharmacyDashboard: React.FC<PharmacyDashboardProps> = ({ orders, updateStatus, isUpdating, showModal }) => {
     const [, setTick] = useState(0);
     useEffect(() => {
         const interval = setInterval(() => {
@@ -103,6 +105,9 @@ const PharmacyDashboard: React.FC<PharmacyDashboardProps> = ({ orders, updateSta
                         columns={columns}
                         dataSource={pharmacyPendingOrders}
                         pagination={false}
+                        onRow={(record:OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
                 <Card title={`In preparazione (${pharmacyUnderPreparationOrders.length})`} variant="borderless">
@@ -110,6 +115,9 @@ const PharmacyDashboard: React.FC<PharmacyDashboardProps> = ({ orders, updateSta
                         columns={columns}
                         dataSource={pharmacyUnderPreparationOrders}
                         pagination={false}
+                        onRow={(record:OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
                 <Card title={`Pronto per la consegna (${pharmacyReadyOrders.length})`} variant="borderless">
@@ -117,6 +125,9 @@ const PharmacyDashboard: React.FC<PharmacyDashboardProps> = ({ orders, updateSta
                         columns={columns.filter(col => col.key !== 'action')}
                         dataSource={pharmacyReadyOrders}
                         pagination={false}
+                        onRow={(record:OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
             </div>
@@ -126,6 +137,9 @@ const PharmacyDashboard: React.FC<PharmacyDashboardProps> = ({ orders, updateSta
                         columns={columns.filter(col => col.key !== 'action')}
                         dataSource={pharmacyDeliveredOrders}
                         pagination={false}
+                        onRow={(record:OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
             </div>

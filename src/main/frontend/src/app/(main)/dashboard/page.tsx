@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Layout, ConfigProvider, Spin, Alert, Typography } from 'antd';
+import { Layout, ConfigProvider, Spin, Alert, Typography, Modal } from 'antd';
 import api from '@/utils/api';
 import { socket } from '@/services/socketService';
 import { useAuth } from '@/context/authContext';
@@ -13,14 +13,20 @@ import { OrderSocket } from '@/interfaces/OrderSocket';
 import { AuthEntityType } from '@/enums/AuthEntityType';
 import { Role } from '@/enums/Role';
 
-import { castToStatusPharmacy, castFromStatusPharmacy,  StatusPharmacy } from '@/enums/StatusPharmacy';
+import { castToStatusPharmacy, castFromStatusPharmacy, StatusPharmacy } from '@/enums/StatusPharmacy';
 import { castToStatusDriver, castFromStatusDriver, StatusDriver } from '@/enums/StatusDriver';
 import { castToStatusDoctor, castFromStatusDoctor, StatusDoctor } from '@/enums/StatusDoctor';
 import { castToPriority, Priority } from '@/enums/Priority';
 import { OrderResponse } from '@/interfaces/OrderResponse';
 
+
+import { OrderDataType } from '@/interfaces/OrderDataType';
+
+
+
 const { Content } = Layout;
 const { Title } = Typography;
+
 
 export default function Dashboard() {
   const { getRole, getEntityType, getId, getName } = useAuth();
@@ -33,6 +39,20 @@ export default function Dashboard() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderDataType | null>(null);
+
+
+  const showModal = (selectedOrder: OrderDataType) => {
+    setIsModalOpen(true);
+    setSelectedOrder(selectedOrder);
+
+  };
+
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
 
   // Recupero iniziale degli ordini
   useEffect(() => {
@@ -68,14 +88,14 @@ export default function Dashboard() {
         const idx = prevOrders.findIndex(order => order.id === orderUpdate.id);
         if (idx !== -1) {
           return prevOrders.map(order =>
-            order.id === orderUpdate.id ? { 
-              ...order, 
+            order.id === orderUpdate.id ? {
+              ...order,
               updatedAt: orderUpdate.updatedAtString,
               statusDoctor: castToStatusDoctor(orderUpdate.statusDoctor),
               statusPharmacy: castToStatusPharmacy(orderUpdate.statusPharmacy),
               statusDriver: castToStatusDriver(orderUpdate.statusDriver),
               priority: castToPriority(orderUpdate.priority),
-             } : order
+            } : order
           );
         }
         return [...prevOrders, { ...orderUpdate, updatedAt: orderUpdate.updatedAtString, statusDoctor: castToStatusDoctor(orderUpdate.statusDoctor), statusPharmacy: castToStatusPharmacy(orderUpdate.statusPharmacy), statusDriver: castToStatusDriver(orderUpdate.statusDriver), priority: castToPriority(orderUpdate.priority) }];
@@ -112,7 +132,7 @@ export default function Dashboard() {
       url = '/doctor/updateStatus';
     }
     setIsUpdating(true);
-console.log("statusString", statusString);
+    console.log("statusString", statusString);
     api.post(url, { orderId, status: statusString })
       .then(() => {
         setOrders((prevOrders: Order[]) =>
@@ -153,13 +173,13 @@ console.log("statusString", statusString);
   // Selezione del dashboard in base al ruolo
   let dashboardContent;
   if (entityType === AuthEntityType.Pharmacy) {
-    dashboardContent = <PharmacyDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} />;
+    dashboardContent = <PharmacyDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} showModal={showModal} />;
   } else if (role === Role.Doctor) {
-    dashboardContent = <DoctorDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} />;
+    dashboardContent = <DoctorDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} showModal={showModal} />;
   } else if (role === Role.Driver) {
-    dashboardContent = <DriverDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} />;
+    dashboardContent = <DriverDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} showModal={showModal} />;
   } else {
-    dashboardContent = <PatientDashboard orders={orders} />;
+    dashboardContent = <PatientDashboard orders={orders} showModal={showModal} />;
   }
 
   return (
@@ -169,7 +189,28 @@ console.log("statusString", statusString);
           <div className='mb-8'>
             <Title>Benvenuto {name}</Title>
           </div>
-          {dashboardContent}
+          <Modal title={
+            <span className='flex items-center'>
+              {selectedOrder ? selectedOrder.name : ''}</span>}
+            open={isModalOpen} onCancel={handleCancel} footer={null}>
+            <div className='flex flex-col gap-4'>
+              <div className='flex items-center justify-between'>
+                <span className='font-bold'>Nome</span>
+                <span>{selectedOrder ? selectedOrder.name : ''}</span>
+              </div>
+              <div className='flex items-center justify-between'>
+                <span className='font-bold'>Stato</span>
+                <span>{selectedOrder ? selectedOrder.statusUser : ''}</span>
+              </div>
+              <div className='flex items-center justify-between'>
+                <span className='font-bold'>Data</span>
+                <span>{selectedOrder ? selectedOrder.updatedAt : ''}</span>
+              </div>
+            </div>
+          </Modal>
+            
+
+            {dashboardContent}
         </Content>
       </Layout>
     </ConfigProvider>

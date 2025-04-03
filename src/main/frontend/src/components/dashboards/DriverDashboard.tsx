@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Tag, Button,Badge } from 'antd';
+import { Card, Table, Tag, Button, Badge } from 'antd';
 import DynamicDrugIcon from '@/components/DynamicDrugIcon';
 import { getTimeDifference } from '@/utils/dateUtils';
 import { StatusDriver } from '@/enums/StatusDriver';
@@ -17,10 +17,11 @@ interface DriverDashboardProps {
     orders: Order[];
     updateStatus: <T extends StatusPharmacy | StatusDriver | StatusDoctor>(orderId: string, status: T) => void;
     isUpdating: boolean;
+    showModal: (selectedOrder: OrderDataType) => void;
 }
 
 
-const DriverDashboard: React.FC<DriverDashboardProps> = ({ orders, updateStatus, isUpdating }) => {
+const DriverDashboard: React.FC<DriverDashboardProps> = ({ orders, updateStatus, isUpdating, showModal }) => {
 
     const [, setTick] = useState(0);
     useEffect(() => {
@@ -97,6 +98,9 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ orders, updateStatus,
                         columns={columns}
                         dataSource={driverPendingOrders}
                         pagination={false}
+                        onRow={(record: OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
                 <Card title={`Preso in carico (${driverTakenOverOrders.length})`} variant="borderless">
@@ -104,6 +108,9 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ orders, updateStatus,
                         columns={columns}
                         dataSource={driverTakenOverOrders}
                         pagination={false}
+                        onRow={(record: OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
                 <Card title={`In consegna (${driverInDeliveryOrders.length})`} variant="borderless">
@@ -111,6 +118,9 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ orders, updateStatus,
                         columns={columns}
                         dataSource={driverInDeliveryOrders}
                         pagination={false}
+                        onRow={(record: OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
             </div>
@@ -120,6 +130,9 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ orders, updateStatus,
                         columns={columns.filter((col) => col.key !== 'action')} // Remove action column for completed orders
                         dataSource={driverCompletedOrders}
                         pagination={false}
+                        onRow={(record: OrderDataType) => ({
+                            onClick: () => showModal(record)
+                        })}
                     />
                 </Card>
             </div>

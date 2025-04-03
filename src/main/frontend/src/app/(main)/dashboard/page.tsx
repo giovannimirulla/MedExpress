@@ -21,7 +21,7 @@ import { OrderResponse } from '@/interfaces/OrderResponse';
 
 
 import { OrderDataType } from '@/interfaces/OrderDataType';
-
+import DynamicDrugIcon from '@/components/DynamicDrugIcon';
 
 
 const { Content } = Layout;
@@ -189,28 +189,67 @@ export default function Dashboard() {
           <div className='mb-8'>
             <Title>Benvenuto {name}</Title>
           </div>
-          <Modal title={
-            <span className='flex items-center'>
-              {selectedOrder ? selectedOrder.name : ''}</span>}
-            open={isModalOpen} onCancel={handleCancel} footer={null}>
-            <div className='flex flex-col gap-4'>
-              <div className='flex items-center justify-between'>
-                <span className='font-bold'>Nome</span>
-                <span>{selectedOrder ? selectedOrder.name : ''}</span>
+          <Modal
+            title={
+              <div className="flex items-center gap-2">
+                {/* Rendi l'icona solo una volta */}
+                {selectedOrder?.drugPackage && (
+                  <DynamicDrugIcon drug={selectedOrder.drugPackage} />
+                )}
+                <span className="text-xl font-bold text-primary">
+                  {selectedOrder ? selectedOrder.name : 'Dettagli Ordine'}
+                </span>
               </div>
-              <div className='flex items-center justify-between'>
-                <span className='font-bold'>Stato</span>
-                <span>{selectedOrder ? selectedOrder.statusUser : ''}</span>
+            }
+            open={isModalOpen}
+            onCancel={handleCancel}
+            footer={null}
+            className="custom-modal"
+          >
+            <div className="flex flex-col gap-6 p-6 bg-gray-50 rounded-lg shadow-lg">
+              {/* Nome */}
+              <div className="flex items-center justify-between border-b pb-3">
+                <span className="font-bold text-gray-600 uppercase tracking-wide">Nome</span>
+                <span className="text-gray-800 font-medium">
+                  {selectedOrder ? selectedOrder.name : 'N/A'}
+                </span>
               </div>
-              <div className='flex items-center justify-between'>
-                <span className='font-bold'>Data</span>
-                <span>{selectedOrder ? selectedOrder.updatedAt : ''}</span>
+
+              {/* Stato */}
+              <div className="flex items-center justify-between border-b pb-3">
+                <span className="font-bold text-gray-600 uppercase tracking-wide">Stato</span>
+                <span
+                  className={`font-medium ${
+                    selectedOrder?.statusUser ? 'text-green-600' : 'text-gray-800'
+                  }`}
+                >
+                  {selectedOrder ? selectedOrder.statusUser : 'N/A'}
+                </span>
+              </div>
+
+              {/* Status Label */}
+              <div className="flex items-center justify-between border-b pb-3">
+                <span className="font-bold text-gray-600 uppercase tracking-wide">Status Label</span>
+                <span className="text-gray-800 font-medium">
+                  {selectedOrder ? selectedOrder.statusLabel : 'N/A'}
+                </span>
+              </div>
+
+              {/* Data */}
+              <div className="flex items-center justify-between border-b pb-3">
+                <span className="font-bold text-gray-600 uppercase tracking-wide">Data</span>
+                <span className="text-gray-800 font-medium">
+                  {selectedOrder
+                    ? new Date(selectedOrder.updatedAt).toISOString().split('T')[0] // Formato YYYY-MM-DD
+                    : 'N/A'}
+                </span>
               </div>
             </div>
-          </Modal>
-            
 
-            {dashboardContent}
+     
+          </Modal>
+
+          {dashboardContent}
         </Content>
       </Layout>
     </ConfigProvider>

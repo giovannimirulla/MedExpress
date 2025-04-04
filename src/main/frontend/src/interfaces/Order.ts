@@ -15,15 +15,34 @@ export interface Order {
     updatedAt: string;
     updatedBy?: Entity;
     user: {
+        id: string;
         name: string;
         surname: string;
+        email: string;
         address: string;
         doctor: {
             name: string;
             surname: string;
+            email: string;
+            id: string;
         };
     };
     pharmacy?: {
+        id: string;
         companyName: string;
+        email: string;
+    };
+    driver?: {
+        id: string;
+        name: string;
+        surname: string;
+        email: string;
+        address: string;
+        doctor: {
+            name: string;
+            surname: string;
+            email: string;
+            id: string;
+        };
     };
 }

@@ -19,7 +19,7 @@ export const StatusDriverColor: Record<StatusDriver, string> = {
     [StatusDriver.PENDING]: "warning",
     [StatusDriver.TAKEN_OVER]: "warning",
     [StatusDriver.IN_DELIVERY]: "warning",
-    [StatusDriver.DELIVERED_TO_USER]: "success",
+    [StatusDriver.DELIVERED_TO_USER]: "green",
 };
 
 export const StatusDriverIcon: Record<StatusDriver,  React.ReactElement> = {

@@ -4,6 +4,7 @@ import { OrderDataType } from '@/interfaces/OrderDataType';
 import { Priority } from '@/enums/Priority';
 import { StatusDriver, StatusDriverLabel, StatusDriverColor, StatusDriverIcon } from '@/enums/StatusDriver';
 import { StatusPharmacy } from '@/enums/StatusPharmacy';
+import { AuthEntityType } from '@/enums/AuthEntityType';
 
 export function useDriverOrders(orders: Order[]) {
   const processDriverOrders = useCallback((filterFn: (order: Order) => boolean): OrderDataType[] => {
@@ -34,7 +35,31 @@ export function useDriverOrders(orders: Order[]) {
         priority: order.priority,
         statusDoctor: order.statusDoctor,
         statusPharmacy: order.statusPharmacy,
-        statusDriver: order.statusDriver
+        statusDriver: order.statusDriver,
+        pharmacy: {
+          name: order.pharmacy?.companyName || "Non assegnata",
+          email: order.pharmacy?.email || "Non assegnata",
+          entityType: AuthEntityType.Pharmacy,
+          id: order.pharmacy?.id || "Non assegnata",
+        },
+        driver: {
+          name: order.driver?.name && order.driver?.surname ? order.driver?.name + " " +  order.driver?.surname : "Non assegnato",
+          email: order.driver?.email || "Non assegnato",
+          entityType: AuthEntityType.User,
+          id: order.driver?.id || "Non assegnato",
+      },
+      user: {
+          name: order.user.name && order.user.surname ? order.user.name + " " + order.user.surname : "Non specificato",
+          email: order.user.email,
+          entityType: AuthEntityType.User,
+          id: order.user.id,
+          doctor: {
+              name: order.user.doctor.name + " " + order.user.doctor.surname,
+              email: order.user.doctor.email,
+              entityType: AuthEntityType.User,
+              id: order.user.doctor.id,   
+          },
+      },
       }));
   }, [orders]);
 

@@ -39,7 +39,11 @@ const CardDrug: React.FC<CardDrugProps> = ({ drug, showModel }) => {
                     <div className="grid grid-cols-2 gap-x-6 gap-y-4 items-start text-gray-700">
                         {/* Somministrazione */}
                         <p className="font-semibold">Somministrazione:</p>
-                        <p className="text-right">{drug.vieSomministrazione}</p>
+                        <ul className="list-disc pl-6 col-span-2 text-sm">
+                            {drug.vieSomministrazione.map((viaSomministrazione: string, index: number) => (
+                                <li key={index}>{viaSomministrazione}</li>
+                            ))}
+                        </ul>
 
                         {/* Dosaggio */}
                         <p className="font-semibold">Dosaggio:</p>

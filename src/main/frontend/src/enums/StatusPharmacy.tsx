@@ -20,7 +20,7 @@ export const StatusPharmacyColor: Record<StatusPharmacy, string> = {
     [StatusPharmacy.PENDING]: "warning",
     [StatusPharmacy.UNDER_PREPARATION]: "warning",
     [StatusPharmacy.READY_FOR_PICKUP]: "warning",
-    [StatusPharmacy.DELIVERED_TO_DRIVER]: "success",
+    [StatusPharmacy.DELIVERED_TO_DRIVER]: "green",
 };
 
 export const StatusPharmacyIcon: Record<StatusPharmacy, React.ReactElement> = {

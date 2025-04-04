@@ -20,4 +20,9 @@ export interface OrderDataType {
   statusDoctor: StatusDoctor;
   statusPharmacy: StatusPharmacy;
   statusDriver: StatusDriver;
-}
+  pharmacy: Entity;
+  driver: Entity;
+  user: Entity & {
+    doctor: Entity;
+  };
+} 

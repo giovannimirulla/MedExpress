@@ -12,15 +12,21 @@ export interface OrderResponse {
   updatedAt: string;
   updatedBy?: Entity;
   user: {
+    id: string;
     name: string;
     surname: string;
+    email: string;
     address: string;
     doctor: {
       name: string;
       surname: string;
+      email: string;
+      id: string;
     };
   };
   pharmacy?: {
     companyName: string;
+    email: string;
+    id: string;
   };
 }

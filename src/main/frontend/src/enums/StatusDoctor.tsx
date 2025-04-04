@@ -18,7 +18,7 @@ export const StatusDoctorColor: Record<StatusDoctor, string> = {
     [StatusDoctor.PENDING]: "warning",
     [StatusDoctor.APPROVED]: "green",
     [StatusDoctor.REJECTED]: "danger",
-    [StatusDoctor.NO_APPROVAL_NEEDED]: "info",
+    [StatusDoctor.NO_APPROVAL_NEEDED]: "default",
 };
 export const StatusDoctorIcon: Record<StatusDoctor, React.ReactElement> = {
     [StatusDoctor.PENDING]: <QuestionCircleOutlined />,

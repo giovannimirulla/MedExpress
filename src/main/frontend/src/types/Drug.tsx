@@ -4,7 +4,7 @@ export interface Drug {
         denominazioneMedicinale: string;
     };
     formaFarmaceutica: string;
-    vieSomministrazione: string;
+    vieSomministrazione: string[];
     descrizioneFormaDosaggio: string;
     principiAttiviIt:string[];
     confezioni: {

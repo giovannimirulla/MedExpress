@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Layout, ConfigProvider, Spin, Alert, Typography, Modal } from 'antd';
+import { Layout, ConfigProvider, Spin, Alert, Typography, Modal, Divider, Badge, Tag } from 'antd';
 import api from '@/utils/api';
 import { socket } from '@/services/socketService';
 import { useAuth } from '@/context/authContext';
@@ -13,15 +13,17 @@ import { OrderSocket } from '@/interfaces/OrderSocket';
 import { AuthEntityType } from '@/enums/AuthEntityType';
 import { Role } from '@/enums/Role';
 
-import { castToStatusPharmacy, castFromStatusPharmacy, StatusPharmacy } from '@/enums/StatusPharmacy';
-import { castToStatusDriver, castFromStatusDriver, StatusDriver } from '@/enums/StatusDriver';
-import { castToStatusDoctor, castFromStatusDoctor, StatusDoctor } from '@/enums/StatusDoctor';
+import { castToStatusPharmacy, castFromStatusPharmacy, StatusPharmacy, StatusPharmacyColor, StatusPharmacyIcon, StatusPharmacyLabel } from '@/enums/StatusPharmacy';
+import { castToStatusDriver, castFromStatusDriver, StatusDriver, StatusDriverColor, StatusDriverIcon, StatusDriverLabel } from '@/enums/StatusDriver';
+import { castToStatusDoctor, castFromStatusDoctor, StatusDoctor, StatusDoctorColor, StatusDoctorIcon, StatusDoctorLabel } from '@/enums/StatusDoctor';
 import { castToPriority, Priority } from '@/enums/Priority';
 import { OrderResponse } from '@/interfaces/OrderResponse';
 
 
 import { OrderDataType } from '@/interfaces/OrderDataType';
 import DynamicDrugIcon from '@/components/DynamicDrugIcon';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStaffSnake, faTruckFast, faUserDoctor } from '@fortawesome/free-solid-svg-icons';
 
 
 const { Content } = Layout;
@@ -44,6 +46,7 @@ export default function Dashboard() {
 
 
   const showModal = (selectedOrder: OrderDataType) => {
+    console.log("selectedOrder", selectedOrder);
     setIsModalOpen(true);
     setSelectedOrder(selectedOrder);
 
@@ -189,69 +192,146 @@ export default function Dashboard() {
           <div className='mb-8'>
             <Title>Benvenuto {name}</Title>
           </div>
+
           <Modal
-            title={
-              <div className="flex items-center gap-2">
-                {selectedOrder?.drugPackage && (
-                  <DynamicDrugIcon drug={selectedOrder.drugPackage} />
-                )}
-                <span className="text-xl font-bold text-gray-800">
-                  {selectedOrder ? selectedOrder.name : 'Dettagli Ordine'}
-                </span>
-              </div>
-            }
             open={isModalOpen}
             onCancel={handleCancel}
             footer={null}
             className="custom-modal"
             style={{
-              top: '50%',
-              transform: 'translateY(-50%)',
+              top: '20%',
+
             }}
+            width={"60%"}
           >
-            <div className="flex flex-col gap-6 p-6 bg-gray-50 rounded-lg shadow-lg">
-              <>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4 items-start text-gray-700">
-                  <p className="font-semibold">Somministrazione:</p>
-                  <p className="text-right">{selectedOrder?.drugPackage.vieSomministrazione}</p>
+            <>
+              {/* 2 div in orizzonatale, la prima contente l'icona del farmaco e la seconda il nome del farmaco e altri dati */}
+              <div className="flex">
+                <div className="flex items-center gap-4 m-4">
 
-                  <p className="font-semibold">Dosaggio:</p>
-                  <p className="text-right">{selectedOrder?.drugPackage.descrizioneFormaDosaggio}</p>
+
+                  {
+                    selectedOrder ? (
+                      selectedOrder.priority === Priority.HIGH ? (
+                        <Badge
+                          count={null} // Usa null per un pallino
+                          dot
+                          offset={[-20, 15]} // Regola la posizione del badge
+                          style={{ width: '30px', height: '30px' }} // Aumenta la dimensione del badge
+                          status="processing"
+                          color="red"
+                        >
+                          <DynamicDrugIcon drug={selectedOrder.drugPackage} size='large' />
+                        </Badge>
+                      ) : (
+                        <DynamicDrugIcon drug={selectedOrder.drugPackage} size='large' />
+                      )
+                    ) : null
+                  }
+
+                </div>
+                <div className="flex flex-col text-left m-4">
+                  <span className="text-2xl font-bold text-gray-800">
+                    {selectedOrder?.drugPackage.medicinale.denominazioneMedicinale}
+                  </span>
+                  <div className="  items-start text-gray-700">
+                    <p className="font-semibold">Somministrazione:</p>
+                    <ul className="list-disc pl-6 col-span-2 text-sm">
+                      {selectedOrder?.drugPackage.vieSomministrazione.map((viaSomministrazione: string, index: number) => (
+                        <li key={index}>{viaSomministrazione}</li>
+                      ))}
+                    </ul>
+
+                    <p className="font-semibold">Dosaggio:</p>
+                    <p className="text-right">{selectedOrder?.drugPackage.descrizioneFormaDosaggio}</p>
+                  </div>
+
+                  <div className="text-gray-700">
+                    <p className="font-semibold col-span-2">Principi attivi:</p>
+                    <ul className="list-disc pl-6 col-span-2 text-sm">
+                      {selectedOrder?.drugPackage.principiAttiviIt.map((principio: string, index: number) => (
+                        <li key={index}>{principio}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <Divider plain>               <span className="text-sm text-gray-500">
+                {selectedOrder?.updatedAt && `Ultimo aggiornamento: ${new Date(selectedOrder.updatedAt).toLocaleString('it-IT', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                })}`}
+              </span></Divider>
+
+
+              {/* 3 div in orizzontale, la prima contente icon medico e dati del medico, la seconda della farmacia e la terza del driver */}
+              <div className="grid grid-cols-3 gap-x-6 gap-y-4 items-start text-gray-700">
+                <div className="flex items-center gap-2">
+                  <div className={`h-12 w-12 flex items-center justify-center rounded-full text-lightBlue bg-lightBlue/20`}>
+                    <FontAwesomeIcon icon={faUserDoctor} />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm text-gray-500">
+                      {selectedOrder?.user.doctor && <span><strong>Dottore:</strong> {selectedOrder.user.doctor.name}</span>}
+                    </span>
+                    <div>
+                      {selectedOrder && <Tag color={StatusDoctorColor[selectedOrder.statusDoctor! as StatusDoctor]} icon={StatusDoctorIcon[selectedOrder.statusDoctor! as StatusDoctor]}>
+                        {StatusDoctorLabel[selectedOrder.statusDoctor! as StatusDoctor]}
+                      </Tag>}
+                    </div>
+                  </div>
                 </div>
 
-                <div className="text-gray-700">
-                  <p className="font-semibold col-span-2">Principi attivi:</p>
-                  <ul className="list-disc pl-6 col-span-2 text-sm">
-                    {selectedOrder?.drugPackage.principiAttiviIt.map((principio: string, index: number) => (
-                      <li key={index}>{principio}</li>
-                    ))}
-                  </ul>
+                <div className="flex items-center gap-2">
+                  <div className={`h-12 w-12 flex items-center justify-center rounded-full text-green bg-green/20`}>
+                    <FontAwesomeIcon icon={faStaffSnake} />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm text-gray-500">
+                      {selectedOrder?.pharmacy && <span><strong>Farmacia:</strong> {selectedOrder.pharmacy.name}</span>}
+                    </span>
+                    <div>
+                      {selectedOrder && <Tag color={StatusPharmacyColor[selectedOrder.statusPharmacy! as StatusPharmacy]} icon={StatusPharmacyIcon[selectedOrder.statusPharmacy! as StatusPharmacy]}>
+                        {StatusPharmacyLabel[selectedOrder.statusPharmacy! as StatusPharmacy]}
+                      </Tag>}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Linea divisoria */}
-                <hr className="my-4 border-t border-gray-300 w-3/4 mx-auto" />
+                <div className="flex items-center gap-2">
+                  <div className={`h-12 w-12 flex items-center justify-center rounded-full text-amber bg-amber/20`}>
+                    <FontAwesomeIcon icon={faTruckFast} />
+                  </div>
 
-                {/* Campi secondari */}
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4 items-start text-gray-700">
-                  <p className="font-semibold">Stato Farmacia:</p>
-                  <p className="text-right">{selectedOrder?.statusPharmacy}</p>
-
-                  <p className="font-semibold">Stato Driver:</p>
-                  <p className="text-right">{selectedOrder?.statusDriver}</p>
-
-                  <p className="font-semibold">Stato Medico:</p>
-                  <p className="text-right">{selectedOrder?.statusDoctor}</p>
-
-                  <p className="font-semibold">Priorità:</p>
-                  <p className="text-right">{selectedOrder?.priority}</p>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm text-gray-500">
+                      {selectedOrder?.driver && <span><strong>Driver:</strong> {selectedOrder.driver.name}</span>}
+                    </span>
+                    <div>
+                      {selectedOrder && <Tag color={StatusDriverColor[selectedOrder.statusDriver! as StatusDriver]} icon={StatusDriverIcon[selectedOrder.statusDriver! as StatusDriver]}>
+                        {StatusDriverLabel[selectedOrder.statusDriver! as StatusDriver]}
+                      </Tag>}
+                    </div>
+                  </div>
                 </div>
-              </>
-            </div>
+
+              </div>
+
+
+
+            </>
           </Modal>
 
           {dashboardContent}
         </Content>
       </Layout>
-    </ConfigProvider>
+    </ConfigProvider >
   );
 }

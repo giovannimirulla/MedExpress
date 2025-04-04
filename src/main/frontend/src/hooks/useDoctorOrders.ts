@@ -3,6 +3,7 @@ import { OrderDataType } from '@/interfaces/OrderDataType';
 import { Order } from '@/interfaces/Order';
 import { Priority } from '@/enums/Priority';
 import { StatusDoctor, StatusDoctorLabel, StatusDoctorColor, StatusDoctorIcon } from '@/enums/StatusDoctor';
+import { AuthEntityType } from '@/enums/AuthEntityType';
 
 function processDoctorOrders(orders: Order[], status: StatusDoctor): OrderDataType[] {
     const priorityOrder: Record<string, number> = { [Priority.HIGH]: 2, [Priority.NORMAL]: 1 };
@@ -33,7 +34,31 @@ function processDoctorOrders(orders: Order[], status: StatusDoctor): OrderDataTy
             priority: order.priority,
             statusDoctor: order.statusDoctor,
             statusPharmacy: order.statusPharmacy,
-            statusDriver: order.statusDriver
+            statusDriver: order.statusDriver,
+            pharmacy: {
+                name: order.pharmacy?.companyName || "Non assegnata",
+                email: order.pharmacy?.email || "Non assegnata",
+                entityType: AuthEntityType.Pharmacy,
+                id: order.pharmacy?.id || "Non assegnata",
+            },
+            driver: {
+                name: order.driver?.name && order.driver?.surname ? order.driver?.name + " " +  order.driver?.surname : "Non assegnato",
+                email: order.driver?.email || "Non assegnato",
+                entityType: AuthEntityType.User,
+                id: order.driver?.id || "Non assegnato",
+            },
+            user: {
+                name: order.user.name && order.user.surname ? order.user.name + " " + order.user.surname : "Non specificato",
+                email: order.user.email,
+                entityType: AuthEntityType.User,
+                id: order.user.id,
+                doctor: {
+                    name: order.user.doctor.name + " " + order.user.doctor.surname,
+                    email: order.user.doctor.email,
+                    entityType: AuthEntityType.User,
+                    id: order.user.doctor.id,   
+                },
+            },
         }));
 }
 

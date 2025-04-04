@@ -9,9 +9,10 @@ interface DynamicDrugIconProps {
   drug: {
     formaFarmaceutica: string;
   };
+  size?: "small" | "medium" | "large";
 }
 
-const DynamicDrugIcon: React.FC<DynamicDrugIconProps> = ({ drug }) => {
+const DynamicDrugIcon: React.FC<DynamicDrugIconProps> = ({ drug, size = "small" }) => {
   const [iconData, setIconData] = useState<{ name: keyof typeof solidIcons; color: string } | null>({ name: "faKitMedical", color: "gray" });
 
   const colorMap = {
@@ -35,6 +36,18 @@ const DynamicDrugIcon: React.FC<DynamicDrugIconProps> = ({ drug }) => {
     "rose": "text-rose bg-rose/20",
   };
 
+  const sizeMap = {
+    "small": "w-12 h-12",
+    "medium": "w-24 h-24",
+    "large": "w-40 h-40",
+  };
+
+  const sizeIconMap = {
+    "small": "text-2xl",
+    "medium": "text-3xl",
+    "large": "text-6xl",
+  };
+
   useEffect(() => {
 
     const fetchIcon = async () => {
@@ -53,12 +66,14 @@ const DynamicDrugIcon: React.FC<DynamicDrugIconProps> = ({ drug }) => {
   }, [drug.formaFarmaceutica]);
 
   const colorClass = colorMap[iconData?.color as keyof typeof colorMap] || colorMap["gray"];
+  const sizeClass = sizeMap[size as keyof typeof sizeMap] || sizeMap["small"];
+  const sizeIconClass = sizeIconMap[size as keyof typeof sizeIconMap] || sizeIconMap["small"];
 
   return (
     <div>
       {iconData ? (
-        <div className={`w-12 h-12 flex items-center justify-center rounded-full ${colorClass}`}>
-          <FontAwesomeIcon icon={solidIcons[iconData.name] as IconDefinition || solidIcons.faExclamationTriangle} className={` text-2xl`} />
+        <div className={`${sizeClass} flex items-center justify-center rounded-full ${colorClass}`}>
+          <FontAwesomeIcon icon={solidIcons[iconData.name] as IconDefinition || solidIcons.faExclamationTriangle} className={sizeIconClass} />
         </div>
       ) : (
         <p>Loading...</p>

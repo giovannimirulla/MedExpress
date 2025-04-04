@@ -24,6 +24,7 @@ interface PharmacyDashboardProps {
     
 }
 
+
 const PharmacyDashboard: React.FC<PharmacyDashboardProps> = ({ orders, updateStatus, isUpdating, showModal }) => {
     const [, setTick] = useState(0);
     useEffect(() => {

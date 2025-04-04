@@ -192,11 +192,10 @@ export default function Dashboard() {
           <Modal
             title={
               <div className="flex items-center gap-2">
-                {/* Rendi l'icona solo una volta */}
                 {selectedOrder?.drugPackage && (
                   <DynamicDrugIcon drug={selectedOrder.drugPackage} />
                 )}
-                <span className="text-xl font-bold text-primary">
+                <span className="text-xl font-bold text-gray-800">
                   {selectedOrder ? selectedOrder.name : 'Dettagli Ordine'}
                 </span>
               </div>
@@ -205,48 +204,49 @@ export default function Dashboard() {
             onCancel={handleCancel}
             footer={null}
             className="custom-modal"
+            style={{
+              top: '50%',
+              transform: 'translateY(-50%)',
+            }}
           >
             <div className="flex flex-col gap-6 p-6 bg-gray-50 rounded-lg shadow-lg">
-              {/* Nome */}
-              <div className="flex items-center justify-between border-b pb-3">
-                <span className="font-bold text-gray-600 uppercase tracking-wide">Nome</span>
-                <span className="text-gray-800 font-medium">
-                  {selectedOrder ? selectedOrder.name : 'N/A'}
-                </span>
-              </div>
+              <>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4 items-start text-gray-700">
+                  <p className="font-semibold">Somministrazione:</p>
+                  <p className="text-right">{selectedOrder?.drugPackage.vieSomministrazione}</p>
 
-              {/* Stato */}
-              <div className="flex items-center justify-between border-b pb-3">
-                <span className="font-bold text-gray-600 uppercase tracking-wide">Stato</span>
-                <span
-                  className={`font-medium ${
-                    selectedOrder?.statusUser ? 'text-green-600' : 'text-gray-800'
-                  }`}
-                >
-                  {selectedOrder ? selectedOrder.statusUser : 'N/A'}
-                </span>
-              </div>
+                  <p className="font-semibold">Dosaggio:</p>
+                  <p className="text-right">{selectedOrder?.drugPackage.descrizioneFormaDosaggio}</p>
+                </div>
 
-              {/* Status Label */}
-              <div className="flex items-center justify-between border-b pb-3">
-                <span className="font-bold text-gray-600 uppercase tracking-wide">Status Label</span>
-                <span className="text-gray-800 font-medium">
-                  {selectedOrder ? selectedOrder.statusLabel : 'N/A'}
-                </span>
-              </div>
+                <div className="text-gray-700">
+                  <p className="font-semibold col-span-2">Principi attivi:</p>
+                  <ul className="list-disc pl-6 col-span-2 text-sm">
+                    {selectedOrder?.drugPackage.principiAttiviIt.map((principio: string, index: number) => (
+                      <li key={index}>{principio}</li>
+                    ))}
+                  </ul>
+                </div>
 
-              {/* Data */}
-              <div className="flex items-center justify-between border-b pb-3">
-                <span className="font-bold text-gray-600 uppercase tracking-wide">Data</span>
-                <span className="text-gray-800 font-medium">
-                  {selectedOrder
-                    ? new Date(selectedOrder.updatedAt).toISOString().split('T')[0] // Formato YYYY-MM-DD
-                    : 'N/A'}
-                </span>
-              </div>
+                {/* Linea divisoria */}
+                <hr className="my-4 border-t border-gray-300 w-3/4 mx-auto" />
+
+                {/* Campi secondari */}
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4 items-start text-gray-700">
+                  <p className="font-semibold">Stato Farmacia:</p>
+                  <p className="text-right">{selectedOrder?.statusPharmacy}</p>
+
+                  <p className="font-semibold">Stato Driver:</p>
+                  <p className="text-right">{selectedOrder?.statusDriver}</p>
+
+                  <p className="font-semibold">Stato Medico:</p>
+                  <p className="text-right">{selectedOrder?.statusDoctor}</p>
+
+                  <p className="font-semibold">Priorità:</p>
+                  <p className="text-right">{selectedOrder?.priority}</p>
+                </div>
+              </>
             </div>
-
-     
           </Modal>
 
           {dashboardContent}

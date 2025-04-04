@@ -3,6 +3,7 @@ import { CommonDrug } from './CommonDrug';
 
 export interface OrderResponse {
   id: string;
+  packageId: string;
   drugPackage: CommonDrug;
   priority: string;
   statusDoctor: string;

@@ -36,7 +36,7 @@
 <br>
 
 <p align="center">
-<img src="docs/images/screenshot.png" alt="screenshot">
+<img src="docs/images/home.png" alt="screenshot">
 </p><br>
 
 # How to run the project
@@ -87,6 +87,23 @@ To prevent this, the project POM contains empty overrides for these elements.
 If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
 
 <br>
+
+# Screenshot
+
+### Search drugs
+<p align="center">
+<img src="docs/images/search.png" alt="screenshot">
+</p><br>
+
+### Dashboard
+<p align="center">
+<img src="docs/images/dashboard.png" alt="screenshot">
+</p><br>
+
+### Order details
+<p align="center">
+<img src="docs/images/modal.png" alt="screenshot">
+</p><br>
 
 # Design Pattern
 

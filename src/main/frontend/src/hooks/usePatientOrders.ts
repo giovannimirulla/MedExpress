@@ -79,7 +79,7 @@ export function usePatientOrders(orders: Order[]) {
         order.statusDoctor === StatusDoctor.REJECTED,
       (order, defaultMapping) => ({
         ...defaultMapping,
-        statusUser: `${order.user.doctor.name} ${order.user.doctor.surname}`
+        statusUser: `Dott. ${order.user.doctor.name} ${order.user.doctor.surname}`
       })
     ),
     [processOrders]

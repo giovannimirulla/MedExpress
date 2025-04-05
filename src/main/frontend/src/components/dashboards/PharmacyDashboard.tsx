@@ -101,7 +101,7 @@ const PharmacyDashboard: React.FC<PharmacyDashboardProps> = ({ orders, updateSta
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <Card title={`In attesa (${pharmacyPendingOrders.length})`} variant="borderless">
+                <Card title={`In attesa (${pharmacyPendingOrders.length})`} >
                     <Table<OrderDataType>
                         columns={columns}
                         dataSource={pharmacyPendingOrders}
@@ -111,7 +111,7 @@ const PharmacyDashboard: React.FC<PharmacyDashboardProps> = ({ orders, updateSta
                         })}
                     />
                 </Card>
-                <Card title={`In preparazione (${pharmacyUnderPreparationOrders.length})`} variant="borderless">
+                <Card title={`In preparazione (${pharmacyUnderPreparationOrders.length})`} >
                     <Table<OrderDataType>
                         columns={columns}
                         dataSource={pharmacyUnderPreparationOrders}
@@ -121,7 +121,7 @@ const PharmacyDashboard: React.FC<PharmacyDashboardProps> = ({ orders, updateSta
                         })}
                     />
                 </Card>
-                <Card title={`Pronto per la consegna (${pharmacyReadyOrders.length})`} variant="borderless">
+                <Card title={`Pronto per la consegna (${pharmacyReadyOrders.length})`} >
                     <Table<OrderDataType>
                         columns={columns.filter(col => col.key !== 'action')}
                         dataSource={pharmacyReadyOrders}
@@ -133,7 +133,7 @@ const PharmacyDashboard: React.FC<PharmacyDashboardProps> = ({ orders, updateSta
                 </Card>
             </div>
             <div className="grid grid-cols-1">
-                <Card title={`Consegna completata (${pharmacyDeliveredOrders.length})`} variant="borderless">
+                <Card title={`Consegna completata (${pharmacyDeliveredOrders.length})`} >
                     <Table<OrderDataType>
                         columns={columns.filter(col => col.key !== 'action')}
                         dataSource={pharmacyDeliveredOrders}

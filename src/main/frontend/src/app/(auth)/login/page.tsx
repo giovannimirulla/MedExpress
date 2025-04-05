@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
 import { App, Button, Form, Input, Flex, message, Segmented } from "antd";
 import { useAuth } from '@/context/authContext';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCapsules } from "@fortawesome/free-solid-svg-icons";
 
 import { AuthEntityType, AuthEntityTypeIcon } from '@/enums/AuthEntityType';
 
@@ -50,9 +52,7 @@ export default function Login() {
         <div className="w-full md:w-1/2 flex items-center justify-center">
           <Form name="login" initialValues={{ remember: true }} onFinish={onFinish}>
             <div className="flex items-center space-x-2 no-underline">
-              <div aria-hidden="true" className="flex space-x-1">
-                <div className="h-10 w-2 bg-primary"></div>
-              </div>
+               <FontAwesomeIcon icon={faCapsules} className="text-primary h-12" />
               <span className="text-5xl font-bold text-body dark:text-white">MedExpress</span>
             </div>
             <div className="sm:mx-auto sm:w-full sm:max-w-sm mt-16 mb-8">
@@ -89,8 +89,13 @@ export default function Login() {
                 {/* <a className="dark:text-white" href="/forgot-password">
                   Password dimenticata?
                 </a> */}
-                <a className="dark:text-white" href="/signup">
-                  Non hai un account? Registrati qui!
+                <a className="dark:text-white group" href="/signup">
+                    <span className="transition-colors duration-300 group-hover:text-black mr-2">
+                    Non hai un account?
+                    </span>
+                    <span className="transition-colors duration-300 group-hover:text-primary">
+                    Registrati qui!
+                    </span>
                 </a>
               </Flex>
             </Form.Item>

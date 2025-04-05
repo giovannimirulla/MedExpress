@@ -1,5 +1,5 @@
 
-import { CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, SendOutlined, ClockCircleOutlined, InboxOutlined } from '@ant-design/icons';
 
 export enum StatusDriver {
     PENDING,
@@ -23,9 +23,9 @@ export const StatusDriverColor: Record<StatusDriver, string> = {
 };
 
 export const StatusDriverIcon: Record<StatusDriver,  React.ReactElement> = {
-    [StatusDriver.PENDING]: <QuestionCircleOutlined />,
-    [StatusDriver.TAKEN_OVER]: <QuestionCircleOutlined />,
-    [StatusDriver.IN_DELIVERY]: <QuestionCircleOutlined />,
+    [StatusDriver.PENDING]: <ClockCircleOutlined />,
+    [StatusDriver.TAKEN_OVER]: <InboxOutlined />,
+    [StatusDriver.IN_DELIVERY]: <SendOutlined />,
     [StatusDriver.DELIVERED_TO_USER]: <CheckCircleOutlined />,
 };
 

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Layout, ConfigProvider, Spin, Alert, Typography, Modal, Divider, Badge, Tag } from 'antd';
+import { Layout, ConfigProvider, Spin, Alert, Modal, Divider, Badge, Tag } from 'antd';
 import api from '@/utils/api';
 import { socket } from '@/services/socketService';
 import { useAuth } from '@/context/authContext';
@@ -27,7 +27,6 @@ import { faStaffSnake, faTruckFast, faUserDoctor } from '@fortawesome/free-solid
 
 
 const { Content } = Layout;
-const { Title } = Typography;
 
 
 export default function Dashboard() {
@@ -187,10 +186,10 @@ export default function Dashboard() {
 
   return (
     <ConfigProvider theme={{ components: { Card: { bodyPadding: 0 } } }}>
-      <Layout className="min-h-screen">
-        <Content className="px-16 py-8">
-          <div className='mb-8'>
-            <Title>Benvenuto {name}</Title>
+      <Layout className="min-h-screen dark:bg-black bg-gray-50">
+        <Content className="px-16 pb-16 pt-8">
+          <div className='mb-8 '>
+            <h1 className='dark:text-white text-gray-800 font-bold text-4xl'>Benvenuto {name}</h1>
           </div>
 
           <Modal
@@ -230,22 +229,22 @@ export default function Dashboard() {
                   }
 
                 </div>
+                
                 <div className="flex flex-col text-left m-4">
-                  <span className="text-2xl font-bold text-gray-800">
+                <span className="text-2xl font-bold text-gray-800">
                     {selectedOrder?.drugPackage.medicinale.denominazioneMedicinale}
                   </span>
-                  <div className="  items-start text-gray-700">
+                  {(selectedOrder?.drugPackage?.vieSomministrazione?.length ?? 0) > 0 && <div className="  items-start text-gray-700 ">
+                  <p className="text-sm text-gray-500 italic mb-4">{selectedOrder?.drugPackage.descrizioneFormaDosaggio}</p>
                     <p className="font-semibold">Somministrazione:</p>
                     <ul className="list-disc pl-6 col-span-2 text-sm">
                       {selectedOrder?.drugPackage.vieSomministrazione.map((viaSomministrazione: string, index: number) => (
                         <li key={index}>{viaSomministrazione}</li>
                       ))}
                     </ul>
+                  </div>}
 
-                    <p className="font-semibold">Dosaggio:</p>
-                    <p className="text-right">{selectedOrder?.drugPackage.descrizioneFormaDosaggio}</p>
-                  </div>
-
+                  {(selectedOrder?.drugPackage?.principiAttiviIt?.length ?? 0) > 0 &&
                   <div className="text-gray-700">
                     <p className="font-semibold col-span-2">Principi attivi:</p>
                     <ul className="list-disc pl-6 col-span-2 text-sm">
@@ -254,6 +253,8 @@ export default function Dashboard() {
                       ))}
                     </ul>
                   </div>
+                  }
+
                 </div>
               </div>
 

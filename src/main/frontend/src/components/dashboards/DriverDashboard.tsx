@@ -93,7 +93,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ orders, updateStatus,
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <Card title={`In attesa (${driverPendingOrders.length})`} variant="borderless">
+                <Card title={`In attesa (${driverPendingOrders.length})`} >
                     <Table<OrderDataType>
                         columns={columns}
                         dataSource={driverPendingOrders}
@@ -103,7 +103,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ orders, updateStatus,
                         })}
                     />
                 </Card>
-                <Card title={`Preso in carico (${driverTakenOverOrders.length})`} variant="borderless">
+                <Card title={`Preso in carico (${driverTakenOverOrders.length})`} >
                     <Table<OrderDataType>
                         columns={columns}
                         dataSource={driverTakenOverOrders}
@@ -113,7 +113,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ orders, updateStatus,
                         })}
                     />
                 </Card>
-                <Card title={`In consegna (${driverInDeliveryOrders.length})`} variant="borderless">
+                <Card title={`In consegna (${driverInDeliveryOrders.length})`} >
                     <Table<OrderDataType>
                         columns={columns}
                         dataSource={driverInDeliveryOrders}
@@ -125,7 +125,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ orders, updateStatus,
                 </Card>
             </div>
             <div className="grid grid-cols-1">
-                <Card title={`Consegna completata (${driverCompletedOrders.length})`} variant="borderless">
+                <Card title={`Consegna completata (${driverCompletedOrders.length})`} >
                     <Table<OrderDataType>
                         columns={columns.filter((col) => col.key !== 'action')} // Remove action column for completed orders
                         dataSource={driverCompletedOrders}

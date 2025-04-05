@@ -102,7 +102,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ orders, updateStatus,
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <Card title={`In attesa (${doctorPendingOrders.length})`} variant="borderless">
+                <Card title={`In attesa (${doctorPendingOrders.length})`} >
                     <Table<OrderDataType>
                         columns={columns}
                         dataSource={doctorPendingOrders}
@@ -112,7 +112,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ orders, updateStatus,
                         })}
                     />
                 </Card>
-                <Card title={`Approvati (${doctorApprovedOrders.length})`} variant="borderless">
+                <Card title={`Approvati (${doctorApprovedOrders.length})`} >
                     <Table<OrderDataType>
                         columns={columns.filter((column) => column.key !== 'action')}
                         dataSource={doctorApprovedOrders}
@@ -122,11 +122,12 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ orders, updateStatus,
                         })}
                     />
                 </Card>
-                <Card title={`Rifiutati (${doctorRejectedOrders.length})`} variant="borderless">
+                <Card title={`Rifiutati (${doctorRejectedOrders.length})`} >
                     <Table<OrderDataType>
                         columns={columns.filter((column) => column.key !== 'action')}
                         dataSource={doctorRejectedOrders}
                         pagination={false}
+                        style={{ height: doctorRejectedOrders.length === 0 ? '100%' : 'auto' }}
                         onRow={(record: OrderDataType) => ({
                             onClick: () => showModal(record)
                         })}

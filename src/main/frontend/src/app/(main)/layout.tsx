@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import Footer from "@/components/Footer";
-import Heading from "@/components/Heading";
-
 
 export const metadata: Metadata = {
   title: "MedExpress",
@@ -15,7 +13,6 @@ export default function RootLayout({
 }>) {
   return (
       <div>
-        <Heading />
         {children}
         <Footer />
         </div>

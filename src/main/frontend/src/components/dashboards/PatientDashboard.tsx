@@ -77,7 +77,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ orders, showModal }
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <Card title={`In attesa autorizzazione medico (${ordersForDoctorApproval.length})`} variant="borderless">
+                <Card title={`In attesa autorizzazione medico (${ordersForDoctorApproval.length})`}>
                     <Table<OrderDataType>
                         columns={columns}
                         dataSource={ordersForDoctorApproval}
@@ -87,7 +87,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ orders, showModal }
                         })}
                     />
                 </Card>
-                <Card title={`Da evadere dalla farmacia (${ordersForPharmacyProcessing.length})`} variant="borderless">
+                <Card title={`Da evadere dalla farmacia (${ordersForPharmacyProcessing.length})`} >
                     <Table<OrderDataType>
                         columns={columns}
                         dataSource={ordersForPharmacyProcessing}
@@ -97,11 +97,12 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ orders, showModal }
                         })}
                     />
                 </Card>
-                <Card title={`Da consegnare dal driver (${ordersForDriverPickup.length})`} variant="borderless">
+                <Card title={`Da consegnare dal driver (${ordersForDriverPickup.length})`} >
                     <Table<OrderDataType>
                         columns={columns}
                         dataSource={ordersForDriverPickup}
                         pagination={false}
+                        style={{ height: ordersForDriverPickup.length === 0 ? '100%' : 'auto' }}
                         onRow={(record: OrderDataType) => ({
                             onClick: () => showModal(record)
                         })}
@@ -109,7 +110,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ orders, showModal }
                 </Card>
             </div>
             <div className="grid grid-cols-1">
-                <Card title={`Ordini Completati (${ordersCompleted.length})`} variant="borderless">
+                <Card title={`Ordini Completati (${ordersCompleted.length})`} >
                     <Table<OrderDataType>
                         columns={columns}
                         dataSource={ordersCompleted}

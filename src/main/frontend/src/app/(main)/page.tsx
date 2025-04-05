@@ -1,7 +1,7 @@
 "use client";
 import Container from '@/components/Container';
 import { useState } from 'react';
-import { App, AutoComplete, Input, Pagination, PaginationProps, Spin, Modal, List, Button, Alert, message } from 'antd';
+import { App, AutoComplete, Input, Pagination, PaginationProps, Spin, Modal, List, Button, Alert, message, Tag } from 'antd';
 import { Drug } from '@/types/Drug';
 import type { AutoCompleteProps } from 'antd';
 
@@ -12,12 +12,15 @@ import { faUserDoctor, faTruckFast } from '@fortawesome/free-solid-svg-icons';
 import DynamicDrugIcon from '@/components/DynamicDrugIcon';
 import api from '@/utils/api';
 import { useAuth } from '@/context/authContext';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import Heading from '@/components/Heading';
 
 interface DataType {
   key: number;
   id: string;
   title: string;
   description: string;
+  tag: string;
   prescription: boolean;
 }
 
@@ -28,7 +31,7 @@ const Home = () => {
   const [selected, setSelected] = useState(false);
   const [drugs, setDrugs] = useState<Drug[]>([]);
   const [totalElements, setTotalElements] = useState(0);
-  const [pageSize] = useState(16);
+  const [pageSize] = useState(15);
   const [currentPage, setCurrentPage] = useState(0);
   const [searchedValue, setSearchedValue] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,8 +55,9 @@ const Home = () => {
         {
           key: index,
           id: confezione.idPackage,
-          title: confezione.denominazionePackage,
-          description: confezione.descrizioneRf.join(', '),
+          title: confezione.denominazionePackage.split('"')[1],
+          description: confezione.denominazionePackage.split('"')[2],
+          tag: confezione.descrizioneRf.join(', '),
           prescription: confezione.classeFornitura === 'RR' || confezione.classeFornitura === 'RNR'
         }
       ]);
@@ -146,6 +150,8 @@ const Home = () => {
       });
   }
   return (
+    <>
+     <Heading />
     <App>
       {contextHolder}
       <main className="relative min-h-screen w-screen" id="home">
@@ -186,7 +192,11 @@ const Home = () => {
                 >
                   <List.Item.Meta
                     title={<p><strong>{item.title}</strong></p>}
-                    description={item.description}
+                    description={<div className='flex flex-col'><span>{item.description}</span>  
+                    <div className='mt-2'>
+                    <Tag color="blue" className="text-sm" icon={<InfoCircleOutlined />}>
+                      {item.tag}
+                    </Tag></div></div>}
                   />
                 </List.Item>
               )}
@@ -266,6 +276,7 @@ const Home = () => {
         ></motion.div>
       </main>
     </App>
+    </>
   )
 }
 

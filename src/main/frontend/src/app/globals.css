@@ -24,7 +24,30 @@ body {
   display: flex;
   flex-direction: column;
 }
+.ant-card-head{
+
+  margin-bottom: 0 !important;
+}
 .ant-card-actions{
  
   margin-top: auto !important;
+}
+
+.ant-card-body{
+  overflow: hidden;
+  height: 100%;
+}
+
+.ant-table-empty, .ant-spin-nested-loading, .ant-spin-container, .ant-table-container, .ant-table-content, .ant-table-content > table {
+  height: 100%;
+}
+
+
+
+.ant-table-empty  .ant-table-tbody  .ant-table-cell{
+border-bottom: 0 !important;
+}
+
+.ant-table{
+  border-radius: 0 !important;
 }

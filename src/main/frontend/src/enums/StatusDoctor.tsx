@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircleOutlined, CloseCircleOutlined, QuestionCircleOutlined, SendOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, SendOutlined } from '@ant-design/icons';
 
 export enum StatusDoctor {
     PENDING,
@@ -21,7 +21,7 @@ export const StatusDoctorColor: Record<StatusDoctor, string> = {
     [StatusDoctor.NO_APPROVAL_NEEDED]: "default",
 };
 export const StatusDoctorIcon: Record<StatusDoctor, React.ReactElement> = {
-    [StatusDoctor.PENDING]: <QuestionCircleOutlined />,
+    [StatusDoctor.PENDING]: <ClockCircleOutlined />,
     [StatusDoctor.APPROVED]: <CheckCircleOutlined />,
     [StatusDoctor.REJECTED]: <CloseCircleOutlined />,
     [StatusDoctor.NO_APPROVAL_NEEDED]: <SendOutlined />,

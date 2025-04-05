@@ -1,5 +1,5 @@
 
-import { CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, LikeOutlined, ClockCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 
 
 export enum StatusPharmacy {
@@ -24,9 +24,9 @@ export const StatusPharmacyColor: Record<StatusPharmacy, string> = {
 };
 
 export const StatusPharmacyIcon: Record<StatusPharmacy, React.ReactElement> = {
-    [StatusPharmacy.PENDING]: <QuestionCircleOutlined />,
-    [StatusPharmacy.UNDER_PREPARATION]: <QuestionCircleOutlined />,
-    [StatusPharmacy.READY_FOR_PICKUP]:  <QuestionCircleOutlined />,
+    [StatusPharmacy.PENDING]: <ClockCircleOutlined />,
+    [StatusPharmacy.UNDER_PREPARATION]: <LoadingOutlined />,
+    [StatusPharmacy.READY_FOR_PICKUP]: <LikeOutlined />,
     [StatusPharmacy.DELIVERED_TO_DRIVER]: <CheckCircleOutlined />,
 };
 

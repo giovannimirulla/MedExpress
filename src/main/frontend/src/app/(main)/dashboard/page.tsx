@@ -228,7 +228,7 @@ export default function Dashboard() {
               <div className="w-80 mb-6 lg:mb-0">
                 <Segmented
                   size="large"
-                  className="w-full"
+                  className="w-full bg-white ring-1 ring-gray-300 dark:ring-gray-600"
                   shape="round"
                   block
                   value={activeDashboard}

@@ -45,21 +45,25 @@ jobs:
               
       - name: Build JAR
         run: ./mvnw clean package -f pom.xml
-              
-              
 
+      - name: Rename JAR with Version
+        run: |
+          VERSION=$(echo "${GITHUB_REF#refs/tags/}" | sed 's/^v//')
+          mv target/medexpress-0.0.1-SNAPSHOT.jar target/medexpress-${VERSION}.jar
+              
       - name: Upload JAR Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: medexpress-${{ github.ref_name }}.jar
-          path: target/medexpress-0.0.1-SNAPSHOT.jar
+          name: medexpress-${VERSION}.jar 
+          path: target/medexpress-${VERSION}.jar 
 
       - name: Install GitHub CLI
         run: sudo apt-get install -y gh
 
       - name: Upload JAR to Latest Release
         run: |
-          gh release upload $(gh release list --limit 1 --json tagName -q '.[0].tagName') target/medexpress-0.0.1-SNAPSHOT.jar \
+          VERSION=$(echo "${GITHUB_REF#refs/tags/}" | sed 's/^v//')
+          gh release upload $(gh release list --limit 1 --json tagName -q '.[0].tagName') target/medexpress-${VERSION}.jar \
             --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

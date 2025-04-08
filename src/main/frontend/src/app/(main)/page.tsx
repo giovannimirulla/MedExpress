@@ -14,6 +14,7 @@ import api from '@/utils/api';
 import { useAuth } from '@/context/authContext';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import Heading from '@/components/Heading';
+import { AuthEntityType } from '@/enums/AuthEntityType';
 
 interface DataType {
   key: number;
@@ -25,7 +26,8 @@ interface DataType {
 }
 
 const Home = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, getEntityType } = useAuth();
+    const entityType = getEntityType();
 
   const [options, setOptions] = useState<AutoCompleteProps['options']>([]);
   const [selected, setSelected] = useState(false);
@@ -179,7 +181,7 @@ const Home = () => {
               renderItem={(item) => (
                 <List.Item
                   actions={[
-                    <Button
+                    entityType === AuthEntityType.User && ( <Button
                       key={item.key}
                       color={item.prescription ? "orange" : "primary"}
                       variant="solid"
@@ -187,7 +189,7 @@ const Home = () => {
                     >
                       <FontAwesomeIcon icon={item.prescription ? faUserDoctor : faTruckFast} />
                       {item.prescription ? "Richiedi" : "Ordina"}
-                    </Button>
+                    </Button> )
                   ]}
                 >
                   <List.Item.Meta

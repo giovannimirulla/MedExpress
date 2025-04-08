@@ -7,7 +7,7 @@ import { StatusDriver, StatusDriverLabel, StatusDriverColor, StatusDriverIcon } 
 import { StatusPharmacy, StatusPharmacyLabel, StatusPharmacyColor, StatusPharmacyIcon } from '@/enums/StatusPharmacy';
 import { AuthEntityType } from '@/enums/AuthEntityType';
 
-export function usePatientOrders(orders: Order[]) {
+export function usePatientOrders(orders: Order[], userId: string) {
 
   const processOrders = useCallback((
     filterFn: (order: Order) => boolean,
@@ -48,23 +48,27 @@ export function usePatientOrders(orders: Order[]) {
             email: order.pharmacy?.email || "Non assegnata",
             entityType: AuthEntityType.Pharmacy,
             id: order.pharmacy?.id || "Non assegnata",
+            address: order.pharmacy?.address || "Non assegnata",
           },
           driver: {
             name: order.driver?.name && order.driver?.surname ? order.driver?.name + " " +  order.driver?.surname : "Non assegnato",
             email: order.driver?.email || "Non assegnato",
             entityType: AuthEntityType.User,
             id: order.driver?.id || "Non assegnato",
+            address: order.driver?.address || "Non assegnato",
         },
         user: {
             name: order.user.name && order.user.surname ? order.user.name + " " + order.user.surname : "Non specificato",
             email: order.user.email,
             entityType: AuthEntityType.User,
             id: order.user.id,
+            address: order.user.address || "Non specificato",
             doctor: {
                 name: order.user.doctor.name + " " + order.user.doctor.surname,
                 email: order.user.doctor.email,
                 entityType: AuthEntityType.User,
                 id: order.user.doctor.id,   
+                address: order.user.doctor.address || "Non specificato",
             },
         },
         };
@@ -75,14 +79,15 @@ export function usePatientOrders(orders: Order[]) {
   const ordersForDoctorApproval: OrderDataType[] = useMemo(
     () => processOrders(
       order =>
-        order.statusDoctor === StatusDoctor.PENDING ||
-        order.statusDoctor === StatusDoctor.REJECTED,
+       ( order.statusDoctor === StatusDoctor.PENDING ||
+        order.statusDoctor === StatusDoctor.REJECTED) &&
+        order.user.id === userId,
       (order, defaultMapping) => ({
         ...defaultMapping,
         statusUser: `Dott. ${order.user.doctor.name} ${order.user.doctor.surname}`
       })
     ),
-    [processOrders]
+    [processOrders, userId]
   );
 
   const ordersForPharmacyProcessing: OrderDataType[] = useMemo(
@@ -100,7 +105,9 @@ export function usePatientOrders(orders: Order[]) {
           const isExcluded =
             order.statusPharmacy === StatusPharmacy.READY_FOR_PICKUP &&
             order.statusDriver === StatusDriver.TAKEN_OVER;
-          return isApprovedDoctor && isValidPharmacyStatus && !isExcluded;
+            //Only order with user id
+          const isUserOrder = order.user.id === userId;
+          return isApprovedDoctor && isValidPharmacyStatus && !isExcluded && isUserOrder;
         },
         (order, defaultMapping) => ({
           ...defaultMapping,
@@ -112,7 +119,7 @@ export function usePatientOrders(orders: Order[]) {
           statusIcon: StatusPharmacyIcon[order.statusPharmacy! as StatusPharmacy]
         })
       ),
-    [processOrders]
+    [processOrders, userId]
   );
 
   const ordersForDriverPickup: OrderDataType[] = useMemo(
@@ -122,7 +129,8 @@ export function usePatientOrders(orders: Order[]) {
           (order.statusDoctor === StatusDoctor.APPROVED || order.statusDoctor === StatusDoctor.NO_APPROVAL_NEEDED) &&
           (order.statusPharmacy === StatusPharmacy.DELIVERED_TO_DRIVER && (
             order.statusDriver === StatusDriver.TAKEN_OVER ||
-            order.statusDriver === StatusDriver.IN_DELIVERY)),
+            order.statusDriver === StatusDriver.IN_DELIVERY)) &&
+          order.user.id === userId,
         (order, defaultMapping) => ({
           ...defaultMapping,
           statusLabel: StatusDriverLabel[order.statusDriver! as StatusDriver],
@@ -130,7 +138,7 @@ export function usePatientOrders(orders: Order[]) {
           statusIcon: StatusDriverIcon[order.statusDriver! as StatusDriver],
         })
       ),
-    [processOrders]
+    [processOrders, userId]
   );
 
   const ordersCompleted: OrderDataType[] = useMemo(
@@ -140,7 +148,8 @@ export function usePatientOrders(orders: Order[]) {
           (order.statusDoctor === StatusDoctor.APPROVED ||
             order.statusDoctor === StatusDoctor.NO_APPROVAL_NEEDED) &&
           order.statusPharmacy === StatusPharmacy.DELIVERED_TO_DRIVER &&
-          order.statusDriver === StatusDriver.DELIVERED_TO_USER,
+          order.statusDriver === StatusDriver.DELIVERED_TO_USER &&
+          order.user.id === userId,
         (order, defaultMapping) => ({
           ...defaultMapping,
           statusLabel: StatusDriverLabel[order.statusDriver! as StatusDriver],
@@ -148,7 +157,7 @@ export function usePatientOrders(orders: Order[]) {
           statusIcon: StatusDriverIcon[order.statusDriver! as StatusDriver],
         })
       ),
-    [processOrders]
+    [processOrders, userId]
   );
 
   // order senza filtro

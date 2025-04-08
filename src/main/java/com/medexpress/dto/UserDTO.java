@@ -4,6 +4,7 @@ import com.medexpress.entity.User.Role;
 import com.medexpress.entity.User;
 
 public class UserDTO {
+    private String id;
     private String name;
     private String surname;
     private String fiscalCode;
@@ -17,7 +18,8 @@ public class UserDTO {
     }
 
     // Costruttore
-    public UserDTO(String name, String surname, String fiscalCode, String address, String email, Role role, UserDTO doctor) {
+    public UserDTO(String id, String name, String surname, String fiscalCode, String address, String email, Role role, UserDTO doctor) {
+        this.id = id;
         this.name = name;
         this.surname = surname;
         this.fiscalCode = fiscalCode;
@@ -34,6 +36,7 @@ public class UserDTO {
             return null;
         }
         return new UserDTO(
+            user.getId().toString(),
             user.getName(),
             user.getSurname(),
             user.getFiscalCode(),
@@ -45,6 +48,9 @@ public class UserDTO {
     }
 
     // Getter
+    public String getId() {
+        return id;
+    }
     public String getName() {
         return name;
     }
@@ -74,6 +80,9 @@ public class UserDTO {
     }
 
     // Setter
+    public void setId(String id) {
+        this.id = id;
+    }
     public void setName(String name) {
         this.name = name;
     }

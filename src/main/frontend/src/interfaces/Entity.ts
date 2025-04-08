@@ -5,4 +5,5 @@ export interface Entity {
     email: string;
     entityType: AuthEntityType;
     id: string;
+    address: string;
 }

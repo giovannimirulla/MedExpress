@@ -55,15 +55,24 @@ const DynamicDrugIcon: React.FC<DynamicDrugIconProps> = ({ drug, size = "small" 
         const response = await api.get(`icon?type=${drug.formaFarmaceutica}`);
         if (response.status === 200 && response.headers["content-type"]?.includes('application/json')) {
           const data = response.data;
-          if (data) setIconData(data);
+          if (data.name && data.color) {
+            setIconData(data);
+          } else {
+            setIconData({ name: "faKitMedical", color: "gray" });
+          }
+        } else {
+          setIconData({ name: "faKitMedical", color: "gray" });
         }
       } catch (error) {
         console.error('Errore nel recupero dell\'icona:', error);
+        setIconData({ name: "faKitMedical", color: "gray" });
       }
     };
 
     fetchIcon();
   }, [drug.formaFarmaceutica]);
+
+
 
   const colorClass = colorMap[iconData?.color as keyof typeof colorMap] || colorMap["gray"];
   const sizeClass = sizeMap[size as keyof typeof sizeMap] || sizeMap["small"];

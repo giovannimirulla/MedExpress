@@ -45,23 +45,27 @@ export function usePharmacyOrders(orders: Order[]) {
             email: order.pharmacy?.email || "Non assegnata",
             entityType: AuthEntityType.Pharmacy,
             id: order.pharmacy?.id || "Non assegnata",
+            address: order.pharmacy?.address || "Non assegnata",
           },
           driver: {
             name: order.driver?.name && order.driver?.surname ? order.driver?.name + " " +  order.driver?.surname : "Non assegnato",
             email: order.driver?.email || "Non assegnato",
             entityType: AuthEntityType.User,
             id: order.driver?.id || "Non assegnato",
+            address: order.driver?.address || "Non assegnato",
         },
         user: {
             name: order.user.name && order.user.surname ? order.user.name + " " + order.user.surname : "Non specificato",
             email: order.user.email,
             entityType: AuthEntityType.User,
             id: order.user.id,
+            address: order.user.address || "Non specificato",
             doctor: {
                 name: order.user.doctor.name + " " + order.user.doctor.surname,
                 email: order.user.doctor.email,
                 entityType: AuthEntityType.User,
                 id: order.user.doctor.id,   
+                address: order.user.doctor.address || "Non specificato",
             },
         },
         };

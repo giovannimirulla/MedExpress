@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Layout, ConfigProvider, Spin, Alert, Modal, Divider, Badge, Tag } from 'antd';
+import { Layout, ConfigProvider, Spin, Alert, Modal, Divider, Badge, Tag, Segmented } from 'antd';
 import api from '@/utils/api';
 import { socket } from '@/services/socketService';
 import { useAuth } from '@/context/authContext';
@@ -23,11 +23,15 @@ import { OrderResponse } from '@/interfaces/OrderResponse';
 import { OrderDataType } from '@/interfaces/OrderDataType';
 import DynamicDrugIcon from '@/components/DynamicDrugIcon';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStaffSnake, faTruckFast, faUserDoctor } from '@fortawesome/free-solid-svg-icons';
+import { faStaffSnake, faTruckFast, faUser, faUserDoctor } from '@fortawesome/free-solid-svg-icons';
 
 
 const { Content } = Layout;
 
+enum DashboardType {
+  MAIN = 'main',
+  PATIENT = 'patient',
+}
 
 export default function Dashboard() {
   const { getRole, getEntityType, getId, getName } = useAuth();
@@ -42,6 +46,32 @@ export default function Dashboard() {
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderDataType | null>(null);
+  const [activeDashboard, setActiveDashboard] = useState<DashboardType>(DashboardType.MAIN);
+
+  const dashboardOptions = [
+    {
+      label: (
+        <span>
+          <FontAwesomeIcon
+            icon={role === Role.Driver ? faTruckFast : faUserDoctor}
+            className="mr-2"
+          />
+          {role === Role.Driver ? "Driver" : "Dottore"}
+        </span>
+      ),
+      value: DashboardType.MAIN,
+    },
+    {
+      label: (
+        <span>
+          <FontAwesomeIcon icon={faUser} className="mr-2" />
+          Paziente
+        </span>
+      ),
+      value: DashboardType.PATIENT,
+    },
+  ];
+
 
 
   const showModal = (selectedOrder: OrderDataType) => {
@@ -174,12 +204,16 @@ export default function Dashboard() {
 
   // Selezione del dashboard in base al ruolo
   let dashboardContent;
-  if (entityType === AuthEntityType.Pharmacy) {
-    dashboardContent = <PharmacyDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} showModal={showModal} />;
-  } else if (role === Role.Doctor) {
-    dashboardContent = <DoctorDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} showModal={showModal} />;
-  } else if (role === Role.Driver) {
-    dashboardContent = <DriverDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} showModal={showModal} />;
+  if (activeDashboard === DashboardType.MAIN) {
+    if (entityType === AuthEntityType.Pharmacy) {
+      dashboardContent = <PharmacyDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} showModal={showModal} />;
+    } else if (role === Role.Doctor) {
+      dashboardContent = <DoctorDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} showModal={showModal} />;
+    } else if (role === Role.Driver) {
+      dashboardContent = <DriverDashboard orders={orders} updateStatus={updateStatus} isUpdating={isUpdating} showModal={showModal} />;
+    } else {
+      dashboardContent = <PatientDashboard orders={orders} showModal={showModal} />;
+    }
   } else {
     dashboardContent = <PatientDashboard orders={orders} showModal={showModal} />;
   }
@@ -188,8 +222,21 @@ export default function Dashboard() {
     <ConfigProvider theme={{ components: { Card: { bodyPadding: 0 } } }}>
       <Layout className="min-h-screen dark:bg-black bg-gray-50">
         <Content className="px-16 pb-16 pt-8">
-          <div className='mb-8 '>
+          <div className='flex flex-col-reverse lg:flex-row lg:justify-between items-center lg:items-start  mb-8 '>
             <h1 className='dark:text-white text-gray-800 font-bold text-4xl'>Benvenuto {name}</h1>
+            {(role === Role.Doctor || role === Role.Driver) && (
+              <div className="w-80 mb-6 lg:mb-0">
+                <Segmented
+                  size="large"
+                  className="w-full"
+                  shape="round"
+                  block
+                  value={activeDashboard}
+                  options={dashboardOptions}
+                  onChange={(val: DashboardType) => setActiveDashboard(val)}
+                />
+              </div>
+            )}
           </div>
 
           <Modal
@@ -229,13 +276,13 @@ export default function Dashboard() {
                   }
 
                 </div>
-                
+
                 <div className="flex flex-col text-left m-4">
-                <span className="text-2xl font-bold text-gray-800">
+                  <span className="text-2xl font-bold text-gray-800">
                     {selectedOrder?.drugPackage.medicinale.denominazioneMedicinale}
                   </span>
                   {(selectedOrder?.drugPackage?.vieSomministrazione?.length ?? 0) > 0 && <div className="  items-start text-gray-700 ">
-                  <p className="text-sm text-gray-500 italic mb-4">{selectedOrder?.drugPackage.descrizioneFormaDosaggio}</p>
+                    <p className="text-sm text-gray-500 italic mb-4">{selectedOrder?.drugPackage.descrizioneFormaDosaggio}</p>
                     <p className="font-semibold">Somministrazione:</p>
                     <ul className="list-disc pl-6 col-span-2 text-sm">
                       {selectedOrder?.drugPackage.vieSomministrazione.map((viaSomministrazione: string, index: number) => (
@@ -245,14 +292,14 @@ export default function Dashboard() {
                   </div>}
 
                   {(selectedOrder?.drugPackage?.principiAttiviIt?.length ?? 0) > 0 &&
-                  <div className="text-gray-700">
-                    <p className="font-semibold col-span-2">Principi attivi:</p>
-                    <ul className="list-disc pl-6 col-span-2 text-sm">
-                      {selectedOrder?.drugPackage.principiAttiviIt.map((principio: string, index: number) => (
-                        <li key={index}>{principio}</li>
-                      ))}
-                    </ul>
-                  </div>
+                    <div className="text-gray-700">
+                      <p className="font-semibold col-span-2">Principi attivi:</p>
+                      <ul className="list-disc pl-6 col-span-2 text-sm">
+                        {selectedOrder?.drugPackage.principiAttiviIt.map((principio: string, index: number) => (
+                          <li key={index}>{principio}</li>
+                        ))}
+                      </ul>
+                    </div>
                   }
 
                 </div>
@@ -325,7 +372,38 @@ export default function Dashboard() {
 
               </div>
 
+              {((entityType=== AuthEntityType.User && (role === Role.Doctor || role === Role.Driver)) || entityType === AuthEntityType.Pharmacy) && (
+                <>
+              <Divider plain>
+                <span className="text-sm text-gray-500">
+                  Ordine eseguito da:
+                </span></Divider>
 
+                <div className="flex">
+                <div className="flex items-center gap-4 m-4">
+
+
+                <div className={`w-40 h-40 flex items-center justify-center rounded-full text-gray-200 bg-gray-200/20`}>
+                    <FontAwesomeIcon icon={faUser} className={"text-6xl"} />
+                  </div>
+              
+                </div>
+
+                <div className="flex flex-col justify-center text-left m-4">
+                  <span className="text-2xl font-bold text-gray-800">
+                    {selectedOrder?.user.name}
+                  </span>
+                  <p className="text-sm text-gray-500">
+                  <span className="font-semibold">Email:</span>  {selectedOrder?.user.email}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                  <span className="font-semibold">Indirizzo:</span>  {selectedOrder?.user.address}
+                  </p>
+            
+                </div>
+              </div>
+              </>
+  )}
 
             </>
           </Modal>

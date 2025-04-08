@@ -83,7 +83,7 @@ public class OrderController {
 
             String nameAndSurname = user.getName() + " " + user.getSurname();
             EntityDTO entity = new EntityDTO(userDetails.getId(), userDetails.getEntityType(), nameAndSurname,
-                    user.getEmail());
+                    user.getEmail(), user.getAddress());
 
             CommonDrug drugPackage = aifaService.getPackage(body.getDrugId(), body.getPackageId()).block();
 
@@ -167,6 +167,20 @@ public class OrderController {
                         }
                     }
 
+                    //get also all orders of the doctor
+                    List<Order> doctorOrders = orderService.getOrdersByUser(userDetails.getId());
+                    for (Order order : doctorOrders) {
+                        if (order.getStatusDoctor() != Order.StatusDoctor.NO_APPROVAL_NEEDED) {
+                            //if not already in orders
+                            if (!orders.contains(order)) {
+                                // add drugPackage
+                                order.setDrugPackage(
+                                        aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
+                                orders.add(order);
+                            }
+                        }
+                    }
+
                     // return list orders mapper to OrderDTO
                     List<OrderDTO> orderDTOs = modelMapper.map(orders, new org.modelmapper.TypeToken<List<OrderDTO>>() {
                     }.getType());
@@ -193,6 +207,20 @@ public class OrderController {
                     for (Order order : orders) {
                         order.setDrugPackage(aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
                     }
+
+                    //get all orders of the driver
+                    List<Order> driverOrders = orderService.getOrdersByUser(userDetails.getId());
+                    for (Order order : driverOrders) {
+                        //if not already in orders
+                        if (!orders.contains(order)) {
+                            // add drugPackage
+                            order.setDrugPackage(
+                                    aifaService.getPackage(order.getDrugId(), order.getPackageId()).block());
+                            orders.add(order);
+                        }
+                        
+                    }
+                    
                     List<OrderDTO> orderDTOs = modelMapper.map(orders, new org.modelmapper.TypeToken<List<OrderDTO>>() {
                     }.getType());
                     return new ResponseEntity<>(orderDTOs, HttpStatus.OK);

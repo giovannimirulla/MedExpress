@@ -52,7 +52,7 @@ public class OrderService {
                 String nameAndSurname = user.getName() + " " + user.getSurname();
 
                 EntityDTO updatedBy = new EntityDTO(user.getId().toString(), AuthEntityType.USER, nameAndSurname,
-                                user.getEmail());
+                                user.getEmail(), user.getAddress());
 
                 Order order = new Order(packageId, user, null, null, drugId, LocalDateTime.now(), LocalDateTime.now(),
                                 Order.StatusPharmacy.PENDING, Order.StatusDriver.PENDING, statusDoctor,
@@ -109,7 +109,7 @@ public class OrderService {
 
                 String nameAndSurname = doctor.getName() + " " + doctor.getSurname();
                 EntityDTO updatedBy = new EntityDTO(doctor.getId().toString(), AuthEntityType.USER, nameAndSurname,
-                                doctor.getEmail());
+                                doctor.getEmail(), doctor.getAddress());
 
                 order.setStatusDoctor(statusDoctor);
                 order.setUpdatedBy(updatedBy);
@@ -142,7 +142,7 @@ public class OrderService {
 
                 String companyName = pharmacy.getCompanyName();
                 EntityDTO updatedBy = new EntityDTO(pharmacy.getId().toString(), AuthEntityType.PHARMACY, companyName,
-                                pharmacy.getEmail());
+                                pharmacy.getEmail(), pharmacy.getAddress());
 
                 order.setStatusPharmacy(statusPharmacy);
                 order.setPharmacy(pharmacy);
@@ -177,7 +177,7 @@ public class OrderService {
 
                 String nameAndSurname = driver.getName() + " " + driver.getSurname();
                 EntityDTO updatedBy = new EntityDTO(driver.getId().toString(), AuthEntityType.USER, nameAndSurname,
-                                driver.getEmail());
+                                driver.getEmail(), driver.getAddress());
 
                 order.setStatusDriver(statusDriver);
                 if (statusDriver == Order.StatusDriver.TAKEN_OVER) {

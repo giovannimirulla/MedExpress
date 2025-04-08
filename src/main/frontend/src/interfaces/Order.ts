@@ -25,12 +25,14 @@ export interface Order {
             surname: string;
             email: string;
             id: string;
+            address: string;
         };
     };
     pharmacy?: {
         id: string;
         companyName: string;
         email: string;
+        address: string;
     };
     driver?: {
         id: string;

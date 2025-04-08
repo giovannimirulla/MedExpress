@@ -22,11 +22,13 @@ export interface OrderResponse {
       surname: string;
       email: string;
       id: string;
+      address: string;
     };
   };
   pharmacy?: {
     companyName: string;
     email: string;
     id: string;
+    address: string;
   };
 }

@@ -7,6 +7,7 @@ import { getTimeDifference } from '@/utils/dateUtils';
 import { Tag } from 'antd';
 import DynamicDrugIcon from '@/components/DynamicDrugIcon';
 import { Priority } from '@/enums/Priority';
+import { useAuth } from '@/context/authContext';
 
 
 
@@ -17,6 +18,8 @@ interface PatientDashboardProps {
 
 
 const PatientDashboard: React.FC<PatientDashboardProps> = ({ orders, showModal }) => {
+    const {getId} = useAuth();
+    const userId = getId() || '';
 
     const [, setTick] = useState(0);
     useEffect(() => {
@@ -26,7 +29,7 @@ const PatientDashboard: React.FC<PatientDashboardProps> = ({ orders, showModal }
         return () => clearInterval(interval);
     }, []);
 
-    const { ordersForDoctorApproval, ordersForPharmacyProcessing, ordersForDriverPickup, ordersCompleted } = usePatientOrders(orders);
+    const { ordersForDoctorApproval, ordersForPharmacyProcessing, ordersForDriverPickup, ordersCompleted } = usePatientOrders(orders, userId);
 
     const columns = [
         {

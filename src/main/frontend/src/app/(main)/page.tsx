@@ -167,7 +167,12 @@ const Home = () => {
               <>
                 <Alert
                   message="Avviso"
-                  description="I farmaci con il pulsante 'Richiedi' in arancione richiedono la prescrizione del medico. Cliccando su 'Richiedi' verrà inviata una richiesta al medico di base."
+                  description={
+                    <>
+                      I farmaci con il pulsante &apos;Richiedi&apos; in arancione richiedono la prescrizione del medico.
+                      {entityType !== AuthEntityType.Pharmacy && " Cliccando su &apos;Richiedi&apos; verrà inviata una richiesta al medico di base."}
+                    </>
+                  }
                   type="warning"
                   showIcon
                   closable
@@ -258,7 +263,7 @@ const Home = () => {
               transition={{ duration: 0.5 }}
             >
               {drugs.map((drug, index) => (
-                <CardDrug key={index} drug={drug} showModel={showModal} />
+                <CardDrug key={index} drug={drug} showModel={showModal} entityType={entityType}/>
               ))}
             </motion.div>
           </div>

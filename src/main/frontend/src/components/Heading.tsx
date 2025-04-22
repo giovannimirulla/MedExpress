@@ -75,7 +75,7 @@ const Heading = ({ position = "absolute", navColor = "transparent" }: HeadingPro
               </>
             ) : (
               <>
-                <Link href="/login" className="text-sm font-medium dark:text-white text-gray-700 hover:underline px-4 py-2 text-center flex items-center justify-center w-full lg:w-auto hover:bg-primary/10 dark:hover:bg-white/10 rounded transition-all duration-300 hover:no-underline">
+                <Link href="/login" className="text-sm font-medium dark:text-white text-gray-700 hover:underline px-4 py-2 text-center flex items-center justify-center w-full lg:w-auto hover:bg-primary/10 dark:hover:bg-white/10 rounded transition-all duration-300">
                   Login
                 </Link>
                 <Link href="/signup" className="text-sm font-medium bg-primary text-white px-4 py-2 rounded text-center flex items-center justify-center hover:bg-primary-dark w-full lg:w-auto">

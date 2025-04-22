@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import org.modelmapper.ModelMapper;
@@ -51,7 +52,9 @@ public class UserController {
            user = userService.createUser(body.getName(), body.getSurname(), body.getFiscalCode(), body.getAddress(), body.getEmail(), encryptedPassword, body.getRole(), null);
            userService.updateDoctorId(user.getId().toString(), user.getId().toString());
         } else {
-
+            if(body.getDoctorId() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Select a doctor");
+            }
            user = userService.createUser(body.getName(), body.getSurname(), body.getFiscalCode(), body.getAddress(), body.getEmail(), encryptedPassword, body.getRole(), body.getDoctorId());
         }
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);

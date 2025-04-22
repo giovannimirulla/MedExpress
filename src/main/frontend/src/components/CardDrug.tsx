@@ -2,30 +2,43 @@ import React from 'react';
 import { Card } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Meta from 'antd/lib/card/Meta';
-import { faTruckFast } from '@fortawesome/free-solid-svg-icons';
+import { faTruckFast, faEye } from '@fortawesome/free-solid-svg-icons';
 
 import { Drug } from '@/types/Drug';
 import DynamicDrugIcon from './DynamicDrugIcon';
+
+import { AuthEntityType } from '@/enums/AuthEntityType';
 
 //props key and drug
 interface CardDrugProps {
     key: number;
     showModel: (drug: Drug) => void;
     drug: Drug;
+    entityType: AuthEntityType;
 }
 
-const CardDrug: React.FC<CardDrugProps> = ({ drug, showModel }) => {
+const CardDrug: React.FC<CardDrugProps> = ({ drug, showModel, entityType }) => {
     return (
         <Card
             title={<h2 className="text-lg font-bold text-gray-800">{drug.medicinale.denominazioneMedicinale}</h2>}
             actions={[
-                <div
-                    key={drug.medicinale.denominazioneMedicinale}
-                    className="w-full h-full text-center text-blue-600 hover:text-blue-800 cursor-pointer"
-                    onClick={() => showModel(drug)}
-                >
-                    <FontAwesomeIcon icon={faTruckFast} /> Ordina
-                </div>
+                    entityType === AuthEntityType.Pharmacy ? (
+                        <div
+                            key={drug.medicinale.denominazioneMedicinale}
+                            className="w-full h-full text-center text-blue-600 hover:text-blue-800 cursor-pointer"
+                            onClick={() => showModel(drug)}
+                        >
+                            <FontAwesomeIcon icon={faEye} /> Visualizza
+                        </div>
+                    ) : (
+                        <div
+                            key={drug.medicinale.denominazioneMedicinale}
+                            className="w-full h-full text-center text-blue-600 hover:text-blue-800 cursor-pointer"
+                            onClick={() => showModel(drug)}
+                        >
+                            <FontAwesomeIcon icon={faTruckFast} /> Ordina
+                        </div>
+                    )
             ]}
         >
             <Meta

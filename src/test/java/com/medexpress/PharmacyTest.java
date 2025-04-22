@@ -1,4 +1,5 @@
 package com.medexpress;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -15,7 +16,6 @@ import com.medexpress.enums.AuthEntityType;
 import com.medexpress.security.JwtUtil;
 import com.medexpress.service.EncryptionService;
 import com.medexpress.service.PharmacyService;
-
 
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +65,7 @@ public class PharmacyTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        mockMvc = MockMvcBuilders.standaloneSetup(pharmacyController,authController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(pharmacyController, authController).build();
     }
 
     @Test
@@ -82,12 +82,11 @@ public class PharmacyTest {
         when(encryptionService.encryptPassword(anyString())).thenReturn(encryptedPassword);
 
         Pharmacy pharmacy = new Pharmacy(
-            "Farmacia Centrale", "532858201", "Via Roma, 15", 
-            "info@farmaciacentrale.it", encryptedPassword, LocalDateTime.now(), LocalDateTime.now()
-        );
+                "Farmacia Centrale", "532858201", "Via Roma, 15",
+                "info@farmaciacentrale.it", encryptedPassword, LocalDateTime.now(), LocalDateTime.now());
 
         when(pharmacyService.createPharmacy(anyString(), anyString(), anyString(), anyString(), anyString()))
-            .thenReturn(pharmacy);
+                .thenReturn(pharmacy);
 
         PharmacyDTO pharmacyDTO = new PharmacyDTO();
         pharmacyDTO.setCompanyName("Farmacia Centrale");
@@ -97,10 +96,10 @@ public class PharmacyTest {
 
         System.out.println("User creato: " + pharmacy);
         System.out.println("UserDTO restituito: " + pharmacyDTO);
-       
+
         try {
-            //PharmacyValidator.validate(requestBody);
-        } catch(Exception e) {
+            // PharmacyValidator.validate(requestBody);
+        } catch (Exception e) {
             System.out.println("Errore di validazione: " + e.getMessage());
             throw e;
         }
@@ -116,35 +115,39 @@ public class PharmacyTest {
         System.out.println("Test createPharmacy completato con status: " + result.getResponse().getStatus());
 
         verify(encryptionService, times(1)).encryptPassword("Password123!");
-        verify(pharmacyService, times(1)).createPharmacy(anyString(), anyString(), anyString(), anyString(), anyString());
-        verify(modelMapper, times(1)).map(any(Pharmacy.class), eq(PharmacyDTO.class));        
+        verify(pharmacyService, times(1)).createPharmacy(anyString(), anyString(), anyString(), anyString(),
+                anyString());
+        verify(modelMapper, times(1)).map(any(Pharmacy.class), eq(PharmacyDTO.class));
     }
+
     @Test
     void loginPharmacy() throws Exception {
         // Definizione delle credenziali
         String email = "farmacia.roma@example.com";
         String plainPassword = "Password123!";
         String encryptedPassword = "encryptedPassword123"; // Simulazione della password crittografata
-    
+
         // Creazione di una farmacia simulata
         Pharmacy pharmacy = new Pharmacy(new ObjectId(), "Farmacia Roma", "IT123456789",
                 "Via Roma, 20", email, encryptedPassword, LocalDateTime.now(), LocalDateTime.now());
-    
+
         // Mockiamo la ricerca della farmacia per email
         when(pharmacyService.findByEmail(email)).thenReturn(pharmacy);
-    
+
         // Mockiamo la verifica della password
         when(encryptionService.verifyPassword(plainPassword, encryptedPassword)).thenReturn(true);
-    
+
         // Mockiamo la generazione dei token JWT
-        when(jwtUtil.generateAccessToken(eq(pharmacy.getId().toString()), eq(AuthEntityType.PHARMACY))).thenReturn("mocked-jwt-token");
-                when(jwtUtil.generateRefreshToken(eq(pharmacy.getId().toString()), eq(AuthEntityType.PHARMACY))).thenReturn("mocked-refresh-token");
-    
+        when(jwtUtil.generateAccessToken(eq(pharmacy.getId().toString()), eq(AuthEntityType.PHARMACY)))
+                .thenReturn("mocked-jwt-token");
+        when(jwtUtil.generateRefreshToken(eq(pharmacy.getId().toString()), eq(AuthEntityType.PHARMACY)))
+                .thenReturn("mocked-refresh-token");
+
         // Simuliamo la richiesta di login (password in chiaro!)
         Map<String, String> loginRequest = new HashMap<>();
         loginRequest.put("email", email);
         loginRequest.put("password", plainPassword); // IMPORTANTE: password in chiaro
-    
+
         // Eseguiamo la richiesta
         MvcResult result = mockMvc.perform(post("/api/v1/auth/login/pharmacy")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -154,14 +157,33 @@ public class PharmacyTest {
                 .andExpect(jsonPath("$.refreshToken").value("mocked-refresh-token"))
                 .andReturn();
 
-
         System.out.println("Test loginPharmacy completato con status: " + result.getResponse().getStatus());
-    
+
         // Verifichiamo che i metodi mockati siano stati chiamati
         verify(pharmacyService, times(1)).findByEmail(email);
         verify(encryptionService, times(1)).verifyPassword(plainPassword, encryptedPassword);
         verify(jwtUtil, times(1)).generateAccessToken(eq(pharmacy.getId().toString()), eq(AuthEntityType.PHARMACY));
         verify(jwtUtil, times(1)).generateRefreshToken(eq(pharmacy.getId().toString()), eq(AuthEntityType.PHARMACY));
     }
-}
 
+    @Test
+    void registerPharmacyWhitInvalidVAT() throws Exception {
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("companyName", "Farmacia Centrale");
+        requestBody.put("vatNumber", "INVALID_VAT");
+        requestBody.put("address", "Via Roma, 15");
+        requestBody.put("email", "info@farmaciacentrale.it");
+        requestBody.put("password", "Password123!");
+
+        MvcResult result = mockMvc.perform(post("/api/v1/pharmacy")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        System.out.println(
+                "Test registerPharmacyWhitInvalidVAT completato con status: " + result.getResponse().getStatus());
+
+    }
+
+}

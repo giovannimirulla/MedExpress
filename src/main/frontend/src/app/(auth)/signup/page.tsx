@@ -118,13 +118,11 @@ export default function Signup() {
       }) ?? false;
     } else {
       console.log('user', values);
+      console.log('role', role);
+      console.log('doctor', doctor);
       let doctorValue: string | undefined = undefined;
       if (role != Role.Doctor && doctor) {
         doctorValue = doctor.value;
-      }else if(!doctor){
-        messageApi.error("Sei un dottore, non puoi selezionare un dottore!");
-        setLoading(false);
-        return;
       }
       response = await signupUser({
         name: values.name,
@@ -197,7 +195,7 @@ export default function Signup() {
             </Form.Item>
             {entity === AuthEntityType.Pharmacy ? (
               <Form.Item name="companyName" rules={[{ required: true, message: "Inserisci il nome della tua azienda!" }]}>
-                <Input prefix={<FontAwesomeIcon icon={faUser} className="text-gray-200 mr-2" />} placeholder="Nome Azienda" />
+                <Input prefix={<FontAwesomeIcon icon={faUser} className="text-gray-200 mr-2" />} placeholder="Ragione Sociale" />
               </Form.Item>
             ) : (
               <div className="flex flex-row gap-4 w-full">

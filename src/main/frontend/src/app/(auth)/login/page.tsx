@@ -7,8 +7,14 @@ import { App, Button, Form, Input, Flex, message, Segmented } from "antd";
 import { useAuth } from '@/context/authContext';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCapsules } from "@fortawesome/free-solid-svg-icons";
-
+import type { FormProps } from 'antd';
 import { AuthEntityType, AuthEntityTypeIcon } from '@/enums/AuthEntityType';
+
+type FieldType = {  
+  email: string;
+  password: string;
+  remember?: boolean;
+};
 
 export default function Login() {
   const router = useRouter();
@@ -26,16 +32,25 @@ export default function Login() {
     value: type,
   }));
 
-  const onFinish = async (values: { email: string; password: string; remember?: boolean }) => {
+  const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     setLoading(true);
-    const success = await login(entity, values.email, values.password);
-    if (success) {
-      messageApi.success("Login effettuato con successo!");
-      router.push('/dashboard');
-    } else {
-      messageApi.error("Credenziali non valide. Riprova.");
+    try {
+      const success = await login(entity, values.email, values.password);
+      if (success) {
+        messageApi.success("Login effettuato con successo!");
+        router.push('/dashboard'); // Navigazione senza refresh
+      } else {
+        messageApi.error("Credenziali non valide. Riprova.");
+      }
+    } catch  {
+      messageApi.error("Si è verificato un errore. Riprova.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
+    console.log('Failed:', errorInfo);
   };
 
   return (
@@ -50,7 +65,7 @@ export default function Login() {
           <div className="blur-[106px] h-32 bg-gradient-to-r from-cyan-400 to-sky-300 dark:to-indigo-600"></div>
         </div>
         <div className="w-full md:w-1/2 flex items-center justify-center">
-          <Form name="login" initialValues={{ remember: true }} onFinish={onFinish}>
+          <Form name="login" initialValues={{ remember: true }} onFinish={onFinish} onFinishFailed={onFinishFailed}>
             <div className="flex items-center space-x-2 no-underline">
                <FontAwesomeIcon icon={faCapsules} className="text-primary h-12" />
               <span className="text-5xl font-bold text-body dark:text-white">MedExpress</span>

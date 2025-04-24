@@ -17,7 +17,7 @@ public class AIFADrugsResponse {
         this.data = data;
     }
 
-    public static class Data {
+    public class Data {
         private java.util.List<CommonDrug> content;
         private Pageable pageable;
         private boolean last;

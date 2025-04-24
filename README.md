@@ -175,8 +175,7 @@ If you manually switch to a different parent and actually want the inheritance, 
 
 2. Strategy :
 
-   - The Order class uses enums like StatusDoctor , StatusPharmacy , and StatusDriver to define different strategies for handling order statuses.
-   - `Order.java`
+   - The Order class uses enums like StatusDoctor , StatusPharmacy , and StatusDriver to define different strategies for handling order statuses. - `Order.java`
 
    <br>
 

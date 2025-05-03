@@ -63,7 +63,6 @@
 1. Download .jar from [MedExpress Releases](https://github.com/giovannimirulla/MedExpress/releases)
 2. Run the jar with the command `java -jar <file>.jar`
 
-<br>
 
 # Test Users
 
@@ -154,31 +153,74 @@ If you manually switch to a different parent and actually want the inheritance, 
 <img src="docs/images/modal.png" alt="screenshot">
 </p><br>
 
-# Design Pattern
+# Design Patterns
+
+## GRASP Patterns
+
+### 1. Controller
+- **OrderController**: Handles requests related to orders. [OrderController.java](src/main/java/com/medexpress/controller/OrderController.java)
+- **AuthController**: Manages authentication and authorization requests. [AuthController.java](src/main/java/com/medexpress/controller/AuthController.java)
+- **AIFAController**: Handles requests related to drugs. [AIFAController.java](src/main/java/com/medexpress/controller/AIFAController.java)
+- **DoctorController**: Handles requests related to doctors. [DoctorController.java](src/main/java/com/medexpress/controller/DoctorController.java)
+- **DriverController**: Handles requests related to drivers. [DriverController.java](src/main/java/com/medexpress/controller/DriverController.java)
+- **PharmacyController**: Handles requests related to pharmacies. [PharmacyController.java](src/main/java/com/medexpress/controller/PharmacyController.java)
+- **SocketIOController**: Manages WebSocket connections. [SocketIOController.java](src/main/java/com/medexpress/controller/SocketIOController.java)
+- **FrontendController**: Redirects requests to the frontend. [FrontendController.java](src/main/java/com/medexpress/controller/FrontendController.java)
+
+### 2. Information Expert
+- **UserService**: Provides user-related information. [UserService.java](src/main/java/com/medexpress/service/UserService.java)
+- **AIFAService**: Retrieves drug information from the AIFA API. [AIFAService.java](src/main/java/com/medexpress/service/AIFAService.java)
+- **IconService**: Manages icons. [IconService.java](src/main/java/com/medexpress/service/IconService.java)
+- **PharmacyService**: Manages pharmacy-related logic. [PharmacyService.java](src/main/java/com/medexpress/service/PharmacyService.java)
+- **EncryptionService**: Handles password encryption. [EncryptionService.java](src/main/java/com/medexpress/service/EncryptionService.java)
+
+### 3. Creator
+- **OrderService**: Responsible for creating `Order` objects. [OrderService.java](src/main/java/com/medexpress/service/OrderService.java)
+- **IconService**: Creates `Icon` objects. [IconService.java](src/main/java/com/medexpress/service/IconService.java)
+
+### 4. High Cohesion
+- **JwtUtil**: Focuses exclusively on JWT token management. [JwtUtil.java](src/main/java/com/medexpress/security/JwtUtil.java)
+- **JwtFilter**: Handles security related to JWT tokens. [JwtFilter.java](src/main/java/com/medexpress/security/JwtFilter.java)
+
+### 5. Low Coupling
+- **UserRepository**: Uses the `MongoRepository` interface to reduce coupling between the persistence layer and the rest of the application. [UserRepository.java](src/main/java/com/medexpress/repository/UserRepository.java)
+- **IconRepository**: Uses the `MongoRepository` interface to manage icons. [IconRepository.java](src/main/java/com/medexpress/repository/IconRepository.java)
+
+### 6. Polymorphism
+- **CustomUserDetails**: Implements the `UserDetails` interface to handle different types of users. [CustomUserDetails.java](src/main/java/com/medexpress/security/CustomUserDetails.java)
+
+### 7. Indirection
+- **JwtFilter**: Acts as an intermediary between HTTP requests and authentication logic, delegating token validation to `JwtUtil`. [JwtFilter.java](src/main/java/com/medexpress/security/JwtFilter.java)
+- **SocketIOController**: Uses `SocketIOServer` to mediate between WebSocket clients and application logic. [SocketIOController.java](src/main/java/com/medexpress/controller/SocketIOController.java)
+
+### 8. Protected Variations
+- **MongoRepository**: Protects the application from changes in persistence logic by abstracting database operations. [UserRepository.java](src/main/java/com/medexpress/repository/UserRepository.java)
+- **JwtUtil**: Shields the application from the implementation details of JWT token management. [JwtUtil.java](src/main/java/com/medexpress/security/JwtUtil.java)
+
+### 9. Pure Fabrication
+- **JwtUtil**: A utility class created to handle JWT token logic, not representing a domain concept. [JwtUtil.java](src/main/java/com/medexpress/security/JwtUtil.java)
+- **ModelMapperConfig**: Provides a singleton configuration for object mapping, unrelated to domain concepts. [ModelMapperConfig.java](src/main/java/com/medexpress/config/ModelMapperConfig.java)
+
+
+## GoF Patterns
 
 ### Creational Patterns
 
-1. Singleton :
-   - The ModelMapperConfig class uses the @Bean annotation to create a singleton instance of ModelMapper . This ensures that only one instance of ModelMapper is created and shared across the application. - `ModelMapperConfig.java`
+1. **Singleton**:
+   - The `ModelMapperConfig` class uses the `@Bean` annotation to create a singleton instance of `ModelMapper`. This ensures that only one instance of `ModelMapper` is created and shared across the application. [ModelMapperConfig.java](src/main/java/com/medexpress/config/ModelMapperConfig.java)
 
 ### Structural Patterns
 
-1. Facade :
-   - The JwtUtil class acts as a facade for JWT operations, providing a simplified interface for generating and validating tokens. - `JwtUtil.java`
+1. **Facade**:
+   - The `JwtUtil` class acts as a facade for JWT operations, providing a simplified interface for generating and validating tokens. [JwtUtil.java](src/main/java/com/medexpress/security/JwtUtil.java)
 
 ### Behavioral Patterns
 
-1. Observer :
+1. **Observer**:
+   - The `SocketIOServer` in `SocketIOController` uses event listeners (`addConnectListener`, `addDisconnectListener`, `addEventListener`) which are typical of the Observer pattern, where changes in state are communicated to interested parties. [SocketIOController.java](src/main/java/com/medexpress/controller/SocketIOController.java)
 
-   - The SocketIOServer in SocketIOController uses event listeners ( addConnectListener , addDisconnectListener , addEventListener ) which are typical of the Observer pattern, where changes in state are communicated to interested parties. - `SocketIOController.java`
-
-
-2. Strategy :
-
-   - The Order class uses enums like StatusDoctor , StatusPharmacy , and StatusDriver to define different strategies for handling order statuses. - `Order.java`
-
-   <br>
-
+2. **Strategy**:
+   - The `Order` class uses enums like `StatusDoctor`, `StatusPharmacy`, and `StatusDriver` to define different strategies for handling order statuses. [Order.java](src/main/java/com/medexpress/entity/Order.java)
 # To DO
 
 ### Uses Cases
